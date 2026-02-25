@@ -1,3 +1,8 @@
+package parser;
+
+import model.Method;
+import model.Request;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Parser {
+public class RequestParser {
     public Request requestFrom(InputStream requestStream) throws IOException {
         BufferedReader requestReader = new BufferedReader(new InputStreamReader(requestStream));
         final String[] splitRequestLine = requestReader.readLine().split(" ");
