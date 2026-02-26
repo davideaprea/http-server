@@ -3,6 +3,7 @@ package parser;
 import model.Header;
 import model.Method;
 import model.Request;
+import model.RequestTarget;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,7 +12,10 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class RequestParser {
-    public Request requestFrom(InputStream requestStream) throws IOException {
+    private RequestParser() {
+    }
+
+    public static Request from(InputStream requestStream) throws IOException {
         BufferedReader requestReader = new BufferedReader(new InputStreamReader(requestStream));
         String[] splitRequestLine = requestReader.readLine().split(" ");
 
@@ -20,28 +24,11 @@ public class RequestParser {
         }
 
         Method method = Method.valueOf(splitRequestLine[0]);
-        String requestTarget = splitRequestLine[1];
+        RequestTarget requestTarget = RequestTargetParser.from(splitRequestLine[1]);
         String version = splitRequestLine[2];
 
         if (!version.startsWith("HTTP/")) {
             throw new IllegalStateException();
-        }
-
-        Map<String, List<String>> queryParams = new HashMap<>();
-
-        int paramsStartIndex = requestTarget.indexOf('?');
-
-        if (paramsStartIndex > -1) {
-            Arrays.stream(requestTarget
-                            .substring(paramsStartIndex + 1)
-                            .split("&"))
-                    .map(rawParam -> rawParam.split("="))
-                    .forEach(pair -> {
-                        queryParams.putIfAbsent(pair[0], new ArrayList<>());
-                        queryParams.get(pair[0]).add(pair[1]);
-                    });
-
-            requestTarget = requestTarget.substring(0, paramsStartIndex);
         }
 
         Map<String, List<String>> headers = new HashMap<>();
@@ -49,7 +36,7 @@ public class RequestParser {
         String currentLine;
 
         while (!(currentLine = requestReader.readLine()).isEmpty()) {
-            Header header = parseHeaderLine(currentLine);
+            Header header = HeaderParser.from(currentLine);
 
             headers.putIfAbsent(header.name(), new ArrayList<>());
             headers.get(header.name()).add(header.value());
@@ -60,25 +47,7 @@ public class RequestParser {
                 requestTarget,
                 version,
                 headers,
-                queryParams,
                 requestStream
         );
-    }
-
-    Header parseHeaderLine(String headerLine) {
-        final int separatorIndex = headerLine.indexOf(':');
-
-        if (separatorIndex == -1) {
-            throw new IllegalStateException();
-        }
-
-        final String headerName = headerLine.substring(0, separatorIndex);
-        final String headerValue = headerLine.substring(separatorIndex + 1).trim();
-
-        if (headerName.contains(" ")) {
-            throw new IllegalStateException();
-        }
-
-        return new Header(headerName, headerValue);
     }
 }

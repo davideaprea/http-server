@@ -6,10 +6,9 @@ import java.util.Map;
 
 public record Request(
         Method method,
-        String targetURL,
+        RequestTarget requestTarget,
         String version,
         Map<String, List<String>> headers,
-        Map<String, List<String>> queryParams,
         InputStream body
 ) {
 }
