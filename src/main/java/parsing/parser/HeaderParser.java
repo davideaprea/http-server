@@ -1,6 +1,7 @@
 package parsing.parser;
 
 import parsing.dto.Header;
+import parsing.exception.MalformedHeaderException;
 
 public class HeaderParser {
     private HeaderParser() {
@@ -10,14 +11,14 @@ public class HeaderParser {
         final int separatorIndex = headerLine.indexOf(':');
 
         if (separatorIndex == -1) {
-            throw new IllegalStateException();
+            throw new MalformedHeaderException(headerLine, "Name and value must be separated by a colon (:) character.");
         }
 
         final String headerName = headerLine.substring(0, separatorIndex);
         final String headerValue = headerLine.substring(separatorIndex + 1).trim();
 
         if (headerName.contains(" ")) {
-            throw new IllegalStateException();
+            throw new MalformedHeaderException(headerLine, "Header name contains invalid space characters.");
         }
 
         return new Header(headerName, headerValue);
