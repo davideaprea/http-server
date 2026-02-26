@@ -2,6 +2,8 @@ package parsing.parser;
 
 import parsing.model.RequestTarget;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class RequestTargetParser {
@@ -9,22 +11,26 @@ public class RequestTargetParser {
     }
 
     public static RequestTarget from(String requestTarget) {
-        Map<String, List<String>> queryParams = new HashMap<>();
         int paramsStartIndex = requestTarget.indexOf('?');
+        String path = paramsStartIndex > -1 ? requestTarget.substring(0, paramsStartIndex) : requestTarget;
+        Map<String, List<String>> queryParams = new HashMap<>();
 
-        if (paramsStartIndex > -1) {
-            Arrays.stream(requestTarget
-                            .substring(paramsStartIndex + 1)
-                            .split("&"))
-                    .map(rawParam -> rawParam.split("="))
-                    .forEach(pair -> {
-                        queryParams.putIfAbsent(pair[0], new ArrayList<>());
-                        queryParams.get(pair[0]).add(pair[1]);
+        if (paramsStartIndex > -1 && paramsStartIndex + 1 < requestTarget.length()) {
+            String rawQuery = requestTarget.substring(paramsStartIndex + 1);
+
+            Arrays.stream(rawQuery.split("&"))
+                    .filter(s -> !s.isEmpty())
+                    .forEach(rawParam -> {
+                        String[] pair = rawParam.split("=", 2);
+                        String rawKey = pair[0];
+                        String rawValue = (pair.length == 2) ? pair[1] : "";
+                        String key = URLDecoder.decode(rawKey, StandardCharsets.UTF_8);
+                        String value = URLDecoder.decode(rawValue, StandardCharsets.UTF_8);
+
+                        queryParams.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
                     });
-
-            requestTarget = requestTarget.substring(0, paramsStartIndex);
         }
 
-        return new RequestTarget(requestTarget, queryParams);
+        return new RequestTarget(path, queryParams);
     }
 }
