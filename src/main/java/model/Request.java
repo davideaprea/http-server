@@ -9,6 +9,7 @@ public record Request(
         String targetURL,
         String version,
         Map<String, List<String>> headers,
+        Map<String, List<String>> queryParams,
         InputStream body
 ) {
 }

@@ -7,26 +7,40 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RequestParser {
     public Request requestFrom(InputStream requestStream) throws IOException {
         BufferedReader requestReader = new BufferedReader(new InputStreamReader(requestStream));
-        final String[] splitRequestLine = requestReader.readLine().split(" ");
+        String[] splitRequestLine = requestReader.readLine().split(" ");
 
         if (splitRequestLine.length != 3) {
             throw new IllegalStateException();
         }
 
-        final Method method = Method.valueOf(splitRequestLine[0]);
-        final String requestTarget = splitRequestLine[1];
-        final String version = splitRequestLine[2];
+        Method method = Method.valueOf(splitRequestLine[0]);
+        String requestTarget = splitRequestLine[1];
+        String version = splitRequestLine[2];
 
         if (!version.startsWith("HTTP/")) {
             throw new IllegalStateException();
+        }
+
+        Map<String, List<String>> queryParams = new HashMap<>();
+
+        int paramsStartIndex = requestTarget.indexOf('?');
+
+        if (paramsStartIndex > -1) {
+            Arrays.stream(requestTarget
+                            .substring(paramsStartIndex + 1)
+                            .split("&"))
+                    .map(rawParam -> rawParam.split("="))
+                    .forEach(pair -> {
+                        queryParams.putIfAbsent(pair[0], new ArrayList<>());
+                        queryParams.get(pair[0]).add(pair[1]);
+                    });
+
+            requestTarget = requestTarget.substring(0, paramsStartIndex);
         }
 
         Map<String, List<String>> headers = new HashMap<>();
@@ -56,6 +70,7 @@ public class RequestParser {
                 requestTarget,
                 version,
                 headers,
+                queryParams,
                 requestStream
         );
     }

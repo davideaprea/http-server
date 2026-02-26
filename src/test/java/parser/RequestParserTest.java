@@ -15,7 +15,7 @@ public class RequestParserTest {
     void successfulRequestParsing() throws IOException {
         RequestParser requestParser = new RequestParser();
         String rawRequest = """
-                POST /target HTTP/1.1
+                POST /target?a=1&b=2 HTTP/1.1
                 Host: example.com
                 Content-Type: application/json
                 Content-Length: 49
@@ -34,6 +34,13 @@ public class RequestParserTest {
                         "Content-Length", List.of("49")
                 ),
                 parsedRequest.headers()
+        );
+        Assertions.assertEquals(
+                Map.of(
+                        "a", List.of("1"),
+                        "b", List.of("2")
+                ),
+                parsedRequest.queryParams()
         );
     }
 }
