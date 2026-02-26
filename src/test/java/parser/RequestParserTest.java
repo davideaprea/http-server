@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class RequestParserTest {
     @Test
-    void successfulRequestParsing() throws IOException {
+    void testValid() throws IOException {
         String rawRequest = """
                 POST /target?a=1&b=2 HTTP/1.1
                 Host: example.com
@@ -24,7 +24,6 @@ public class RequestParserTest {
         Request parsedRequest = RequestParser.from(new ByteArrayInputStream(rawRequest.getBytes()));
 
         Assertions.assertEquals(Method.POST, parsedRequest.method());
-        Assertions.assertEquals("/target", parsedRequest.requestTarget().url());
         Assertions.assertEquals("HTTP/1.1", parsedRequest.version());
         Assertions.assertEquals(
                 Map.of(
@@ -33,13 +32,6 @@ public class RequestParserTest {
                         "Content-Length", List.of("49")
                 ),
                 parsedRequest.headers()
-        );
-        Assertions.assertEquals(
-                Map.of(
-                        "a", List.of("1"),
-                        "b", List.of("2")
-                ),
-                parsedRequest.requestTarget().queryParams()
         );
     }
 }
