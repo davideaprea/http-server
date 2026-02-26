@@ -21,13 +21,14 @@ public class RequestParser {
             throw new IllegalStateException();
         }
 
-        if (!splitRequestLine[2].startsWith("HTTP/")) {
-            throw new IllegalStateException();
-        }
-
         final Method method = Method.valueOf(splitRequestLine[0]);
         final String requestTarget = splitRequestLine[1];
         final String version = splitRequestLine[2];
+
+        if (!version.startsWith("HTTP/")) {
+            throw new IllegalStateException();
+        }
+
         Map<String, List<String>> headers = new HashMap<>();
 
         String currentLine;
@@ -46,15 +47,8 @@ public class RequestParser {
                 throw new IllegalStateException();
             }
 
-            headers.compute(headerName, (k, v) -> {
-                if (v == null) {
-                    return new ArrayList<>();
-                }
-
-                v.add(headerValue);
-
-                return v;
-            });
+            headers.putIfAbsent(headerName, new ArrayList<>());
+            headers.get(headerName).add(headerValue);
         }
 
         return new Request(
