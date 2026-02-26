@@ -1,7 +1,7 @@
-package parser;
+package parsing.parser;
 
-import model.Method;
-import model.RequestLine;
+import parsing.model.Method;
+import parsing.dto.RequestLine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
-package parser;
+package parsing.parser;
 
-import model.Header;
+import parsing.dto.Header;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

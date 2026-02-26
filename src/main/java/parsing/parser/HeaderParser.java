@@ -1,6 +1,6 @@
-package parser;
+package parsing.parser;
 
-import model.Header;
+import parsing.dto.Header;
 
 public class HeaderParser {
     private HeaderParser() {

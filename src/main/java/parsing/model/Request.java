@@ -1,4 +1,4 @@
-package model;
+package parsing.model;
 
 import java.io.InputStream;
 import java.util.List;

@@ -1,7 +1,7 @@
-package parser;
+package parsing.parser;
 
-import model.Method;
-import model.RequestLine;
+import parsing.model.Method;
+import parsing.dto.RequestLine;
 
 public class RequestLineParser {
     private RequestLineParser() {

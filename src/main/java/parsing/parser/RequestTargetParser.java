@@ -1,6 +1,6 @@
-package parser;
+package parsing.parser;
 
-import model.RequestTarget;
+import parsing.model.RequestTarget;
 
 import java.util.*;
 
