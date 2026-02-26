@@ -1,9 +1,6 @@
 package parser;
 
-import model.Header;
-import model.Method;
-import model.Request;
-import model.RequestTarget;
+import model.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,20 +14,7 @@ public class RequestParser {
 
     public static Request from(InputStream requestStream) throws IOException {
         BufferedReader requestReader = new BufferedReader(new InputStreamReader(requestStream));
-        String[] splitRequestLine = requestReader.readLine().split(" ");
-
-        if (splitRequestLine.length != 3) {
-            throw new IllegalStateException();
-        }
-
-        Method method = Method.valueOf(splitRequestLine[0]);
-        RequestTarget requestTarget = RequestTargetParser.from(splitRequestLine[1]);
-        String version = splitRequestLine[2];
-
-        if (!version.startsWith("HTTP/")) {
-            throw new IllegalStateException();
-        }
-
+        RequestLine requestLine = RequestLineParser.from(requestReader.readLine());
         Map<String, List<String>> headers = new HashMap<>();
 
         String currentLine;
@@ -43,9 +27,7 @@ public class RequestParser {
         }
 
         return new Request(
-                method,
-                requestTarget,
-                version,
+                requestLine,
                 headers,
                 requestStream
         );

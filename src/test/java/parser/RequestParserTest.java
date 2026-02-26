@@ -23,8 +23,8 @@ public class RequestParserTest {
                 """;
         Request parsedRequest = RequestParser.from(new ByteArrayInputStream(rawRequest.getBytes()));
 
-        Assertions.assertEquals(Method.POST, parsedRequest.method());
-        Assertions.assertEquals("HTTP/1.1", parsedRequest.version());
+        Assertions.assertEquals(Method.POST, parsedRequest.requestLine().method());
+        Assertions.assertEquals("HTTP/1.1", parsedRequest.requestLine().version());
         Assertions.assertEquals(
                 Map.of(
                         "Host", List.of("example.com"),
