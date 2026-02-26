@@ -15,6 +15,7 @@ public class RequestParser {
     public static Request from(InputStream requestStream) throws IOException {
         BufferedReader requestReader = new BufferedReader(new InputStreamReader(requestStream));
         RequestLine requestLine = RequestLineParser.from(requestReader.readLine());
+        RequestTarget requestTarget = RequestTargetParser.from(requestLine.requestTarget());
         Map<String, List<String>> headers = new HashMap<>();
 
         String currentLine;
@@ -27,7 +28,9 @@ public class RequestParser {
         }
 
         return new Request(
-                requestLine,
+                requestLine.method(),
+                requestLine.version(),
+                requestTarget,
                 headers,
                 requestStream
         );

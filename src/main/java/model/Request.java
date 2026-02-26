@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 public record Request(
-        RequestLine requestLine,
+        Method method,
+        String version,
+        RequestTarget target,
         Map<String, List<String>> headers,
         InputStream body
 ) {

@@ -2,7 +2,6 @@ package parser;
 
 import model.Method;
 import model.RequestLine;
-import model.RequestTarget;
 
 public class RequestLineParser {
     private RequestLineParser() {
@@ -16,7 +15,7 @@ public class RequestLineParser {
         }
 
         Method method = Method.valueOf(splitRequestLine[0]);
-        RequestTarget requestTarget = RequestTargetParser.from(splitRequestLine[1]);
+        String requestTarget = splitRequestLine[1];
         String version = splitRequestLine[2];
 
         if (!version.startsWith("HTTP/")) {
