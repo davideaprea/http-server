@@ -1,5 +1,6 @@
 package parser;
 
+import model.Header;
 import model.Method;
 import model.Request;
 
@@ -48,21 +49,10 @@ public class RequestParser {
         String currentLine;
 
         while (!(currentLine = requestReader.readLine()).isEmpty()) {
-            final int separatorIndex = currentLine.indexOf(':');
+            Header header = parseHeaderLine(currentLine);
 
-            if (separatorIndex == -1) {
-                throw new IllegalStateException();
-            }
-
-            final String headerName = currentLine.substring(0, separatorIndex);
-            final String headerValue = currentLine.substring(separatorIndex + 1).trim();
-
-            if (headerName.contains(" ")) {
-                throw new IllegalStateException();
-            }
-
-            headers.putIfAbsent(headerName, new ArrayList<>());
-            headers.get(headerName).add(headerValue);
+            headers.putIfAbsent(header.name(), new ArrayList<>());
+            headers.get(header.name()).add(header.value());
         }
 
         return new Request(
@@ -73,5 +63,22 @@ public class RequestParser {
                 queryParams,
                 requestStream
         );
+    }
+
+    Header parseHeaderLine(String headerLine) {
+        final int separatorIndex = headerLine.indexOf(':');
+
+        if (separatorIndex == -1) {
+            throw new IllegalStateException();
+        }
+
+        final String headerName = headerLine.substring(0, separatorIndex);
+        final String headerValue = headerLine.substring(separatorIndex + 1).trim();
+
+        if (headerName.contains(" ")) {
+            throw new IllegalStateException();
+        }
+
+        return new Header(headerName, headerValue);
     }
 }
