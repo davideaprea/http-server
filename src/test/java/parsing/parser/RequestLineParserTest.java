@@ -4,6 +4,7 @@ import parsing.model.Method;
 import parsing.dto.RequestLine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import parsing.model.Version;
 
 public class RequestLineParserTest {
     @Test
@@ -13,7 +14,7 @@ public class RequestLineParserTest {
         Assertions.assertEquals(new RequestLine(
                 Method.POST,
                 "/a/b/c",
-                "HTTP/1.1"
+                Version.HTTP_1_0
         ), requestLine);
     }
 

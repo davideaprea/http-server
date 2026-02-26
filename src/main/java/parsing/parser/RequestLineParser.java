@@ -2,6 +2,7 @@ package parsing.parser;
 
 import parsing.model.Method;
 import parsing.dto.RequestLine;
+import parsing.model.Version;
 
 public class RequestLineParser {
     private RequestLineParser() {
@@ -16,11 +17,7 @@ public class RequestLineParser {
 
         Method method = Method.valueOf(splitRequestLine[0]);
         String requestTarget = splitRequestLine[1];
-        String version = splitRequestLine[2];
-
-        if (!version.startsWith("HTTP/")) {
-            throw new IllegalStateException();
-        }
+        Version version = Version.fromValue(splitRequestLine[2]);
 
         return new RequestLine(method, requestTarget, version);
     }
