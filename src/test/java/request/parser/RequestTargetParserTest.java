@@ -1,9 +1,8 @@
-package parsing.parser;
+package request.parser;
 
-import parsing.model.RequestTarget;
+import request.model.RequestTarget;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import parsing.parser.RequestTargetParser;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,13 +18,14 @@ public class RequestTargetParserTest {
 
     @Test
     void parseWithParams() {
-        RequestTarget requestTarget = RequestTargetParser.from("/target?a=1&b=2");
+        RequestTarget requestTarget = RequestTargetParser.from("/target?a=1&&b=2&name=John=Doe&a=3");
 
         Assertions.assertEquals(new RequestTarget(
                 "/target",
                 Map.of(
-                        "a", List.of("1"),
-                        "b", List.of("2")
+                        "a", List.of("1", "3"),
+                        "b", List.of("2"),
+                        "name", List.of("John=Doe")
                 )
         ), requestTarget);
     }

@@ -1,6 +1,6 @@
-package parsing.parser;
+package request.parser;
 
-import parsing.model.RequestTarget;
+import request.model.RequestTarget;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +23,7 @@ public class RequestTargetParser {
                     .forEach(rawParam -> {
                         String[] pair = rawParam.split("=", 2);
                         String rawKey = pair[0];
-                        String rawValue = (pair.length == 2) ? pair[1] : "";
+                        String rawValue = pair.length == 2 ? pair[1] : "";
                         String key = URLDecoder.decode(rawKey, StandardCharsets.UTF_8);
                         String value = URLDecoder.decode(rawValue, StandardCharsets.UTF_8);
 

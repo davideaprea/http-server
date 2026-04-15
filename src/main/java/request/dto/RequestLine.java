@@ -1,7 +1,7 @@
-package parsing.dto;
+package request.dto;
 
-import parsing.model.Method;
-import parsing.model.Version;
+import request.model.Method;
+import request.model.Version;
 
 public record RequestLine(
         Method method,

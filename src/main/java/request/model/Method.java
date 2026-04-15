@@ -1,4 +1,4 @@
-package parsing.model;
+package request.model;
 
 public enum Method {
     POST,

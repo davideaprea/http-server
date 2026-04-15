@@ -1,4 +1,4 @@
-package parsing.dto;
+package request.dto;
 
 public record Header(
         String name,

@@ -1,4 +1,4 @@
-package parsing.model;
+package request.model;
 
 public enum Version {
     HTTP_1_0("HTTP/1.1");

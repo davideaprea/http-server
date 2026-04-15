@@ -1,4 +1,4 @@
-package parsing.exception;
+package request.exception;
 
 public class MalformedHeaderException extends RuntimeException {
   public MalformedHeaderException(String rawHeader, String message) {

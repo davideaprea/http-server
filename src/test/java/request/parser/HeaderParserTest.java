@@ -1,9 +1,9 @@
-package parsing.parser;
+package request.parser;
 
-import parsing.dto.Header;
+import request.dto.Header;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import parsing.exception.MalformedHeaderException;
+import request.exception.MalformedHeaderException;
 
 public class HeaderParserTest {
     @Test
@@ -20,6 +20,6 @@ public class HeaderParserTest {
 
     @Test
     void testInvalidHeaderName() {
-        Assertions.assertThrows(MalformedHeaderException.class, () -> HeaderParser.from("name with spaces: value"));
+        Assertions.assertThrows(MalformedHeaderException.class, () -> HeaderParser.from("invalid name: value"));
     }
 }

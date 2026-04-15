@@ -1,4 +1,4 @@
-package parsing.model;
+package request.model;
 
 import java.util.List;
 import java.util.Map;
