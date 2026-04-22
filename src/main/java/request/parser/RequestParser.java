@@ -12,10 +12,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class RequestParser {
-    private RequestParser() {
-    }
-
-    public static Request from(InputStream requestStream) throws IOException {
+    public Request from(InputStream requestStream) throws IOException {
         BufferedReader requestReader = new BufferedReader(new InputStreamReader(requestStream));
         RequestLine requestLine = RequestLineParser.from(requestReader.readLine());
         RequestTarget requestTarget = RequestTargetParser.from(requestLine.requestTarget());
