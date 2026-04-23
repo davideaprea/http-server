@@ -1,4 +1,4 @@
-package request.parser;
+package parser;
 
 import model.RequestTarget;
 import org.junit.jupiter.api.Assertions;

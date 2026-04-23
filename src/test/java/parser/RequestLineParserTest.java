@@ -1,4 +1,4 @@
-package request.parser;
+package parser;
 
 import parser.RequestLineParser;
 import model.Method;

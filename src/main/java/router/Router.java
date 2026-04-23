@@ -36,7 +36,7 @@ public class Router {
         Segment currSegment = root;
 
         for (String segmentName : path) {
-            currSegment = root.children().get(segmentName);
+            currSegment = currSegment.children().get(segmentName);
         }
 
         RequestHandler handler = Optional

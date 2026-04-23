@@ -1,4 +1,4 @@
-package request.parser;
+package parser;
 
 import parser.HeaderParser;
 import parser.dto.Header;
