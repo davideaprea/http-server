@@ -1,8 +1,8 @@
-package routing;
+package router;
 
-import request.model.Method;
-import request.model.Request;
-import response.Response;
+import model.Method;
+import model.Request;
+import model.Response;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,6 +1,7 @@
 package request.parser;
 
-import request.model.RequestTarget;
+import parser.RequestTargetParser;
+import model.RequestTarget;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

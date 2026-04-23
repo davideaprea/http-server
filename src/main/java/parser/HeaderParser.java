@@ -1,7 +1,7 @@
-package request.parser;
+package parser;
 
-import request.dto.Header;
-import request.exception.MalformedHeaderException;
+import parser.dto.Header;
+import exception.MalformedHeaderException;
 
 public class HeaderParser {
     private HeaderParser() {

@@ -1,7 +1,5 @@
-package request;
-
-import request.model.Request;
-import request.parser.RequestParser;
+import model.Request;
+import parser.RequestParser;
 
 import java.io.IOException;
 import java.net.ServerSocket;

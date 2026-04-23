@@ -1,4 +1,4 @@
-package response;
+package model;
 
 public record Response() {
 }

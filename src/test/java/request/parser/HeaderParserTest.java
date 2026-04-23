@@ -1,9 +1,10 @@
 package request.parser;
 
-import request.dto.Header;
+import parser.HeaderParser;
+import parser.dto.Header;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import request.exception.MalformedHeaderException;
+import exception.MalformedHeaderException;
 
 public class HeaderParserTest {
     @Test

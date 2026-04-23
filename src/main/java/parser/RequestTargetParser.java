@@ -1,6 +1,6 @@
-package request.parser;
+package parser;
 
-import request.model.RequestTarget;
+import model.RequestTarget;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

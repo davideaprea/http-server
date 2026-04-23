@@ -1,10 +1,11 @@
 package request.parser;
 
-import request.model.Method;
-import request.dto.RequestLine;
+import parser.RequestLineParser;
+import model.Method;
+import parser.dto.RequestLine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import request.model.Version;
+import model.Version;
 
 public class RequestLineParserTest {
     @Test

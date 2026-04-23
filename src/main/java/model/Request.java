@@ -1,4 +1,4 @@
-package request.model;
+package model;
 
 import java.io.InputStream;
 import java.util.List;
