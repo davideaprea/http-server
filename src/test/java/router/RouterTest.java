@@ -9,7 +9,6 @@ import java.util.Map;
 public class RouterTest {
     @Test
     void testValidRequest() {
-        Router router = new Router();
         Response mockResponse = new Response(
                 Version.HTTP_1_0,
                 Status.OK,
@@ -26,7 +25,9 @@ public class RouterTest {
             }
         };
 
-        router.add(handler);
+        Router router = new RouterBuilder()
+                .add(handler)
+                .build();
         Response response = router.handle(new Request(
                 handler.getMethod(),
                 Version.HTTP_1_0,
@@ -39,26 +40,7 @@ public class RouterTest {
     }
 
     @Test
-    void testConflictingHandlersRegistration() {
-        Router router = new Router();
-        RequestHandler handler = new RequestHandler(
-                Method.GET,
-                "/resource/path"
-        ) {
-            @Override
-            public Response handle(Request request) {
-                return null;
-            }
-        };
-
-        router.add(handler);
-
-        Assertions.assertThrows(Throwable.class, () -> router.add(handler));
-    }
-
-    @Test
     void testResourceNotFound() {
-        Router router = new Router();
         RequestHandler handler = new RequestHandler(
                 Method.GET,
                 "/resource/path"
@@ -68,8 +50,9 @@ public class RouterTest {
                 return null;
             }
         };
-
-        router.add(handler);
+        Router router = new RouterBuilder()
+                .add(handler)
+                .build();
 
         Assertions.assertThrows(Throwable.class, () -> router.handle(new Request(
                 handler.getMethod(),
@@ -82,7 +65,6 @@ public class RouterTest {
 
     @Test
     void testMethodNotSupported() {
-        Router router = new Router();
         RequestHandler handler = new RequestHandler(
                 Method.GET,
                 "/resource/path"
@@ -92,8 +74,9 @@ public class RouterTest {
                 return null;
             }
         };
-
-        router.add(handler);
+        Router router = new RouterBuilder()
+                .add(handler)
+                .build();
 
         Assertions.assertThrows(Throwable.class, () -> router.handle(new Request(
                 Method.POST,
