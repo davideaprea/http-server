@@ -15,9 +15,9 @@ public class Server {
     private final ServerConfiguration configuration;
     private final RequestParser requestParser;
 
-    public Server(ServerConfiguration configuration, RequestParser requestParser) {
+    public Server(ServerConfiguration configuration) {
         this.configuration = configuration;
-        this.requestParser = requestParser;
+        this.requestParser = new RequestParser();
     }
 
     public void init() throws IOException {
