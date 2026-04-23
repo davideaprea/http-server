@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class RouterTest {
     @Test
-    void test() {
+    void testValidRequest() {
         Router router = new Router();
         Response mockResponse = new Response(
                 Version.HTTP_1_0,
@@ -39,7 +39,7 @@ public class RouterTest {
     }
 
     @Test
-    void s() {
+    void testConflictingHandlersRegistration() {
         Router router = new Router();
         RequestHandler handler = new RequestHandler(
                 Method.GET,
@@ -57,10 +57,9 @@ public class RouterTest {
     }
 
     @Test
-    void d() {
+    void testResourceNotFound() {
         Router router = new Router();
-
-        router.add(new RequestHandler(
+        RequestHandler handler = new RequestHandler(
                 Method.GET,
                 "/resource/path"
         ) {
@@ -68,10 +67,12 @@ public class RouterTest {
             public Response handle(Request request) {
                 return null;
             }
-        });
+        };
+
+        router.add(handler);
 
         Assertions.assertThrows(Throwable.class, () -> router.handle(new Request(
-                Method.GET,
+                handler.getMethod(),
                 Version.HTTP_1_0,
                 new RequestTarget("/non/existing/path", Map.of()),
                 Map.of(),
@@ -80,21 +81,15 @@ public class RouterTest {
     }
 
     @Test
-    void a() {
+    void testMethodNotSupported() {
         Router router = new Router();
-        Response mockResponse = new Response(
-                Version.HTTP_1_0,
-                Status.OK,
-                Map.of(),
-                new byte[0]
-        );
         RequestHandler handler = new RequestHandler(
                 Method.GET,
                 "/resource/path"
         ) {
             @Override
             public Response handle(Request request) {
-                return mockResponse;
+                return null;
             }
         };
 
