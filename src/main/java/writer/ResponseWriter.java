@@ -7,7 +7,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Arrays;
 import java.util.Map;
 
 @AllArgsConstructor
@@ -16,8 +15,6 @@ public class ResponseWriter {
 
     public void write(Response response) throws IOException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
-
-        response.headers().put("Content-Length", String.valueOf(response.body().length));
 
         writer.write(
                 response.version().getValue() + " " +
@@ -29,8 +26,13 @@ public class ResponseWriter {
             writer.write(h.getKey() + ": " + h.getValue() + "\r\n");
         }
 
+        if (!response.headers().containsKey("Content-Length")) {
+            writer.write("Content-Length: " + response.body().length + "\r\n");
+        }
         writer.write("\r\n");
-        writer.write(Arrays.toString(response.body()));
         writer.flush();
+
+        outputStream.write(response.body());
+        outputStream.flush();
     }
 }

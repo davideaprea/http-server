@@ -6,6 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum Status {
+    INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERROR"),
     NOT_IMPLEMENTED(501, "NOT IMPLEMENTED"),
     NOT_FOUND(404, "NOT FOUND"),
     VERSION_NOT_SUPPORTED(505, "VERSION NOT SUPPORTED"),
