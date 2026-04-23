@@ -55,4 +55,27 @@ public class RouterTest {
 
         Assertions.assertThrows(Throwable.class, () -> router.add(handler));
     }
+
+    @Test
+    void d() {
+        Router router = new Router();
+
+        router.add(new RequestHandler(
+                Method.GET,
+                "/resource/path"
+        ) {
+            @Override
+            public Response handle(Request request) {
+                return null;
+            }
+        });
+
+        Assertions.assertThrows(Throwable.class, () -> router.handle(new Request(
+                Method.GET,
+                Version.HTTP_1_0,
+                new RequestTarget("/non/existing/path", Map.of()),
+                Map.of(),
+                null
+        )));
+    }
 }

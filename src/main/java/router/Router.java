@@ -38,7 +38,9 @@ public class Router {
         Segment currSegment = root;
 
         for (String segmentName : path) {
-            currSegment = currSegment.children().get(segmentName);
+            currSegment = Optional
+                    .ofNullable(currSegment.children().get(segmentName))
+                    .orElseThrow();
         }
 
         RequestHandler handler = Optional
