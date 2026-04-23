@@ -5,10 +5,7 @@ import parser.dto.RequestLine;
 import model.Version;
 
 public class RequestLineParser {
-    private RequestLineParser() {
-    }
-
-    public static RequestLine from(String rawRequestLine) {
+    public RequestLine from(String rawRequestLine) {
         String[] splitRequestLine = rawRequestLine.split(" ");
 
         if (splitRequestLine.length != 3) {

@@ -12,16 +12,20 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class RequestParser {
+    private final HeaderParser headerParser = new HeaderParser();
+    private final RequestLineParser requestLineParser = new RequestLineParser();
+    private final RequestTargetParser requestTargetParser = new RequestTargetParser();
+
     public Request from(InputStream requestStream) throws IOException {
         BufferedReader requestReader = new BufferedReader(new InputStreamReader(requestStream));
-        RequestLine requestLine = RequestLineParser.from(requestReader.readLine());
-        RequestTarget requestTarget = RequestTargetParser.from(requestLine.requestTarget());
+        RequestLine requestLine = requestLineParser.from(requestReader.readLine());
+        RequestTarget requestTarget = requestTargetParser.from(requestLine.requestTarget());
         Map<String, List<String>> headers = new HashMap<>();
 
         String currentLine;
 
         while (!(currentLine = requestReader.readLine()).isEmpty()) {
-            Header header = HeaderParser.from(currentLine);
+            Header header = headerParser.from(currentLine);
 
             headers.putIfAbsent(header.name(), new ArrayList<>());
             headers.get(header.name()).add(header.value());

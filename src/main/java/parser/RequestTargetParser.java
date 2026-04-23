@@ -7,10 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class RequestTargetParser {
-    private RequestTargetParser() {
-    }
-
-    public static RequestTarget from(String requestTarget) {
+    public RequestTarget from(String requestTarget) {
         int paramsStartIndex = requestTarget.indexOf('?');
         String path = paramsStartIndex > -1 ? requestTarget.substring(0, paramsStartIndex) : requestTarget;
         Map<String, List<String>> queryParams = new HashMap<>();

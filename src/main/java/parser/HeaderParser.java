@@ -4,10 +4,7 @@ import parser.dto.Header;
 import exception.MalformedHeaderException;
 
 public class HeaderParser {
-    private HeaderParser() {
-    }
-
-    public static Header from(String headerLine) {
+    public Header from(String headerLine) {
         final int separatorIndex = headerLine.indexOf(':');
 
         if (separatorIndex == -1) {
