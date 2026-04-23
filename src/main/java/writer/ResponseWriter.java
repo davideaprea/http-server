@@ -1,5 +1,6 @@
 package writer;
 
+import lombok.AllArgsConstructor;
 import model.Response;
 
 import java.io.BufferedWriter;
@@ -9,12 +10,9 @@ import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Map;
 
+@AllArgsConstructor
 public class ResponseWriter {
     private final OutputStream outputStream;
-
-    public ResponseWriter(OutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
 
     public void write(Response response) throws IOException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));

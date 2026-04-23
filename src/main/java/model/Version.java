@@ -1,17 +1,14 @@
 package model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum Version {
     HTTP_1_0("HTTP/1.1");
 
     private final String value;
-
-    Version(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
 
     public static Version fromValue(String value) {
         for (Version v : values()) {
