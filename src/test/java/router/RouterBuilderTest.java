@@ -1,10 +1,12 @@
 package router;
 
-import model.Method;
-import model.Request;
-import model.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import router.exception.ConflictingRoutesException;
+import router.model.RequestHandler;
+import shared.model.Method;
+import shared.model.Request;
+import shared.model.Response;
 
 public class RouterBuilderTest {
     @Test
@@ -20,6 +22,6 @@ public class RouterBuilderTest {
         };
         RouterBuilder routerBuilder = new RouterBuilder().add(handler);
 
-        Assertions.assertThrows(Throwable.class, () -> routerBuilder.add(handler));
+        Assertions.assertThrows(ConflictingRoutesException.class, () -> routerBuilder.add(handler));
     }
 }

@@ -1,5 +1,6 @@
-package model;
+package shared.model;
 
+import shared.exception.ResponseStatusException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,6 +18,6 @@ public enum Version {
             }
         }
 
-        throw new IllegalArgumentException("Unsupported HTTP version: " + value);
+        throw new ResponseStatusException("Unsupported HTTP version: " + value, Status.VERSION_NOT_SUPPORTED);
     }
 }

@@ -1,9 +1,9 @@
 package parser;
 
 import parser.dto.Header;
-import model.Request;
+import shared.model.Request;
 import parser.dto.RequestLine;
-import model.RequestTarget;
+import shared.model.RequestTarget;
 
 import java.io.BufferedReader;
 import java.io.IOException;

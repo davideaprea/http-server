@@ -1,4 +1,4 @@
-package model;
+package shared.model;
 
 public enum Method {
     POST,

@@ -1,10 +1,10 @@
-package router;
+package router.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import model.Method;
-import model.Request;
-import model.Response;
+import shared.model.Method;
+import shared.model.Request;
+import shared.model.Response;
 
 @AllArgsConstructor
 @Getter

@@ -1,11 +1,12 @@
 package parser;
 
-import parser.RequestLineParser;
-import model.Method;
-import parser.dto.RequestLine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import model.Version;
+import parser.dto.RequestLine;
+import shared.exception.ResponseStatusException;
+import shared.model.Method;
+import shared.model.Status;
+import shared.model.Version;
 
 public class RequestLineParserTest {
     private final RequestLineParser requestLineParser = new RequestLineParser();
@@ -23,25 +24,31 @@ public class RequestLineParserTest {
 
     @Test
     void testInvalidMethod() {
-        Assertions.assertThrows(
-                Exception.class,
+        var ex = Assertions.assertThrows(
+                ResponseStatusException.class,
                 () -> requestLineParser.from("INVALID-METHOD /a/b/c HTTP/1.1")
         );
+
+        Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());
     }
 
     @Test
     void testInvalidVersion() {
-        Assertions.assertThrows(
-                Exception.class,
+        var ex = Assertions.assertThrows(
+                ResponseStatusException.class,
                 () -> requestLineParser.from("POST /a/b/c INVALID-VERSION")
         );
+
+        Assertions.assertEquals(Status.VERSION_NOT_SUPPORTED, ex.getStatus());
     }
 
     @Test
     void testMissingPart() {
-        Assertions.assertThrows(
-                Exception.class,
+        var ex = Assertions.assertThrows(
+                ResponseStatusException.class,
                 () -> requestLineParser.from("POST HTTP/1.1")
         );
+
+        Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());
     }
 }

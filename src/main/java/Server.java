@@ -1,5 +1,5 @@
-import model.Request;
-import model.Response;
+import shared.model.Request;
+import shared.model.Response;
 import parser.RequestParser;
 import router.Router;
 import writer.ResponseWriter;

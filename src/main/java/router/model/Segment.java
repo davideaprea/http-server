@@ -1,6 +1,6 @@
-package router;
+package router.model;
 
-import model.Method;
+import shared.model.Method;
 
 import java.util.HashMap;
 import java.util.Map;

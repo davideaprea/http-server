@@ -1,18 +1,27 @@
 package parser;
 
-import model.Method;
 import parser.dto.RequestLine;
-import model.Version;
+import shared.exception.ResponseStatusException;
+import shared.model.Method;
+import shared.model.Status;
+import shared.model.Version;
 
 public class RequestLineParser {
     public RequestLine from(String rawRequestLine) {
         String[] splitRequestLine = rawRequestLine.split(" ");
 
         if (splitRequestLine.length != 3) {
-            throw new IllegalStateException();
+            throw new ResponseStatusException("Request line is malformed.", Status.BAD_REQUEST);
         }
 
-        Method method = Method.valueOf(splitRequestLine[0]);
+        Method method;
+
+        try {
+            method = Method.valueOf(splitRequestLine[0]);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException("Invalid method.", Status.BAD_REQUEST);
+        }
+
         String requestTarget = splitRequestLine[1];
         Version version = Version.fromValue(splitRequestLine[2]);
 

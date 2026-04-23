@@ -1,10 +1,10 @@
 package parser;
 
-import parser.HeaderParser;
-import parser.dto.Header;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import exception.MalformedHeaderException;
+import parser.dto.Header;
+import shared.exception.ResponseStatusException;
+import shared.model.Status;
 
 public class HeaderParserTest {
     private final HeaderParser headerParser = new HeaderParser();
@@ -18,11 +18,15 @@ public class HeaderParserTest {
 
     @Test
     void testMissingColon() {
-        Assertions.assertThrows(MalformedHeaderException.class, () -> headerParser.from("name value"));
+        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> headerParser.from("name value"));
+
+        Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());
     }
 
     @Test
     void testInvalidHeaderName() {
-        Assertions.assertThrows(MalformedHeaderException.class, () -> headerParser.from("invalid name: value"));
+        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> headerParser.from("invalid name: value"));
+
+        Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());
     }
 }

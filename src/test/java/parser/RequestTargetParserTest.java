@@ -1,9 +1,8 @@
 package parser;
 
-import model.RequestTarget;
+import shared.model.RequestTarget;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import parser.RequestTargetParser;
 
 import java.util.HashMap;
 import java.util.List;

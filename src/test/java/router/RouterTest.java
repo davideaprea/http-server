@@ -1,8 +1,10 @@
 package router;
 
-import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import router.model.RequestHandler;
+import shared.exception.ResponseStatusException;
+import shared.model.*;
 
 import java.util.Map;
 
@@ -53,14 +55,15 @@ public class RouterTest {
         Router router = new RouterBuilder()
                 .add(handler)
                 .build();
-
-        Assertions.assertThrows(Throwable.class, () -> router.handle(new Request(
+        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
                 handler.getMethod(),
                 Version.HTTP_1_0,
                 new RequestTarget("/non/existing/path", Map.of()),
                 Map.of(),
                 null
         )));
+
+        Assertions.assertEquals(Status.NOT_FOUND, ex.getStatus());
     }
 
     @Test
@@ -77,13 +80,14 @@ public class RouterTest {
         Router router = new RouterBuilder()
                 .add(handler)
                 .build();
-
-        Assertions.assertThrows(Throwable.class, () -> router.handle(new Request(
+        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
                 Method.POST,
                 Version.HTTP_1_0,
                 new RequestTarget(handler.getPath(), Map.of()),
                 Map.of(),
                 null
         )));
+
+        Assertions.assertEquals(Status.NOT_IMPLEMENTED, ex.getStatus());
     }
 }

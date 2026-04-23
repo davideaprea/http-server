@@ -1,5 +1,9 @@
 package router;
 
+import router.exception.ConflictingRoutesException;
+import router.model.RequestHandler;
+import router.model.Segment;
+
 public class RouterBuilder {
     private final Segment root = Segment.withDefault();
 
@@ -22,7 +26,7 @@ public class RouterBuilder {
         }
 
         if (currSegment.methodHandlers().containsKey(requestHandler.getMethod())) {
-            throw new IllegalStateException();
+            throw new ConflictingRoutesException(requestHandler.getPath(), requestHandler.getMethod());
         }
 
         currSegment.methodHandlers().put(requestHandler.getMethod(), requestHandler);

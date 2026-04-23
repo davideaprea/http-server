@@ -1,7 +1,7 @@
 package writer;
 
 import lombok.AllArgsConstructor;
-import model.Response;
+import shared.model.Response;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
