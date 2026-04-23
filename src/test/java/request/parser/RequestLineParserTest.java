@@ -8,9 +8,11 @@ import org.junit.jupiter.api.Test;
 import model.Version;
 
 public class RequestLineParserTest {
+    private final RequestLineParser requestLineParser = new RequestLineParser();
+
     @Test
     void testValid() {
-        RequestLine requestLine = RequestLineParser.from("POST /a/b/c HTTP/1.1");
+        RequestLine requestLine = requestLineParser.from("POST /a/b/c HTTP/1.1");
 
         Assertions.assertEquals(new RequestLine(
                 Method.POST,
@@ -23,7 +25,7 @@ public class RequestLineParserTest {
     void testInvalidMethod() {
         Assertions.assertThrows(
                 Exception.class,
-                () -> RequestLineParser.from("INVALID-METHOD /a/b/c HTTP/1.1")
+                () -> requestLineParser.from("INVALID-METHOD /a/b/c HTTP/1.1")
         );
     }
 
@@ -31,7 +33,7 @@ public class RequestLineParserTest {
     void testInvalidVersion() {
         Assertions.assertThrows(
                 Exception.class,
-                () -> RequestLineParser.from("POST /a/b/c INVALID-VERSION")
+                () -> requestLineParser.from("POST /a/b/c INVALID-VERSION")
         );
     }
 
@@ -39,7 +41,7 @@ public class RequestLineParserTest {
     void testMissingPart() {
         Assertions.assertThrows(
                 Exception.class,
-                () -> RequestLineParser.from("POST HTTP/1.1")
+                () -> requestLineParser.from("POST HTTP/1.1")
         );
     }
 }
