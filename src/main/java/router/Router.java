@@ -3,17 +3,15 @@ package router;
 import model.Request;
 import model.Response;
 
-import java.util.HashMap;
-
 public class Router {
-    private final Segment root = new Segment(new HashMap<>(), new HashMap<>());
+    private final Segment root = Segment.withDefault();
 
     public void add(RequestHandler requestHandler) {
         String[] path = requestHandler.getPath().split("/");
         Segment currSegment = root;
 
         for (String segmentName : path) {
-            Segment segment = new Segment(new HashMap<>(), new HashMap<>());
+            Segment segment = Segment.withDefault();
 
             currSegment.children().put(segmentName, segment);
 
