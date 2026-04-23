@@ -6,6 +6,6 @@ public record Response(
         Version version,
         Status status,
         Map<String, String> headers,
-        Object body
+        byte[] body
 ) {
 }

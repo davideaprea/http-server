@@ -18,9 +18,8 @@ public class ResponseWriter {
 
     public void write(Response response) throws IOException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
-        byte[] bodyBytes = response.body() != null ? response.body().toString().getBytes() : new byte[0];
 
-        response.headers().put("Content-Length", String.valueOf(bodyBytes.length));
+        response.headers().put("Content-Length", String.valueOf(response.body().length));
 
         writer.write(
                 response.version().getValue() + " " +
@@ -33,7 +32,7 @@ public class ResponseWriter {
         }
 
         writer.write("\r\n");
-        writer.write(Arrays.toString(bodyBytes));
+        writer.write(Arrays.toString(response.body()));
         writer.flush();
     }
 }
