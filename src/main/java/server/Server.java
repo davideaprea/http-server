@@ -1,7 +1,8 @@
+package server;
+
+import parser.RequestParser;
 import shared.model.Request;
 import shared.model.Response;
-import parser.RequestParser;
-import router.Router;
 import writer.ResponseWriter;
 
 import java.io.IOException;
@@ -11,18 +12,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
+    private final ServerConfiguration configuration;
     private final RequestParser requestParser;
-    private final Router router;
 
-    public Server(Router router) {
-        requestParser = new RequestParser();
-        this.router = router;
+    public Server(ServerConfiguration configuration, RequestParser requestParser) {
+        this.configuration = configuration;
+        this.requestParser = requestParser;
     }
 
     public void init() throws IOException {
         try (
-                ServerSocket serverSocket = new ServerSocket(8080);
-                ExecutorService executor = Executors.newFixedThreadPool(5)
+                ServerSocket serverSocket = new ServerSocket(configuration.port());
+                ExecutorService executor = Executors.newFixedThreadPool(configuration.threadPoolSize())
         ) {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -30,7 +31,7 @@ public class Server {
                 executor.submit(() -> {
                     try {
                         Request request = requestParser.from(clientSocket.getInputStream());
-                        Response response = router.handle(request);
+                        Response response = configuration.router().handle(request);
                         ResponseWriter responseWriter = new ResponseWriter(clientSocket.getOutputStream());
 
                         responseWriter.write(response);
