@@ -37,4 +37,22 @@ public class RouterTest {
 
         Assertions.assertEquals(mockResponse, response);
     }
+
+    @Test
+    void s() {
+        Router router = new Router();
+        RequestHandler handler = new RequestHandler(
+                Method.GET,
+                "/resource/path"
+        ) {
+            @Override
+            public Response handle(Request request) {
+                return null;
+            }
+        };
+
+        router.add(handler);
+
+        Assertions.assertThrows(Throwable.class, () -> router.add(handler));
+    }
 }

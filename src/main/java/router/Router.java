@@ -13,15 +13,17 @@ public class Router {
         Segment currSegment = root;
 
         for (String segmentName : path) {
-            Segment segment = Segment.withDefault();
+            var segmentChildren = currSegment.children();
 
-            if (currSegment.children().containsKey(segmentName)) {
-                throw new IllegalStateException();
+            if (segmentChildren.containsKey(segmentName)) {
+                currSegment = segmentChildren.get(segmentName);
+            } else {
+                var segment = Segment.withDefault();
+
+                segmentChildren.put(segmentName, segment);
+
+                currSegment = segment;
             }
-
-            currSegment.children().put(segmentName, segment);
-
-            currSegment = segment;
         }
 
         if (currSegment.methodHandlers().containsKey(requestHandler.getMethod())) {
