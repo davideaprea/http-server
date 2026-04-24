@@ -4,10 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import router.Router;
 import router.RouterBuilder;
-import router.model.RequestHandler;
+import router.dto.RequestHandlerRegisterCommand;
 import server.Server;
 import server.ServerConfiguration;
-import shared.model.*;
+import shared.model.Method;
+import shared.model.Response;
+import shared.model.Status;
+import shared.model.Version;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,20 +27,16 @@ public class ServerTest {
     @BeforeEach
     void setup() {
         Router router = new RouterBuilder()
-                .add(new RequestHandler(
-                        Method.GET,
-                        "/resource/path"
-                ) {
-                    @Override
-                    public Response handle(Request request) {
-                        return new Response(
+                .add(new RequestHandlerRegisterCommand(
+                        request -> new Response(
                                 Version.HTTP_1_0,
                                 Status.OK,
                                 Map.of("Content-Type", "text/plain"),
                                 "Hello world".getBytes(StandardCharsets.UTF_8)
-                        );
-                    }
-                })
+                        ),
+                        Method.GET,
+                        "/resource/path"
+                ))
                 .build();
         ServerConfiguration serverConfiguration = new ServerConfiguration(0, 3, router);
         server = new Server(serverConfiguration);

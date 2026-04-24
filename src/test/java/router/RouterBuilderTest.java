@@ -2,26 +2,20 @@ package router;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import router.dto.RequestHandlerRegisterCommand;
 import router.exception.ConflictingRoutesException;
-import router.model.RequestHandler;
 import shared.model.Method;
-import shared.model.Request;
-import shared.model.Response;
 
 public class RouterBuilderTest {
     @Test
     void testConflictingHandlersRegistration() {
-        RequestHandler handler = new RequestHandler(
+        RequestHandlerRegisterCommand command = new RequestHandlerRegisterCommand(
+                request -> null,
                 Method.GET,
                 "/resource/path"
-        ) {
-            @Override
-            public Response handle(Request request) {
-                return null;
-            }
-        };
-        RouterBuilder routerBuilder = new RouterBuilder().add(handler);
+        );
+        RouterBuilder routerBuilder = new RouterBuilder().add(command);
 
-        Assertions.assertThrows(ConflictingRoutesException.class, () -> routerBuilder.add(handler));
+        Assertions.assertThrows(ConflictingRoutesException.class, () -> routerBuilder.add(command));
     }
 }

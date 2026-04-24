@@ -2,7 +2,7 @@ package router;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import router.model.RequestHandler;
+import router.dto.RequestHandlerRegisterCommand;
 import shared.exception.ResponseStatusException;
 import shared.model.*;
 
@@ -17,23 +17,19 @@ public class RouterTest {
                 Map.of(),
                 new byte[0]
         );
-        RequestHandler handler = new RequestHandler(
+        RequestHandlerRegisterCommand command = new RequestHandlerRegisterCommand(
+                request -> mockResponse,
                 Method.GET,
                 "/resource/path"
-        ) {
-            @Override
-            public Response handle(Request request) {
-                return mockResponse;
-            }
-        };
+        );
 
         Router router = new RouterBuilder()
-                .add(handler)
+                .add(command)
                 .build();
         Response response = router.handle(new Request(
-                handler.getMethod(),
+                command.method(),
                 Version.HTTP_1_0,
-                new RequestTarget(handler.getPath(), Map.of()),
+                new RequestTarget(command.path(), Map.of()),
                 Map.of(),
                 null
         ));
@@ -43,20 +39,16 @@ public class RouterTest {
 
     @Test
     void testResourceNotFound() {
-        RequestHandler handler = new RequestHandler(
+        RequestHandlerRegisterCommand command = new RequestHandlerRegisterCommand(
+                request -> null,
                 Method.GET,
                 "/resource/path"
-        ) {
-            @Override
-            public Response handle(Request request) {
-                return null;
-            }
-        };
+        );
         Router router = new RouterBuilder()
-                .add(handler)
+                .add(command)
                 .build();
         var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
-                handler.getMethod(),
+                command.method(),
                 Version.HTTP_1_0,
                 new RequestTarget("/non/existing/path", Map.of()),
                 Map.of(),
@@ -68,22 +60,18 @@ public class RouterTest {
 
     @Test
     void testMethodNotSupported() {
-        RequestHandler handler = new RequestHandler(
+        RequestHandlerRegisterCommand command = new RequestHandlerRegisterCommand(
+                request -> null,
                 Method.GET,
                 "/resource/path"
-        ) {
-            @Override
-            public Response handle(Request request) {
-                return null;
-            }
-        };
+        );
         Router router = new RouterBuilder()
-                .add(handler)
+                .add(command)
                 .build();
         var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
                 Method.POST,
                 Version.HTTP_1_0,
-                new RequestTarget(handler.getPath(), Map.of()),
+                new RequestTarget(command.path(), Map.of()),
                 Map.of(),
                 null
         )));

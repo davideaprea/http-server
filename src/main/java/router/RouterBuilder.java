@@ -1,14 +1,14 @@
 package router;
 
+import router.dto.RequestHandlerRegisterCommand;
 import router.exception.ConflictingRoutesException;
-import router.model.RequestHandler;
 import router.model.Segment;
 
 public class RouterBuilder {
     private final Segment root = Segment.withDefault();
 
-    public RouterBuilder add(RequestHandler requestHandler) {
-        String[] path = requestHandler.getPath().split("/");
+    public RouterBuilder add(RequestHandlerRegisterCommand command) {
+        String[] path = command.path().split("/");
         Segment currSegment = root;
 
         for (String segmentName : path) {
@@ -25,11 +25,11 @@ public class RouterBuilder {
             }
         }
 
-        if (currSegment.methodHandlers().containsKey(requestHandler.getMethod())) {
-            throw new ConflictingRoutesException(requestHandler.getPath(), requestHandler.getMethod());
+        if (currSegment.methodHandlers().containsKey(command.method())) {
+            throw new ConflictingRoutesException(command.path(), command.method());
         }
 
-        currSegment.methodHandlers().put(requestHandler.getMethod(), requestHandler);
+        currSegment.methodHandlers().put(command.method(), command.handler());
 
         return this;
     }
