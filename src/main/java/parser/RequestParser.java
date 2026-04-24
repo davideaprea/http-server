@@ -1,8 +1,8 @@
 package parser;
 
 import parser.dto.Header;
-import shared.model.Request;
 import parser.dto.RequestLine;
+import shared.model.Request;
 import shared.model.RequestTarget;
 
 import java.io.BufferedReader;
@@ -24,7 +24,10 @@ public class RequestParser {
 
         String currentLine;
 
-        while (!(currentLine = requestReader.readLine()).isEmpty()) {
+        while (!(currentLine = Optional
+                .ofNullable(requestReader.readLine())
+                .orElse(""))
+                .isEmpty()) {
             Header header = headerParser.from(currentLine);
 
             headers.putIfAbsent(header.name(), new ArrayList<>());
