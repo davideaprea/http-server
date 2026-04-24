@@ -29,7 +29,7 @@ public class ServerTest {
         Router router = new RouterBuilder()
                 .add(new RequestHandlerRegisterCommand(
                         request -> new Response(
-                                Version.HTTP_1_0,
+                                Version.HTTP_1_1,
                                 Status.OK,
                                 Map.of("Content-Type", "text/plain"),
                                 "Hello world".getBytes(StandardCharsets.UTF_8)

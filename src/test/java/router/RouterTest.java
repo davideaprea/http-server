@@ -12,7 +12,7 @@ public class RouterTest {
     @Test
     void testValidRequest() {
         Response mockResponse = new Response(
-                Version.HTTP_1_0,
+                Version.HTTP_1_1,
                 Status.OK,
                 Map.of(),
                 new byte[0]
@@ -28,7 +28,7 @@ public class RouterTest {
                 .build();
         Response response = router.handle(new Request(
                 command.method(),
-                Version.HTTP_1_0,
+                Version.HTTP_1_1,
                 new RequestTarget(command.path(), Map.of()),
                 Map.of(),
                 null
@@ -49,7 +49,7 @@ public class RouterTest {
                 .build();
         var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
                 command.method(),
-                Version.HTTP_1_0,
+                Version.HTTP_1_1,
                 new RequestTarget("/non/existing/path", Map.of()),
                 Map.of(),
                 null
@@ -70,7 +70,7 @@ public class RouterTest {
                 .build();
         var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
                 Method.POST,
-                Version.HTTP_1_0,
+                Version.HTTP_1_1,
                 new RequestTarget(command.path(), Map.of()),
                 Map.of(),
                 null

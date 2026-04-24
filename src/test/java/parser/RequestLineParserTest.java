@@ -18,7 +18,7 @@ public class RequestLineParserTest {
         Assertions.assertEquals(new RequestLine(
                 Method.POST,
                 "/a/b/c",
-                Version.HTTP_1_0
+                Version.HTTP_1_1
         ), requestLine);
     }
 

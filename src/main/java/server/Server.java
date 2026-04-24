@@ -2,6 +2,7 @@ package server;
 
 import lombok.Getter;
 import parser.RequestParser;
+import shared.exception.ResponseStatusException;
 import shared.model.Request;
 import shared.model.Response;
 import shared.model.Status;
@@ -11,6 +12,7 @@ import writer.ResponseWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,7 +24,6 @@ public class Server {
 
     @Getter
     private int port;
-    private volatile boolean running = false;
     private ServerSocket serverSocket;
 
     public Server(ServerConfiguration configuration) {
@@ -33,49 +34,59 @@ public class Server {
 
     public void start() throws IOException {
         serverSocket = new ServerSocket(configuration.port());
-        running = true;
         port = serverSocket.getLocalPort();
 
-        while (running) {
+        while (isServerSocketOpen()) {
+            Socket clientSocket;
+
             try {
-                Socket clientSocket = serverSocket.accept();
-
-                executor.submit(() -> {
-                    try (clientSocket) {
-                        ResponseWriter responseWriter = new ResponseWriter(clientSocket.getOutputStream());
-
-                        try {
-                            Request request = requestParser.from(clientSocket.getInputStream());
-                            Response response = configuration.router().handle(request);
-
-                            responseWriter.write(response);
-                        } catch (Throwable e) {
-                            responseWriter.write(new Response(
-                                    Version.HTTP_1_0,
-                                    Status.INTERNAL_SERVER_ERROR,
-                                    Map.of(),
-                                    new byte[0]
-                            ));
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            } catch (java.net.SocketException e) {
-                if (!running) break;
+                clientSocket = serverSocket.accept();
+            } catch (SocketException e) {
+                if (serverSocket.isClosed()) {
+                    break;
+                }
 
                 throw e;
             }
+
+            executor.submit(() -> {
+                ResponseWriter responseWriter = new ResponseWriter(clientSocket);
+
+                try {
+                    Request request = requestParser.from(clientSocket);
+                    Response response = configuration.router().handle(request);
+
+                    responseWriter.write(response);
+                } catch (IOException e) {
+                    System.out.println("Connection closed.");
+                } catch (ResponseStatusException e) {
+                    responseWriter.write(new Response(
+                            Version.HTTP_1_1,
+                            e.getStatus(),
+                            Map.of(),
+                            new byte[0]
+                    ));
+                } catch (Exception e) {
+                    responseWriter.write(new Response(
+                            Version.HTTP_1_1,
+                            Status.INTERNAL_SERVER_ERROR,
+                            Map.of(),
+                            new byte[0]
+                    ));
+                }
+            });
         }
     }
 
     public void stop() throws IOException {
-        running = false;
-
-        if (serverSocket != null && !serverSocket.isClosed()) {
+        if (isServerSocketOpen()) {
             serverSocket.close();
         }
 
         executor.shutdownNow();
+    }
+
+    private boolean isServerSocketOpen() {
+        return serverSocket != null && !serverSocket.isClosed();
     }
 }
