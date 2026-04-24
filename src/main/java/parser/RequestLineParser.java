@@ -6,6 +6,8 @@ import shared.model.Method;
 import shared.model.Status;
 import shared.model.Version;
 
+import java.util.NoSuchElementException;
+
 public class RequestLineParser {
     public RequestLine from(String rawRequestLine) {
         String[] splitRequestLine = rawRequestLine.split(" ");
@@ -14,17 +16,26 @@ public class RequestLineParser {
             throw new ResponseStatusException("Request line is malformed.", Status.BAD_REQUEST);
         }
 
-        Method method;
+        return new RequestLine(
+                parseMethod(splitRequestLine[0]),
+                splitRequestLine[1],
+                parseVersion(splitRequestLine[2])
+        );
+    }
 
+    private Method parseMethod(String method) {
         try {
-            method = Method.valueOf(splitRequestLine[0]);
+            return Method.valueOf(method);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException("Invalid method.", Status.BAD_REQUEST);
         }
+    }
 
-        String requestTarget = splitRequestLine[1];
-        Version version = Version.fromValue(splitRequestLine[2]);
-
-        return new RequestLine(method, requestTarget, version);
+    private Version parseVersion(String version) {
+        try {
+            return Version.fromValue(version);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException("Unsupported HTTP version: " + version, Status.VERSION_NOT_SUPPORTED);
+        }
     }
 }

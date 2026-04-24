@@ -1,8 +1,9 @@
 package shared.model;
 
-import shared.exception.ResponseStatusException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.NoSuchElementException;
 
 @Getter
 @AllArgsConstructor
@@ -18,6 +19,6 @@ public enum Version {
             }
         }
 
-        throw new ResponseStatusException("Unsupported HTTP version: " + value, Status.VERSION_NOT_SUPPORTED);
+        throw new NoSuchElementException("Version not supported.");
     }
 }
