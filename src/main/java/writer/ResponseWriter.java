@@ -16,14 +16,14 @@ public class ResponseWriter {
     public void write(Response response) throws IOException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
 
-        writer.write(
-                response.version().getValue() + " " +
-                        response.status().getCode() + " " +
-                        response.status().getName() + "\r\n"
-        );
+        writer.write("%s %s %s\r\n".formatted(
+                response.version().getValue(),
+                response.status().getCode(),
+                response.status().getName()
+        ));
 
         for (Map.Entry<String, String> h : response.headers().entrySet()) {
-            writer.write(h.getKey() + ": " + h.getValue() + "\r\n");
+            writer.write("%s: %s\r\n".formatted(h.getKey(), h.getValue()));
         }
 
         if (!response.headers().containsKey("Content-Length")) {
