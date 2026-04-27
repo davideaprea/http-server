@@ -2,8 +2,8 @@ package parser;
 
 import parser.dto.Header;
 import parser.dto.RequestLine;
-import shared.model.Request;
-import shared.model.RequestTarget;
+import shared.exception.ResponseStatusException;
+import shared.model.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,6 +34,14 @@ public class RequestParser {
 
             headers.putIfAbsent(header.name(), new ArrayList<>());
             headers.get(header.name()).add(header.value());
+        }
+
+        if (
+                !requestLine.method().equals(Method.GET) &&
+                !requestLine.method().equals(Method.HEAD) &&
+                !headers.containsKey(HeaderKey.CONTENT_LENGTH.getValue())
+        ) {
+            throw new ResponseStatusException("Headers 'Content-Length' or 'Transfer-Encoding' are mandatory.", Status.BAD_REQUEST);
         }
 
         return new Request(
