@@ -1,6 +1,5 @@
 package server;
 
-import lombok.Getter;
 import parser.RequestParser;
 import shared.exception.ResponseStatusException;
 import shared.model.Request;
@@ -22,8 +21,6 @@ public class Server {
     private final RequestParser requestParser;
     private final ExecutorService executor;
 
-    @Getter
-    private int port;
     private ServerSocket serverSocket;
 
     public Server(ServerConfiguration configuration) {
@@ -34,7 +31,6 @@ public class Server {
 
     public void start() throws IOException {
         serverSocket = new ServerSocket(configuration.port());
-        port = serverSocket.getLocalPort();
 
         while (isServerSocketOpen()) {
             Socket clientSocket;
@@ -84,6 +80,14 @@ public class Server {
         }
 
         executor.shutdownNow();
+    }
+
+    public int getPort() {
+        if (serverSocket == null) {
+            return -1;
+        }
+
+        return serverSocket.getLocalPort();
     }
 
     private boolean isServerSocketOpen() {
