@@ -29,9 +29,6 @@ public class ResponseWriter {
                 writer.write("%s: %s\r\n".formatted(h.getKey(), h.getValue()));
             }
 
-            if (!response.headers().containsKey("Content-Length")) {
-                writer.write("Content-Length: " + response.body().length + "\r\n");
-            }
             writer.write("\r\n");
             writer.flush();
 
