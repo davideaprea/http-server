@@ -6,7 +6,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum HeaderKey {
-    CONTENT_LENGTH("Content_Length");
+    CONTENT_TYPE("Content-Type"),
+    CONTENT_LENGTH("Content-Length");
 
     private final String value;
 }

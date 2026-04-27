@@ -3,10 +3,7 @@ package writer;
 import lombok.AllArgsConstructor;
 import shared.model.Response;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.Map;
 
@@ -17,23 +14,32 @@ public class ResponseWriter {
     public void write(Response response) {
         try {
             OutputStream clientOutputStream = clientSocket.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(clientOutputStream));
 
-            writer.write("%s %s %s\r\n".formatted(
+            clientOutputStream.write("%s %s %s\r\n".formatted(
                     response.version().getValue(),
                     response.status().getCode(),
                     response.status().getName()
-            ));
+            ).getBytes());
 
             for (Map.Entry<String, String> h : response.headers().entrySet()) {
-                writer.write("%s: %s\r\n".formatted(h.getKey(), h.getValue()));
+                clientOutputStream.write("%s: %s\r\n".formatted(h.getKey(), h.getValue()).getBytes());
             }
 
-            writer.write("\r\n");
-            writer.flush();
-
-            clientOutputStream.write(response.body());
+            clientOutputStream.write("\r\n".getBytes());
             clientOutputStream.flush();
+
+            InputStream responseBodyStream = response.body();
+
+            try (responseBodyStream) {
+                byte[] buffer = new byte[8192];
+                int bytesNumber;
+
+                while ((bytesNumber = responseBodyStream.read(buffer)) != -1) {
+                    clientOutputStream.write(buffer, 0, bytesNumber);
+                }
+
+                clientOutputStream.flush();
+            }
         } catch (IOException e) {
             System.out.println("Client disconnected.");
         }

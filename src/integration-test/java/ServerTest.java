@@ -7,17 +7,14 @@ import router.RouterBuilder;
 import router.dto.RequestHandlerRegisterCommand;
 import server.Server;
 import server.ServerConfiguration;
-import shared.model.Method;
-import shared.model.Response;
-import shared.model.Status;
-import shared.model.Version;
+import shared.model.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class ServerTest {
@@ -31,8 +28,11 @@ public class ServerTest {
                         request -> new Response(
                                 Version.HTTP_1_1,
                                 Status.OK,
-                                Map.of("Content-Type", "text/plain"),
-                                "Hello world".getBytes(StandardCharsets.UTF_8)
+                                Map.of(
+                                        HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
+                                        HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf("Hello world".length())
+                                ),
+                                new ByteArrayInputStream("Hello world".getBytes())
                         ),
                         Method.GET,
                         "/resource/path"

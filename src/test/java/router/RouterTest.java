@@ -6,6 +6,7 @@ import router.dto.RequestHandlerRegisterCommand;
 import shared.exception.ResponseStatusException;
 import shared.model.*;
 
+import java.io.InputStream;
 import java.util.Map;
 
 public class RouterTest {
@@ -15,7 +16,7 @@ public class RouterTest {
                 Version.HTTP_1_1,
                 Status.OK,
                 Map.of(),
-                new byte[0]
+                InputStream.nullInputStream()
         );
         RequestHandlerRegisterCommand command = new RequestHandlerRegisterCommand(
                 request -> mockResponse,

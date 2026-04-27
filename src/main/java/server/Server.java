@@ -9,6 +9,7 @@ import shared.model.Version;
 import writer.ResponseWriter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -60,14 +61,14 @@ public class Server {
                             Version.HTTP_1_1,
                             e.getStatus(),
                             Map.of(),
-                            new byte[0]
+                            InputStream.nullInputStream()
                     ));
                 } catch (Exception e) {
                     responseWriter.write(new Response(
                             Version.HTTP_1_1,
                             Status.INTERNAL_SERVER_ERROR,
                             Map.of(),
-                            new byte[0]
+                            InputStream.nullInputStream()
                     ));
                 }
             });
