@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.Socket;
 import java.util.*;
 
 public class RequestParser {
@@ -17,8 +16,7 @@ public class RequestParser {
     private final RequestLineParser requestLineParser = new RequestLineParser();
     private final RequestTargetParser requestTargetParser = new RequestTargetParser();
 
-    public Request from(Socket clientSocket) throws IOException {
-        InputStream requestStream = clientSocket.getInputStream();
+    public Request from(InputStream requestStream) throws IOException {
         BufferedReader requestReader = new BufferedReader(new InputStreamReader(requestStream));
         RequestLine requestLine = requestLineParser.from(requestReader.readLine());
         RequestTarget requestTarget = requestTargetParser.from(requestLine.requestTarget());

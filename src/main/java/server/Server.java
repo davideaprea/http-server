@@ -47,29 +47,34 @@ public class Server {
             }
 
             executor.submit(() -> {
-                ResponseWriter responseWriter = new ResponseWriter(clientSocket);
+                ResponseWriter responseWriter = null;
 
                 try {
-                    Request request = requestParser.from(clientSocket);
+                    responseWriter = new ResponseWriter(clientSocket.getOutputStream());
+                    Request request = requestParser.from(clientSocket.getInputStream());
                     Response response = configuration.router().handle(request);
 
                     responseWriter.write(response);
                 } catch (IOException e) {
                     System.out.println("Connection closed.");
                 } catch (ResponseStatusException e) {
-                    responseWriter.write(new Response(
-                            Version.HTTP_1_1,
-                            e.getStatus(),
-                            Map.of(),
-                            InputStream.nullInputStream()
-                    ));
+                    if (responseWriter != null) {
+                        responseWriter.write(new Response(
+                                Version.HTTP_1_1,
+                                e.getStatus(),
+                                Map.of(),
+                                InputStream.nullInputStream()
+                        ));
+                    }
                 } catch (Exception e) {
-                    responseWriter.write(new Response(
-                            Version.HTTP_1_1,
-                            Status.INTERNAL_SERVER_ERROR,
-                            Map.of(),
-                            InputStream.nullInputStream()
-                    ));
+                    if (responseWriter != null) {
+                        responseWriter.write(new Response(
+                                Version.HTTP_1_1,
+                                Status.INTERNAL_SERVER_ERROR,
+                                Map.of(),
+                                InputStream.nullInputStream()
+                        ));
+                    }
                 }
             });
         }

@@ -4,17 +4,14 @@ import lombok.AllArgsConstructor;
 import shared.model.Response;
 
 import java.io.*;
-import java.net.Socket;
 import java.util.Map;
 
 @AllArgsConstructor
 public class ResponseWriter {
-    private final Socket clientSocket;
+    private final OutputStream clientOutputStream;
 
     public void write(Response response) {
         try {
-            OutputStream clientOutputStream = clientSocket.getOutputStream();
-
             clientOutputStream.write("%s %s %s\r\n".formatted(
                     response.version().getValue(),
                     response.status().getCode(),
