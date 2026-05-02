@@ -4,8 +4,8 @@ import shared.exception.ResponseStatusException;
 import shared.model.Status;
 import parser.dto.Header;
 
-public class HeaderParser {
-    public Header from(String headerLine) {
+public final class HeaderParser {
+    public static Header from(String headerLine) {
         final int separatorIndex = headerLine.indexOf(':');
 
         if (separatorIndex == -1) {

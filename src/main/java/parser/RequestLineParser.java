@@ -8,8 +8,8 @@ import shared.model.Version;
 
 import java.util.NoSuchElementException;
 
-public class RequestLineParser {
-    public RequestLine from(String rawRequestLine) {
+public final class RequestLineParser {
+    public static RequestLine from(String rawRequestLine) {
         String[] splitRequestLine = rawRequestLine.split(" ");
 
         if (splitRequestLine.length != 3) {
@@ -23,7 +23,7 @@ public class RequestLineParser {
         );
     }
 
-    private Method parseMethod(String method) {
+    private static Method parseMethod(String method) {
         try {
             return Method.valueOf(method);
         } catch (IllegalArgumentException e) {
@@ -31,7 +31,7 @@ public class RequestLineParser {
         }
     }
 
-    private Version parseVersion(String version) {
+    private static Version parseVersion(String version) {
         try {
             return Version.fromValue(version);
         } catch (NoSuchElementException e) {

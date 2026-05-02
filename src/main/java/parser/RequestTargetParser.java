@@ -6,8 +6,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class RequestTargetParser {
-    public RequestTarget from(String requestTarget) {
+public final class RequestTargetParser {
+    public static RequestTarget from(String requestTarget) {
         int paramsStartIndex = requestTarget.indexOf('?');
         String path = paramsStartIndex > -1 ? requestTarget.substring(0, paramsStartIndex) : requestTarget;
         Map<String, List<String>> queryParams = new HashMap<>();

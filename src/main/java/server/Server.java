@@ -1,102 +1,71 @@
 package server;
 
 import parser.RequestParser;
-import shared.exception.ResponseStatusException;
-import shared.model.Request;
-import shared.model.Response;
-import shared.model.Status;
-import shared.model.Version;
-import writer.ResponseWriter;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
-import java.util.Map;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
     private final ServerConfiguration configuration;
-    private final RequestParser requestParser;
     private final ExecutorService executor;
 
-    private ServerSocket serverSocket;
+    private Selector selector;
 
     public Server(ServerConfiguration configuration) {
         this.configuration = configuration;
-        this.requestParser = new RequestParser();
         executor = Executors.newFixedThreadPool(configuration.threadPoolSize());
     }
 
     public void start() throws IOException {
-        serverSocket = new ServerSocket(configuration.port());
+        selector = Selector.open();
+        ServerSocketChannel serverChannel = ServerSocketChannel.open();
 
-        while (isServerSocketOpen()) {
-            Socket clientSocket;
+        serverChannel.configureBlocking(false);
+        serverChannel.bind(new InetSocketAddress(configuration.port()));
+        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-            try {
-                clientSocket = serverSocket.accept();
-            } catch (SocketException e) {
-                if (serverSocket.isClosed()) {
-                    break;
+        while (serverChannel.isOpen()) {
+            selector.select();
+
+            Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
+
+            while (keys.hasNext()) {
+                SelectionKey key = keys.next();
+                keys.remove();
+
+                if (!key.isValid()) {
+                    continue;
                 }
 
-                throw e;
+                if (key.isAcceptable()) {
+                    SocketChannel client = ((ServerSocketChannel) key.channel()).accept();
+
+                    client.configureBlocking(false);
+                    client.register(selector, SelectionKey.OP_READ, new RequestParser());
+                } else if (key.isReadable()) {
+                    SocketChannel client = (SocketChannel) key.channel();
+                    ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
+                    int bytesRead;
+
+                    while ((bytesRead = client.read(byteBuffer)) > 0) {
+
+                    }
+                } else if (key.isWritable()) {
+                }
             }
-
-            executor.submit(() -> {
-                ResponseWriter responseWriter = null;
-
-                try {
-                    responseWriter = new ResponseWriter(clientSocket.getOutputStream());
-                    Request request = requestParser.from(clientSocket.getInputStream());
-                    Response response = configuration.router().handle(request);
-
-                    responseWriter.write(response);
-                } catch (IOException e) {
-                    System.out.println("Connection closed.");
-                } catch (ResponseStatusException e) {
-                    if (responseWriter != null) {
-                        responseWriter.write(new Response(
-                                Version.HTTP_1_1,
-                                e.getStatus(),
-                                Map.of(),
-                                InputStream.nullInputStream()
-                        ));
-                    }
-                } catch (Exception e) {
-                    if (responseWriter != null) {
-                        responseWriter.write(new Response(
-                                Version.HTTP_1_1,
-                                Status.INTERNAL_SERVER_ERROR,
-                                Map.of(),
-                                InputStream.nullInputStream()
-                        ));
-                    }
-                }
-            });
         }
     }
 
     public void stop() throws IOException {
-        if (isServerSocketOpen()) {
-            serverSocket.close();
-        }
-
+        selector.close();
         executor.shutdownNow();
-    }
-
-    public int getPort() {
-        if (serverSocket == null) {
-            return -1;
-        }
-
-        return serverSocket.getLocalPort();
-    }
-
-    private boolean isServerSocketOpen() {
-        return serverSocket != null && !serverSocket.isClosed();
     }
 }
