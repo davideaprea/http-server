@@ -3,79 +3,70 @@ package parser;
 import parser.dto.Header;
 import parser.dto.RequestLine;
 import shared.exception.ResponseStatusException;
-import shared.model.*;
+import shared.model.HeaderKey;
+import shared.model.Method;
+import shared.model.Request;
+import shared.model.Status;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class RequestParser {
     private ParsingState parsingState;
+    private StringBuilder currentLine;
+    private Request.Builder requestBuilder;
     private boolean isLineFeed;
-    StringBuilder currentLine;
-
-    Method method;
-    Version version;
-    RequestTarget requestTarget;
-    Map<String, List<String>> headers = new HashMap<>();
 
     public RequestParser() {
         init();
     }
 
     public void eval(char character) {
-        if (character == '\n') {
-            if (isLineFeed) {
-                //throw
-            }
-
-            isLineFeed = true;
-        } else if (character == '\r') {
-            if (!isLineFeed) {
-                //throw
-            }
-
-            switch (parsingState) {
-                case REQUEST_LINE -> {
-                    RequestLine requestLine = RequestLineParser.from(currentLine.toString());
-                    method = requestLine.method();
-                    version = requestLine.version();
-                    requestTarget = RequestTargetParser.from(requestLine.requestTarget());
-                    parsingState = ParsingState.HEADER;
+        switch (character) {
+            case '\n' -> {
+                if (isLineFeed) {
+                    //throw
                 }
-                case HEADER -> {
-                    Header header = HeaderParser.from(currentLine.toString());
 
-                    headers.putIfAbsent(header.name(), new ArrayList<>());
-                    headers.get(header.name()).add(header.value());
-                }
+                isLineFeed = true;
             }
+            case '\r' -> {
+                if (!isLineFeed) {
+                    //throw
+                }
 
-            currentLine = new StringBuilder();
-            isLineFeed = false;
-        } else {
-            currentLine.append(character);
+                switch (parsingState) {
+                    case REQUEST_LINE -> {
+                        parsingState = ParsingState.HEADER;
+                        RequestLine requestLine = RequestLineParser.from(currentLine.toString());
+
+                        requestBuilder
+                                .method(requestLine.method())
+                                .version(requestLine.version())
+                                .requestTarget(RequestTargetParser.from(requestLine.requestTarget()));
+                    }
+                    case HEADER -> {
+                        Header header = HeaderParser.from(currentLine.toString());
+
+                        requestBuilder.header(header);
+                    }
+                }
+
+                currentLine = new StringBuilder();
+            }
+            default -> currentLine.append(character);
         }
     }
 
     public Request build(InputStream body) {
+        Request request = requestBuilder.build();
+
         if (
-                !method.equals(Method.GET) &&
-                        !method.equals(Method.HEAD) &&
-                        !headers.containsKey(HeaderKey.CONTENT_LENGTH.getValue())
+                !request.method().equals(Method.GET) &&
+                !request.method().equals(Method.HEAD) &&
+                (!request.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue()) && !request.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue()))
         ) {
             throw new ResponseStatusException("Headers 'Content-Length' or 'Transfer-Encoding' are mandatory.", Status.BAD_REQUEST);
         }
-
-        Request request = new Request(
-                method,
-                version,
-                requestTarget,
-                headers,
-                body
-        );
 
         init();
 
@@ -84,7 +75,8 @@ public class RequestParser {
 
     private void init() {
         parsingState = ParsingState.REQUEST_LINE;
-        isLineFeed = false;
         currentLine = new StringBuilder();
+        requestBuilder = new Request.Builder();
+        isLineFeed = false;
     }
 }
