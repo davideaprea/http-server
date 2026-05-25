@@ -1,76 +1,89 @@
 package parser;
 
+import lombok.AllArgsConstructor;
 import parser.dto.Header;
 import parser.dto.RequestLine;
 import shared.exception.ResponseStatusException;
-import shared.model.HeaderKey;
-import shared.model.Method;
 import shared.model.Request;
 import shared.model.Status;
 
-import java.io.InputStream;
+import java.nio.ByteBuffer;
 
+@AllArgsConstructor
 public class RequestParser {
+    private final ByteBuffer byteBuffer;
+
     private ParsingState parsingState;
     private StringBuilder currentLine;
     private Request.Builder requestBuilder;
     private boolean isLineFeed;
 
-    public RequestParser() {
+    public RequestParser(ByteBuffer byteBuffer) {
+        this.byteBuffer = byteBuffer;
+
         init();
     }
 
-    public void eval(char character) {
-        switch (character) {
-            case '\n' -> {
-                if (isLineFeed) {
-                    //throw
-                }
+    public void eval(byte requestByte) {
+        switch (parsingState) {
+            case REQUEST_LINE -> {
+                switch (requestByte) {
+                    case '\n' -> {
+                        if (isLineFeed) {
+                            throw new ResponseStatusException("", Status.BAD_REQUEST);
+                        }
 
-                isLineFeed = true;
-            }
-            case '\r' -> {
-                if (!isLineFeed) {
-                    //throw
-                }
+                        isLineFeed = true;
+                    }
+                    case '\r' -> {
+                        if (!isLineFeed) {
+                            throw new ResponseStatusException("", Status.BAD_REQUEST);
+                        }
 
-                switch (parsingState) {
-                    case REQUEST_LINE -> {
                         parsingState = ParsingState.HEADER;
                         RequestLine requestLine = RequestLineParser.from(currentLine.toString());
+                        isLineFeed = false;
 
                         requestBuilder
                                 .method(requestLine.method())
                                 .version(requestLine.version())
                                 .requestTarget(RequestTargetParser.from(requestLine.requestTarget()));
                     }
-                    case HEADER -> {
-                        Header header = HeaderParser.from(currentLine.toString());
-
-                        requestBuilder.header(header);
-                    }
+                    default -> currentLine.append(requestByte);
                 }
-
-                currentLine = new StringBuilder();
             }
-            default -> currentLine.append(character);
+            case HEADER -> {
+                switch (requestByte) {
+                    case '\n' -> {
+                        if (isLineFeed) {
+                            throw new ResponseStatusException("", Status.BAD_REQUEST);
+                        }
+
+                        isLineFeed = true;
+                    }
+                    case '\r' -> {
+                        if (!isLineFeed) {
+                            throw new ResponseStatusException("", Status.BAD_REQUEST);
+                        }
+
+                        if (currentLine.isEmpty()) {
+                            parsingState = ParsingState.BODY;
+                        } else {
+                            Header header = HeaderParser.from(currentLine.toString());
+
+                            requestBuilder.header(header);
+                            currentLine.setLength(0);
+                        }
+
+                        isLineFeed = false;
+                    }
+                    default -> currentLine.append(requestByte);
+                }
+            }
+            case BODY -> {
+
+            }
         }
-    }
-
-    public Request build(InputStream body) {
-        Request request = requestBuilder.build();
-
-        if (
-                !request.method().equals(Method.GET) &&
-                !request.method().equals(Method.HEAD) &&
-                (!request.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue()) && !request.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue()))
-        ) {
-            throw new ResponseStatusException("Headers 'Content-Length' or 'Transfer-Encoding' are mandatory.", Status.BAD_REQUEST);
-        }
-
-        init();
-
-        return request;
     }
 
     private void init() {
