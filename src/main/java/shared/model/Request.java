@@ -20,6 +20,7 @@ public record Request(
         private Version version;
         private RequestTarget requestTarget;
         private final Map<String, List<String>> headers = new HashMap<>();
+        private InputStream body;
 
         public Builder method(Method method) {
             this.method = method;
@@ -42,6 +43,12 @@ public record Request(
         public Builder header(Header header) {
             headers.putIfAbsent(header.name(), new ArrayList<>());
             headers.get(header.name()).add(header.value());
+
+            return this;
+        }
+
+        public Builder body(InputStream body) {
+            this.body = body;
 
             return this;
         }

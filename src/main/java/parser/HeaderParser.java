@@ -19,6 +19,6 @@ public final class HeaderParser {
             throw new ResponseStatusException("Header name contains invalid space characters.", Status.BAD_REQUEST);
         }
 
-        return new Header(headerName, headerValue);
+        return new Header(headerName.toLowerCase(), headerValue);
     }
 }
