@@ -1,25 +1,33 @@
 package shared;
 
-import java.io.IOException;
+import lombok.Getter;
+
 import java.io.InputStream;
-import java.util.concurrent.BlockingQueue;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class RequestBodyStream extends InputStream {
-    BlockingQueue<Byte> byteQueue = new LinkedBlockingQueue<>();
+    private final Queue<Byte> buffer = new LinkedBlockingQueue<>();
 
-    @Override
-    public int read() throws IOException {
-        var b = byteQueue.poll();
+    @Getter
+    private boolean closed = false;
 
-        if (b == null) {
-            return -1;
+    public void append(byte data) {
+        if (closed) {
+            return;
         }
 
-        return b & 0xFF;
+        buffer.add(data);
     }
 
-    public void append(byte b) {
-        byteQueue.add(b);
+    @Override
+    public int read() {
+        return Optional.ofNullable(buffer.poll()).orElse((byte) -1) & 0xFF;
+    }
+
+    @Override
+    public void close() {
+        closed = true;
     }
 }

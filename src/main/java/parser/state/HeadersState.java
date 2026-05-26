@@ -2,6 +2,7 @@ package parser.state;
 
 import parser.HeaderParser;
 import parser.dto.Header;
+import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
 import shared.model.HeaderKey;
 import shared.model.Request;
@@ -33,7 +34,7 @@ public class HeadersState implements ParsingState {
                 }
 
                 if (currentLine.isEmpty()) {
-                    Request request = requestBuilder.body().build();
+                    Request request = requestBuilder.body(new RequestBodyStream()).build();
 
                     if (request.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
                         return new ContentLengthBodyState(request);
