@@ -1,5 +1,13 @@
 package parser.state;
 
-public interface ParsingState {
-    ParsingState eval(byte requestByte);
+import parser.dto.RequestContext;
+
+public abstract class ParsingState {
+    protected final RequestContext context;
+
+    protected ParsingState(RequestContext context) {
+        this.context = context;
+    }
+
+    public abstract ParsingState eval(byte requestByte);
 }

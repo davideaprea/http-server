@@ -1,13 +1,16 @@
 package parser.state;
 
 import parser.dto.ContentLengthRequest;
+import parser.dto.RequestContext;
 
-public class ContentLengthBodyState implements ParsingState {
+public class ContentLengthBodyState extends ParsingState {
     private final ContentLengthRequest request;
 
     private long remainingBytes;
 
-    public ContentLengthBodyState(ContentLengthRequest request) {
+    public ContentLengthBodyState(ContentLengthRequest request, RequestContext context) {
+        super(context);
+
         this.request = request;
         remainingBytes = request.bytesNumber();
     }
@@ -17,7 +20,7 @@ public class ContentLengthBodyState implements ParsingState {
         if (remainingBytes == 0) {
             request.body().close();
 
-            return new RequestLineState();
+            return new RequestLineState(context);
         }
 
         remainingBytes--;

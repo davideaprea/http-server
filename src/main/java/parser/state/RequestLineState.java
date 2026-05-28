@@ -2,16 +2,21 @@ package parser.state;
 
 import parser.RequestLineParser;
 import parser.RequestTargetParser;
+import parser.dto.RequestContext;
 import parser.dto.RequestLine;
 import shared.exception.ResponseStatusException;
 import shared.model.Request;
 import shared.model.Status;
 
-public class RequestLineState implements ParsingState {
+public class RequestLineState extends ParsingState {
     private final StringBuilder requestLine = new StringBuilder();
     private final Request.Builder requestBuilder = new Request.Builder();
 
     private boolean isLineFeed = false;
+
+    protected RequestLineState(RequestContext context) {
+        super(context);
+    }
 
     @Override
     public ParsingState eval(byte requestByte) {
@@ -36,7 +41,7 @@ public class RequestLineState implements ParsingState {
                         .version(requestLine.version())
                         .requestTarget(RequestTargetParser.from(requestLine.requestTarget()));
 
-                return new HeadersState(requestBuilder);
+                return new HeadersState(requestBuilder, context);
             }
             default -> requestLine.append(requestByte);
         }

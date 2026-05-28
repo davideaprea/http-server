@@ -3,6 +3,8 @@ package parser.state;
 import parser.HeaderParser;
 import parser.dto.ContentLengthRequest;
 import parser.dto.Header;
+import parser.dto.RequestContext;
+import router.Router;
 import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
 import shared.model.HeaderKey;
@@ -12,13 +14,15 @@ import shared.model.Status;
 import java.util.List;
 import java.util.Optional;
 
-public class HeadersState implements ParsingState {
+public class HeadersState extends ParsingState {
     private final Request.Builder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
 
     private boolean isLineFeed = false;
 
-    public HeadersState(Request.Builder requestBuilder) {
+    public HeadersState(Request.Builder requestBuilder, RequestContext context) {
+        super(context);
+
         this.requestBuilder = requestBuilder;
     }
 
@@ -51,11 +55,11 @@ public class HeadersState implements ParsingState {
                         return new ContentLengthBodyState(new ContentLengthRequest(
                                 request.body(),
                                 contentLengthValue.get()
-                        ));
+                        ), context);
                     }
 
                     if (transferEncodingValue.filter("chunked"::equals).isPresent()) {
-                        return new ChunkedBodyState(request.body());
+                        return new ChunkedBodyState(request.body(), context);
                     }
 
                     throw new ResponseStatusException("", Status.BAD_REQUEST);
