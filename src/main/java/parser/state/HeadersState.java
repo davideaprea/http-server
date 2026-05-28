@@ -43,6 +43,9 @@ public class HeadersState implements ParsingState {
                             .ofNullable(request.headers().get(HeaderKey.CONTENT_LENGTH.getValue()))
                             .map(List::getFirst)
                             .map(Long::parseLong);
+                    Optional<String> transferEncodingValue = Optional
+                            .ofNullable(request.headers().get(HeaderKey.TRANSFER_ENCODING.getValue()))
+                            .map(List::getFirst);
 
                     if (contentLengthValue.isPresent()) {
                         return new ContentLengthBodyState(new ContentLengthRequest(
@@ -51,11 +54,11 @@ public class HeadersState implements ParsingState {
                         ));
                     }
 
-                    if (request.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue())) {
-                        return new ChunkedBodyState(request);
+                    if (transferEncodingValue.filter("chunked"::equals).isPresent()) {
+                        return new ChunkedBodyState(request.body());
                     }
 
-                    //throw
+                    throw new ResponseStatusException("", Status.BAD_REQUEST);
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 

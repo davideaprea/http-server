@@ -1,7 +1,7 @@
 package parser.state;
 
+import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
-import shared.model.Request;
 import shared.model.Status;
 
 public class ChunkedBodyState implements ParsingState {
@@ -10,10 +10,10 @@ public class ChunkedBodyState implements ParsingState {
     private boolean isLineFeed = false;
     private long remainingChunkBytes = 0;
     private long currentChunkBytes = 0;
-    private final Request request;
+    private final RequestBodyStream bodyStream;
 
-    public ChunkedBodyState(Request request) {
-        this.request = request;
+    public ChunkedBodyState(RequestBodyStream bodyStream) {
+        this.bodyStream = bodyStream;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ChunkedBodyState implements ParsingState {
             }
         } else {
             if (remainingChunkBytes > 0) {
-                request.body().append(requestByte);
+                bodyStream.append(requestByte);
                 remainingChunkBytes--;
             } else {
                 if (requestByte == '\n') {
