@@ -1,6 +1,6 @@
-package parser.state;
+package reader.state;
 
-import parser.dto.RequestContext;
+import reader.dto.RequestContext;
 import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
 import shared.model.Status;
@@ -12,7 +12,7 @@ public class ChunkedBodyState extends ParsingState {
     private long currentChunkBytes = 0;
 
     private final RequestBodyStream bodyStream;
-    private final CRLFSequenceValidator CRLFSequenceValidator = new CRLFSequenceValidator();
+    private final CRLFSequenceState CRLFSequenceState = new CRLFSequenceState();
 
     public ChunkedBodyState(RequestBodyStream bodyStream, RequestContext context) {
         super(context);
@@ -24,9 +24,9 @@ public class ChunkedBodyState extends ParsingState {
     public ParsingState eval(byte requestByte) {
         if (isReadingChunkSize) {
             if (requestByte == '\n') {
-                CRLFSequenceValidator.setLineFeedState();
+                CRLFSequenceState.setLineFeed();
             } else if (requestByte == '\r') {
-                CRLFSequenceValidator.setCarriageReturnState();
+                CRLFSequenceState.setCarriageReturn();
 
                 isReadingChunkSize = false;
                 currentChunkBytes = Long.parseLong(chunkSizeBuilder.toString(), 16);
@@ -41,9 +41,9 @@ public class ChunkedBodyState extends ParsingState {
                 remainingChunkBytes--;
             } else {
                 if (requestByte == '\n') {
-                    CRLFSequenceValidator.setLineFeedState();
+                    CRLFSequenceState.setLineFeed();
                 } else if (requestByte == '\r') {
-                    CRLFSequenceValidator.setCarriageReturnState();
+                    CRLFSequenceState.setCarriageReturn();
 
                     isReadingChunkSize = true;
 

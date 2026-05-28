@@ -1,8 +1,8 @@
-package parser;
+package reader;
 
-import parser.state.ParsingState;
+import reader.state.ParsingState;
 
-public class RequestParser {
+public class RequestReader {
     private ParsingState parsingState;
 
     public void eval(byte requestByte) {

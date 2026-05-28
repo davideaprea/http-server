@@ -1,7 +1,7 @@
-package parser.state;
+package reader.state;
 
-import parser.dto.ContentLengthRequest;
-import parser.dto.RequestContext;
+import reader.dto.ContentLengthRequest;
+import reader.dto.RequestContext;
 
 public class ContentLengthBodyState extends ParsingState {
     private final ContentLengthRequest request;

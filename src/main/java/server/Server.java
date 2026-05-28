@@ -1,6 +1,6 @@
 package server;
 
-import parser.RequestParser;
+import reader.RequestReader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -49,7 +49,7 @@ public class Server {
                     SocketChannel client = ((ServerSocketChannel) key.channel()).accept();
 
                     client.configureBlocking(false);
-                    client.register(selector, SelectionKey.OP_READ, new RequestParser());
+                    client.register(selector, SelectionKey.OP_READ, new RequestReader());
                 } else if (key.isReadable()) {
                     SocketChannel client = (SocketChannel) key.channel();
                     ByteBuffer byteBuffer = ByteBuffer.allocate(4096);

@@ -1,6 +1,6 @@
-package parser.state;
+package reader.state;
 
-import parser.dto.RequestContext;
+import reader.dto.RequestContext;
 
 public abstract class ParsingState {
     protected final RequestContext context;

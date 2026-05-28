@@ -1,4 +1,4 @@
-package parser.dto;
+package reader.dto;
 
 import shared.RequestBodyStream;
 

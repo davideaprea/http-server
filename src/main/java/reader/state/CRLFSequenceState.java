@@ -1,12 +1,12 @@
-package parser.state;
+package reader.state;
 
 import shared.exception.ResponseStatusException;
 import shared.model.Status;
 
-public class CRLFSequenceValidator {
+public class CRLFSequenceState {
     private boolean isLineFeed = false;
 
-    public void setLineFeedState() {
+    public void setLineFeed() {
         if (isLineFeed) {
             throw new ResponseStatusException("", Status.BAD_REQUEST);
         }
@@ -14,7 +14,7 @@ public class CRLFSequenceValidator {
         isLineFeed = true;
     }
 
-    public void setCarriageReturnState() {
+    public void setCarriageReturn() {
         if (!isLineFeed) {
             throw new ResponseStatusException("", Status.BAD_REQUEST);
         }

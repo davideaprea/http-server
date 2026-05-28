@@ -1,9 +1,9 @@
-package parser.state;
+package reader.state;
 
 import parser.HeaderParser;
-import parser.dto.ContentLengthRequest;
+import reader.dto.ContentLengthRequest;
 import parser.dto.Header;
-import parser.dto.RequestContext;
+import reader.dto.RequestContext;
 import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
 import shared.model.HeaderKey;
@@ -16,7 +16,7 @@ import java.util.Optional;
 public class HeadersState extends ParsingState {
     private final Request.Builder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
-    private final CRLFSequenceValidator CRLFSequenceValidator = new CRLFSequenceValidator();
+    private final CRLFSequenceState CRLFSequenceState = new CRLFSequenceState();
 
     public HeadersState(Request.Builder requestBuilder, RequestContext context) {
         super(context);
@@ -27,9 +27,9 @@ public class HeadersState extends ParsingState {
     @Override
     public ParsingState eval(byte requestByte) {
         switch (requestByte) {
-            case '\n' -> CRLFSequenceValidator.setLineFeedState();
+            case '\n' -> CRLFSequenceState.setLineFeed();
             case '\r' -> {
-                CRLFSequenceValidator.setCarriageReturnState();
+                CRLFSequenceState.setCarriageReturn();
 
                 if (currentLine.isEmpty()) {
                     Request request = requestBuilder.body(new RequestBodyStream()).build();
