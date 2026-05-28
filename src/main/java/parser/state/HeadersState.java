@@ -1,12 +1,16 @@
 package parser.state;
 
 import parser.HeaderParser;
+import parser.dto.ContentLengthRequest;
 import parser.dto.Header;
 import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
 import shared.model.HeaderKey;
 import shared.model.Request;
 import shared.model.Status;
+
+import java.util.List;
+import java.util.Optional;
 
 public class HeadersState implements ParsingState {
     private final Request.Builder requestBuilder;
@@ -35,10 +39,18 @@ public class HeadersState implements ParsingState {
 
                 if (currentLine.isEmpty()) {
                     Request request = requestBuilder.body(new RequestBodyStream()).build();
+                    Optional<Long> contentLengthValue = Optional
+                            .ofNullable(request.headers().get(HeaderKey.CONTENT_LENGTH.getValue()))
+                            .map(List::getFirst)
+                            .map(Long::parseLong);
 
-                    if (request.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
-                        return new ContentLengthBodyState(request);
+                    if (contentLengthValue.isPresent()) {
+                        return new ContentLengthBodyState(new ContentLengthRequest(
+                                request.body(),
+                                contentLengthValue.get()
+                        ));
                     }
+
                     if (request.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue())) {
                         return new ChunkedBodyState(request);
                     }

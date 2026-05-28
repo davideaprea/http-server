@@ -1,16 +1,15 @@
 package parser.state;
 
-import shared.model.HeaderKey;
-import shared.model.Request;
+import parser.dto.ContentLengthRequest;
 
 public class ContentLengthBodyState implements ParsingState {
-    private final Request request;
+    private final ContentLengthRequest request;
 
     private long remainingBytes;
 
-    protected ContentLengthBodyState(Request request) {
+    public ContentLengthBodyState(ContentLengthRequest request) {
         this.request = request;
-        this.remainingBytes = Long.parseLong(request.headers().get(HeaderKey.CONTENT_LENGTH.getValue()).getFirst());
+        remainingBytes = request.bytesNumber();
     }
 
     @Override
