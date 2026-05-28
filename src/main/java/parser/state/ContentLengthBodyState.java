@@ -15,11 +15,15 @@ public class ContentLengthBodyState implements ParsingState {
 
     @Override
     public ParsingState eval(byte requestByte) {
-        remainingBytes--;
-
         if (remainingBytes == 0) {
+            request.body().close();
+
             return new RequestLineState();
         }
+
+        remainingBytes--;
+
+        request.body().append(requestByte);
 
         return this;
     }

@@ -1,8 +1,8 @@
 package shared.model;
 
 import parser.dto.Header;
+import shared.RequestBodyStream;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,14 +13,14 @@ public record Request(
         Version version,
         RequestTarget target,
         Map<String, List<String>> headers,
-        InputStream body
+        RequestBodyStream body
 ) {
     public static final class Builder {
         private Method method;
         private Version version;
         private RequestTarget requestTarget;
         private final Map<String, List<String>> headers = new HashMap<>();
-        private InputStream body;
+        private RequestBodyStream body;
 
         public Builder method(Method method) {
             this.method = method;
@@ -47,7 +47,7 @@ public record Request(
             return this;
         }
 
-        public Builder body(InputStream body) {
+        public Builder body(RequestBodyStream body) {
             this.body = body;
 
             return this;
