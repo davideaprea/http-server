@@ -8,10 +8,11 @@ import shared.model.Status;
 public class ChunkedBodyState extends ParsingState {
     private boolean isReadingChunkSize = true;
     private StringBuilder chunkSizeBuilder = new StringBuilder();
-    private boolean isLineFeed = false;
     private long remainingChunkBytes = 0;
     private long currentChunkBytes = 0;
+
     private final RequestBodyStream bodyStream;
+    private final CRLFSequenceValidator CRLFSequenceValidator = new CRLFSequenceValidator();
 
     public ChunkedBodyState(RequestBodyStream bodyStream, RequestContext context) {
         super(context);
@@ -23,17 +24,10 @@ public class ChunkedBodyState extends ParsingState {
     public ParsingState eval(byte requestByte) {
         if (isReadingChunkSize) {
             if (requestByte == '\n') {
-                if (isLineFeed) {
-                    throw new ResponseStatusException("Malformed request.", Status.BAD_REQUEST);
-                }
-
-                isLineFeed = true;
+                CRLFSequenceValidator.setLineFeedState();
             } else if (requestByte == '\r') {
-                if (!isLineFeed) {
-                    throw new ResponseStatusException("Malformed request.", Status.BAD_REQUEST);
-                }
+                CRLFSequenceValidator.setCarriageReturnState();
 
-                isLineFeed = false;
                 isReadingChunkSize = false;
                 currentChunkBytes = Long.parseLong(chunkSizeBuilder.toString(), 16);
                 remainingChunkBytes = currentChunkBytes;
@@ -47,17 +41,10 @@ public class ChunkedBodyState extends ParsingState {
                 remainingChunkBytes--;
             } else {
                 if (requestByte == '\n') {
-                    if (isLineFeed) {
-                        throw new ResponseStatusException("Malformed request.", Status.BAD_REQUEST);
-                    }
-
-                    isLineFeed = true;
+                    CRLFSequenceValidator.setLineFeedState();
                 } else if (requestByte == '\r') {
-                    if (!isLineFeed) {
-                        throw new ResponseStatusException("Malformed request.", Status.BAD_REQUEST);
-                    }
+                    CRLFSequenceValidator.setCarriageReturnState();
 
-                    isLineFeed = false;
                     isReadingChunkSize = true;
 
                     if (currentChunkBytes == 0) {

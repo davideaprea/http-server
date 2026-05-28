@@ -4,15 +4,12 @@ import parser.RequestLineParser;
 import parser.RequestTargetParser;
 import parser.dto.RequestContext;
 import parser.dto.RequestLine;
-import shared.exception.ResponseStatusException;
 import shared.model.Request;
-import shared.model.Status;
 
 public class RequestLineState extends ParsingState {
     private final StringBuilder requestLine = new StringBuilder();
     private final Request.Builder requestBuilder = new Request.Builder();
-
-    private boolean isLineFeed = false;
+    private final CRLFSequenceValidator CRLFSequenceValidator = new CRLFSequenceValidator();
 
     protected RequestLineState(RequestContext context) {
         super(context);
@@ -21,20 +18,11 @@ public class RequestLineState extends ParsingState {
     @Override
     public ParsingState eval(byte requestByte) {
         switch (requestByte) {
-            case '\n' -> {
-                if (isLineFeed) {
-                    throw new ResponseStatusException("", Status.BAD_REQUEST);
-                }
-
-                isLineFeed = true;
-            }
+            case '\n' -> CRLFSequenceValidator.setLineFeedState();
             case '\r' -> {
-                if (!isLineFeed) {
-                    throw new ResponseStatusException("", Status.BAD_REQUEST);
-                }
+                CRLFSequenceValidator.setCarriageReturnState();
 
                 RequestLine requestLine = RequestLineParser.from(RequestLineState.this.requestLine.toString());
-                isLineFeed = false;
 
                 requestBuilder
                         .method(requestLine.method())

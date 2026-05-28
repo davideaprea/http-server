@@ -4,7 +4,6 @@ import parser.HeaderParser;
 import parser.dto.ContentLengthRequest;
 import parser.dto.Header;
 import parser.dto.RequestContext;
-import router.Router;
 import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
 import shared.model.HeaderKey;
@@ -17,8 +16,7 @@ import java.util.Optional;
 public class HeadersState extends ParsingState {
     private final Request.Builder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
-
-    private boolean isLineFeed = false;
+    private final CRLFSequenceValidator CRLFSequenceValidator = new CRLFSequenceValidator();
 
     public HeadersState(Request.Builder requestBuilder, RequestContext context) {
         super(context);
@@ -29,17 +27,9 @@ public class HeadersState extends ParsingState {
     @Override
     public ParsingState eval(byte requestByte) {
         switch (requestByte) {
-            case '\n' -> {
-                if (isLineFeed) {
-                    throw new ResponseStatusException("", Status.BAD_REQUEST);
-                }
-
-                isLineFeed = true;
-            }
+            case '\n' -> CRLFSequenceValidator.setLineFeedState();
             case '\r' -> {
-                if (!isLineFeed) {
-                    throw new ResponseStatusException("", Status.BAD_REQUEST);
-                }
+                CRLFSequenceValidator.setCarriageReturnState();
 
                 if (currentLine.isEmpty()) {
                     Request request = requestBuilder.body(new RequestBodyStream()).build();
@@ -69,8 +59,6 @@ public class HeadersState extends ParsingState {
                     requestBuilder.header(header);
                     currentLine.setLength(0);
                 }
-
-                isLineFeed = false;
             }
             default -> currentLine.append(requestByte);
         }
