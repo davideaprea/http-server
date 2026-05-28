@@ -40,7 +40,7 @@ public class HeadersState implements ParsingState {
                         return new ContentLengthBodyState(request);
                     }
                     if (request.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue())) {
-                        return new TransferEncodingBodyState(request);
+                        return new ChunkedBodyState(request);
                     }
 
                     //throw
