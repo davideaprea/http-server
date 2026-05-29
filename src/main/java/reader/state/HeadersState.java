@@ -1,8 +1,8 @@
 package reader.state;
 
 import parser.HeaderParser;
-import reader.dto.ContentLengthRequest;
 import parser.dto.Header;
+import reader.dto.ContentLengthRequest;
 import reader.dto.RequestContext;
 import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
@@ -32,7 +32,11 @@ public class HeadersState extends ParsingState {
                 if (currentLine.isEmpty()) {
                     Request request = requestBuilder.body(new RequestBodyStream()).build();
                     Optional<Long> contentLengthValue = request.getContentLength();
-                    Optional<String> transferEncodingValue = request.getTransferEncoding();
+                    Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
+
+                    if (contentLengthValue.isEmpty() && transferEncodingValue.isEmpty()) {
+                        throw new ResponseStatusException("", Status.BAD_REQUEST);
+                    }
 
                     if (contentLengthValue.isPresent()) {
                         return new ContentLengthBodyState(new ContentLengthRequest(
@@ -41,11 +45,7 @@ public class HeadersState extends ParsingState {
                         ), context);
                     }
 
-                    if (transferEncodingValue.filter("chunked"::equals).isPresent()) {
-                        return new ChunkedBodyState(request.body(), context);
-                    }
-
-                    throw new ResponseStatusException("", Status.BAD_REQUEST);
+                    return new ChunkedBodyState(request.body(), context);
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 
