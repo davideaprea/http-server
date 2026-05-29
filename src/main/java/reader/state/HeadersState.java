@@ -10,6 +10,7 @@ import shared.model.Request;
 import shared.model.Status;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class HeadersState extends ParsingState {
     private final Request.Builder requestBuilder;
@@ -37,6 +38,11 @@ public class HeadersState extends ParsingState {
                     if (contentLengthValue.isEmpty() && transferEncodingValue.isEmpty()) {
                         throw new ResponseStatusException("", Status.BAD_REQUEST);
                     }
+
+                    CompletableFuture.supplyAsync(
+                            () -> context.router().handle(request),
+                            context.executorService()
+                    ).thenAccept(response -> {});
 
                     if (contentLengthValue.isPresent()) {
                         return new ContentLengthBodyState(new ContentLengthRequest(
