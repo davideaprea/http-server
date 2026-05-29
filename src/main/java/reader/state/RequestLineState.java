@@ -7,7 +7,7 @@ import parser.dto.RequestLine;
 import shared.model.Request;
 
 public class RequestLineState extends ParsingState {
-    private final StringBuilder requestLine = new StringBuilder();
+    private final StringBuilder requestLineBuilder = new StringBuilder();
     private final Request.Builder requestBuilder = new Request.Builder();
     private final CRLFSequenceState CRLFSequenceState = new CRLFSequenceState();
 
@@ -22,7 +22,7 @@ public class RequestLineState extends ParsingState {
             case '\r' -> {
                 CRLFSequenceState.setCarriageReturn();
 
-                RequestLine requestLine = RequestLineParser.from(RequestLineState.this.requestLine.toString());
+                RequestLine requestLine = RequestLineParser.from(requestLineBuilder.toString());
 
                 requestBuilder
                         .method(requestLine.method())
@@ -31,7 +31,7 @@ public class RequestLineState extends ParsingState {
 
                 return new HeadersState(requestBuilder, context);
             }
-            default -> requestLine.append(requestByte);
+            default -> requestLineBuilder.append(requestByte);
         }
 
         return this;
