@@ -1,6 +1,6 @@
 package reader.dto;
 
-import router.Router;
+import router.model.Router;
 
 import java.util.concurrent.ExecutorService;
 

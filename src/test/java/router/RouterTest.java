@@ -3,6 +3,7 @@ package router;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import router.dto.HandlerCreateCommand;
+import router.model.Router;
 import shared.exception.ResponseStatusException;
 import shared.model.*;
 

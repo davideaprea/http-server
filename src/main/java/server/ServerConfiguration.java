@@ -1,6 +1,6 @@
 package server;
 
-import router.Router;
+import router.model.Router;
 
 public record ServerConfiguration(
         int port,
