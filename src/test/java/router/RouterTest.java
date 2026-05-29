@@ -2,7 +2,7 @@ package router;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import router.dto.RequestHandlerRegisterCommand;
+import router.dto.HandlerCreateCommand;
 import shared.exception.ResponseStatusException;
 import shared.model.*;
 
@@ -18,7 +18,7 @@ public class RouterTest {
                 Map.of(),
                 InputStream.nullInputStream()
         );
-        RequestHandlerRegisterCommand command = new RequestHandlerRegisterCommand(
+        HandlerCreateCommand command = new HandlerCreateCommand(
                 request -> mockResponse,
                 Method.GET,
                 "/resource/path"
@@ -40,7 +40,7 @@ public class RouterTest {
 
     @Test
     void testResourceNotFound() {
-        RequestHandlerRegisterCommand command = new RequestHandlerRegisterCommand(
+        HandlerCreateCommand command = new HandlerCreateCommand(
                 request -> null,
                 Method.GET,
                 "/resource/path"
@@ -61,7 +61,7 @@ public class RouterTest {
 
     @Test
     void testMethodNotSupported() {
-        RequestHandlerRegisterCommand command = new RequestHandlerRegisterCommand(
+        HandlerCreateCommand command = new HandlerCreateCommand(
                 request -> null,
                 Method.GET,
                 "/resource/path"

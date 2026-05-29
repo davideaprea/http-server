@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import router.Router;
 import router.RouterBuilder;
-import router.dto.RequestHandlerRegisterCommand;
+import router.dto.HandlerCreateCommand;
 import server.Server;
 import server.ServerConfiguration;
 import shared.model.*;
@@ -24,7 +24,7 @@ public class ServerTest {
     @BeforeEach
     void setup() {
         Router router = new RouterBuilder()
-                .add(new RequestHandlerRegisterCommand(
+                .add(new HandlerCreateCommand(
                         request -> new Response(
                                 Version.HTTP_1_1,
                                 Status.OK,
