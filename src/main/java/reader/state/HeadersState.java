@@ -6,11 +6,9 @@ import parser.dto.Header;
 import reader.dto.RequestContext;
 import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
-import shared.model.HeaderKey;
 import shared.model.Request;
 import shared.model.Status;
 
-import java.util.List;
 import java.util.Optional;
 
 public class HeadersState extends ParsingState {
@@ -33,13 +31,8 @@ public class HeadersState extends ParsingState {
 
                 if (currentLine.isEmpty()) {
                     Request request = requestBuilder.body(new RequestBodyStream()).build();
-                    Optional<Long> contentLengthValue = Optional
-                            .ofNullable(request.headers().get(HeaderKey.CONTENT_LENGTH.getValue()))
-                            .map(List::getFirst)
-                            .map(Long::parseLong);
-                    Optional<String> transferEncodingValue = Optional
-                            .ofNullable(request.headers().get(HeaderKey.TRANSFER_ENCODING.getValue()))
-                            .map(List::getFirst);
+                    Optional<Long> contentLengthValue = request.getContentLength();
+                    Optional<String> transferEncodingValue = request.getTransferEncoding();
 
                     if (contentLengthValue.isPresent()) {
                         return new ContentLengthBodyState(new ContentLengthRequest(

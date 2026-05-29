@@ -3,10 +3,7 @@ package shared.model;
 import parser.dto.Header;
 import shared.RequestBodyStream;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public record Request(
         Method method,
@@ -62,5 +59,18 @@ public record Request(
                     body
             );
         }
+    }
+
+    public Optional<Long> getContentLength() {
+        return Optional
+                .ofNullable(headers.get(HeaderKey.CONTENT_LENGTH.getValue()))
+                .map(List::getFirst)
+                .map(Long::parseLong);
+    }
+
+    public Optional<String> getTransferEncoding() {
+        return Optional
+                .ofNullable(headers.get(HeaderKey.TRANSFER_ENCODING.getValue()))
+                .map(List::getFirst);
     }
 }
