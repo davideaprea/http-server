@@ -22,7 +22,7 @@ public class ServerTest {
 
     @BeforeEach
     void setup() {
-        Router router = new RouterBuilder()
+        Router router = new Router.Builder()
                 .add(new HandlerCreateCommand(
                         request -> new Response(
                                 Version.HTTP_1_1,
@@ -60,7 +60,7 @@ public class ServerTest {
     void test() {
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:%d/resource/path".formatted(server.getPort())))
+                    .uri(URI.create("http://localhost:%d/resource/path".formatted(8000)))
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());

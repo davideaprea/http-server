@@ -25,7 +25,7 @@ public class RouterTest {
                 "/resource/path"
         );
 
-        Router router = new RouterBuilder()
+        Router router = new Router.Builder()
                 .add(command)
                 .build();
         Response response = router.handle(new Request(
@@ -46,7 +46,7 @@ public class RouterTest {
                 Method.GET,
                 "/resource/path"
         );
-        Router router = new RouterBuilder()
+        Router router = new Router.Builder()
                 .add(command)
                 .build();
         var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
@@ -67,7 +67,7 @@ public class RouterTest {
                 Method.GET,
                 "/resource/path"
         );
-        Router router = new RouterBuilder()
+        Router router = new Router.Builder()
                 .add(command)
                 .build();
         var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(

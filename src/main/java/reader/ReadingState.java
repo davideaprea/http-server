@@ -5,7 +5,7 @@ import reader.dto.RequestContext;
 public abstract class ReadingState {
     protected final RequestContext context;
 
-    protected ReadingState(RequestContext context) {
+    public ReadingState(RequestContext context) {
         this.context = context;
     }
 

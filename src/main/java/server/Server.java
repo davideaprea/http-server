@@ -1,5 +1,8 @@
 package server;
 
+import reader.RequestLineReader;
+import reader.dto.RequestContext;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -47,7 +50,7 @@ public class Server {
                     SocketChannel client = ((ServerSocketChannel) key.channel()).accept();
 
                     client.configureBlocking(false);
-                    client.register(selector, SelectionKey.OP_READ, new RequestReader());
+                    client.register(selector, SelectionKey.OP_READ, new RequestLineReader(new RequestContext(configuration.router(), executor)));
                 } else if (key.isReadable()) {
                     SocketChannel client = (SocketChannel) key.channel();
                     ByteBuffer byteBuffer = ByteBuffer.allocate(4096);

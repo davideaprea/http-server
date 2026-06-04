@@ -12,13 +12,15 @@ public class RequestLineReader extends ReadingState {
     private final Request.Builder requestBuilder = new Request.Builder();
     private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
 
-    protected RequestLineReader(RequestContext context) {
+    public RequestLineReader(RequestContext context) {
         super(context);
     }
 
     @Override
     public ReadingState eval(byte requestByte) {
-        switch (requestByte) {
+        char c = (char) requestByte;
+
+        switch (c) {
             case '\n' -> CRLFSequenceStateTracker.setLineFeed();
             case '\r' -> {
                 CRLFSequenceStateTracker.setCarriageReturn();
@@ -32,7 +34,7 @@ public class RequestLineReader extends ReadingState {
 
                 return new HeadersReader(requestBuilder, context);
             }
-            default -> requestLineBuilder.append(requestByte);
+            default -> requestLineBuilder.append(c);
         }
 
         return this;

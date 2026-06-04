@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import router.dto.HandlerCreateCommand;
 import router.exception.ConflictingRoutesException;
+import router.model.Router;
 import shared.model.Method;
 
 public class RouterBuilderTest {
@@ -14,7 +15,7 @@ public class RouterBuilderTest {
                 Method.GET,
                 "/resource/path"
         );
-        RouterBuilder routerBuilder = new RouterBuilder().add(command);
+        Router.Builder routerBuilder = new Router.Builder().add(command);
 
         Assertions.assertThrows(ConflictingRoutesException.class, () -> routerBuilder.add(command));
     }
