@@ -12,11 +12,13 @@ public class HeadersState extends ParsingState {
     private final Request.Builder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
     private final CRLFSequenceState CRLFSequenceState = new CRLFSequenceState();
+    private final BodyReadingModeSelector bodyReadingModeSelector;
 
     public HeadersState(Request.Builder requestBuilder, RequestContext context) {
         super(context);
 
         this.requestBuilder = requestBuilder;
+        this.bodyReadingModeSelector = new BodyReadingModeSelector(context);
     }
 
     @Override
@@ -35,7 +37,7 @@ public class HeadersState extends ParsingState {
                     ).thenAccept(response -> {
                     });
 
-                    return BodyReadingModeSelector.evalFromRequest(request, context);
+                    return bodyReadingModeSelector.evalFromRequest(request);
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 

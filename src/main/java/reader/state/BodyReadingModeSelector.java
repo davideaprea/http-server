@@ -1,7 +1,6 @@
 package reader.state;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import reader.dto.ContentLengthRequest;
 import reader.dto.RequestContext;
 import shared.exception.ResponseStatusException;
@@ -10,9 +9,11 @@ import shared.model.Status;
 
 import java.util.Optional;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 public class BodyReadingModeSelector {
-    public static ParsingState evalFromRequest(Request request, RequestContext context) {
+    private final RequestContext context;
+
+    public ParsingState evalFromRequest(Request request) {
         Optional<Long> contentLengthValue = request.getContentLength();
         Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
 
