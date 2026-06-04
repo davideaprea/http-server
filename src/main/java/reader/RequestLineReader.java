@@ -1,26 +1,27 @@
-package reader.state;
+package reader;
 
 import parser.RequestLineParser;
 import parser.RequestTargetParser;
 import reader.dto.RequestContext;
 import parser.dto.RequestLine;
+import reader.util.CRLFSequenceStateTracker;
 import shared.model.Request;
 
-public class RequestLineState extends ParsingState {
+public class RequestLineReader extends ReadingState {
     private final StringBuilder requestLineBuilder = new StringBuilder();
     private final Request.Builder requestBuilder = new Request.Builder();
-    private final CRLFSequenceState CRLFSequenceState = new CRLFSequenceState();
+    private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
 
-    protected RequestLineState(RequestContext context) {
+    protected RequestLineReader(RequestContext context) {
         super(context);
     }
 
     @Override
-    public ParsingState eval(byte requestByte) {
+    public ReadingState eval(byte requestByte) {
         switch (requestByte) {
-            case '\n' -> CRLFSequenceState.setLineFeed();
+            case '\n' -> CRLFSequenceStateTracker.setLineFeed();
             case '\r' -> {
-                CRLFSequenceState.setCarriageReturn();
+                CRLFSequenceStateTracker.setCarriageReturn();
 
                 RequestLine requestLine = RequestLineParser.from(requestLineBuilder.toString());
 
@@ -29,7 +30,7 @@ public class RequestLineState extends ParsingState {
                         .version(requestLine.version())
                         .requestTarget(RequestTargetParser.from(requestLine.requestTarget()));
 
-                return new HeadersState(requestBuilder, context);
+                return new HeadersReader(requestBuilder, context);
             }
             default -> requestLineBuilder.append(requestByte);
         }

@@ -1,6 +1,9 @@
-package reader.state;
+package reader.util;
 
 import lombok.AllArgsConstructor;
+import reader.ChunkedBodyReader;
+import reader.ContentLengthBodyReader;
+import reader.ReadingState;
 import reader.dto.ContentLengthRequest;
 import reader.dto.RequestContext;
 import shared.exception.ResponseStatusException;
@@ -13,7 +16,7 @@ import java.util.Optional;
 public class BodyReadingModeSelector {
     private final RequestContext context;
 
-    public ParsingState evalFromRequest(Request request) {
+    public ReadingState evalFromRequest(Request request) {
         Optional<Long> contentLengthValue = request.getContentLength();
         Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
 
@@ -22,12 +25,12 @@ public class BodyReadingModeSelector {
         }
 
         if (contentLengthValue.isPresent()) {
-            return new ContentLengthBodyState(new ContentLengthRequest(
+            return new ContentLengthBodyReader(new ContentLengthRequest(
                     request.body(),
                     contentLengthValue.get()
             ), context);
         }
 
-        return new ChunkedBodyState(request.body(), context);
+        return new ChunkedBodyReader(request.body(), context);
     }
 }

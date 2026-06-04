@@ -1,14 +1,14 @@
-package reader.state;
+package reader;
 
 import reader.dto.ContentLengthRequest;
 import reader.dto.RequestContext;
 
-public class ContentLengthBodyState extends ParsingState {
+public class ContentLengthBodyReader extends ReadingState {
     private final ContentLengthRequest request;
 
     private long remainingBytes;
 
-    public ContentLengthBodyState(ContentLengthRequest request, RequestContext context) {
+    public ContentLengthBodyReader(ContentLengthRequest request, RequestContext context) {
         super(context);
 
         this.request = request;
@@ -16,11 +16,11 @@ public class ContentLengthBodyState extends ParsingState {
     }
 
     @Override
-    public ParsingState eval(byte requestByte) {
+    public ReadingState eval(byte requestByte) {
         if (remainingBytes == 0) {
             request.body().close();
 
-            return new RequestLineState(context);
+            return new RequestLineReader(context);
         }
 
         remainingBytes--;

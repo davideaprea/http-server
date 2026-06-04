@@ -1,32 +1,33 @@
-package reader.state;
+package reader;
 
 import reader.dto.RequestContext;
+import reader.util.CRLFSequenceStateTracker;
 import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
 import shared.model.Status;
 
-public class ChunkedBodyState extends ParsingState {
+public class ChunkedBodyReader extends ReadingState {
     private boolean isReadingChunkSize = true;
     private StringBuilder chunkSizeBuilder = new StringBuilder();
     private long remainingChunkBytes = 0;
     private long currentChunkBytes = 0;
 
     private final RequestBodyStream bodyStream;
-    private final CRLFSequenceState CRLFSequenceState = new CRLFSequenceState();
+    private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
 
-    public ChunkedBodyState(RequestBodyStream bodyStream, RequestContext context) {
+    public ChunkedBodyReader(RequestBodyStream bodyStream, RequestContext context) {
         super(context);
 
         this.bodyStream = bodyStream;
     }
 
     @Override
-    public ParsingState eval(byte requestByte) {
+    public ReadingState eval(byte requestByte) {
         if (isReadingChunkSize) {
             if (requestByte == '\n') {
-                CRLFSequenceState.setLineFeed();
+                CRLFSequenceStateTracker.setLineFeed();
             } else if (requestByte == '\r') {
-                CRLFSequenceState.setCarriageReturn();
+                CRLFSequenceStateTracker.setCarriageReturn();
 
                 isReadingChunkSize = false;
                 currentChunkBytes = Long.parseLong(chunkSizeBuilder.toString(), 16);
@@ -41,14 +42,14 @@ public class ChunkedBodyState extends ParsingState {
                 remainingChunkBytes--;
             } else {
                 if (requestByte == '\n') {
-                    CRLFSequenceState.setLineFeed();
+                    CRLFSequenceStateTracker.setLineFeed();
                 } else if (requestByte == '\r') {
-                    CRLFSequenceState.setCarriageReturn();
+                    CRLFSequenceStateTracker.setCarriageReturn();
 
                     isReadingChunkSize = true;
 
                     if (currentChunkBytes == 0) {
-                        return new RequestLineState(context);
+                        return new RequestLineReader(context);
                     }
                 } else {
                     throw new ResponseStatusException("Malformed request.", Status.BAD_REQUEST);

@@ -1,20 +1,22 @@
-package reader.state;
+package reader;
 
 import parser.HeaderParser;
 import parser.dto.Header;
 import reader.dto.RequestContext;
+import reader.util.BodyReadingModeSelector;
+import reader.util.CRLFSequenceStateTracker;
 import shared.RequestBodyStream;
 import shared.model.Request;
 
 import java.util.concurrent.CompletableFuture;
 
-public class HeadersState extends ParsingState {
+public class HeadersReader extends ReadingState {
     private final Request.Builder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
-    private final CRLFSequenceState CRLFSequenceState = new CRLFSequenceState();
+    private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
     private final BodyReadingModeSelector bodyReadingModeSelector;
 
-    public HeadersState(Request.Builder requestBuilder, RequestContext context) {
+    public HeadersReader(Request.Builder requestBuilder, RequestContext context) {
         super(context);
 
         this.requestBuilder = requestBuilder;
@@ -22,11 +24,11 @@ public class HeadersState extends ParsingState {
     }
 
     @Override
-    public ParsingState eval(byte requestByte) {
+    public ReadingState eval(byte requestByte) {
         switch (requestByte) {
-            case '\n' -> CRLFSequenceState.setLineFeed();
+            case '\n' -> CRLFSequenceStateTracker.setLineFeed();
             case '\r' -> {
-                CRLFSequenceState.setCarriageReturn();
+                CRLFSequenceStateTracker.setCarriageReturn();
 
                 if (currentLine.isEmpty()) {
                     Request request = requestBuilder.body(new RequestBodyStream()).build();

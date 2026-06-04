@@ -1,9 +1,9 @@
-package reader.state;
+package reader.util;
 
 import shared.exception.ResponseStatusException;
 import shared.model.Status;
 
-public class CRLFSequenceState {
+public class CRLFSequenceStateTracker {
     private boolean isLineFeed = false;
 
     public void setLineFeed() {
