@@ -14,18 +14,18 @@ public class HeadersReader extends ReadingState {
     private final Request.Builder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
     private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
-    private final BodyReadingModeSelector bodyReadingModeSelector;
 
     public HeadersReader(Request.Builder requestBuilder, RequestContext context) {
         super(context);
 
         this.requestBuilder = requestBuilder;
-        this.bodyReadingModeSelector = new BodyReadingModeSelector(context);
     }
 
     @Override
     public ReadingState eval(byte requestByte) {
-        switch (requestByte) {
+        char c = (char) requestByte;
+
+        switch (c) {
             case '\n' -> CRLFSequenceStateTracker.setLineFeed();
             case '\r' -> {
                 CRLFSequenceStateTracker.setCarriageReturn();
@@ -39,7 +39,7 @@ public class HeadersReader extends ReadingState {
                     ).thenAccept(response -> {
                     });
 
-                    return bodyReadingModeSelector.evalFromRequest(request);
+                    return BodyReadingModeSelector.evalFromRequest(request, context);
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 
@@ -47,7 +47,7 @@ public class HeadersReader extends ReadingState {
                     currentLine.setLength(0);
                 }
             }
-            default -> currentLine.append(requestByte);
+            default -> currentLine.append(c);
         }
 
         return this;
