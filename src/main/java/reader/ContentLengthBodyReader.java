@@ -18,14 +18,18 @@ public class ContentLengthBodyReader extends ReadingState {
     @Override
     public ReadingState eval(byte requestByte) {
         if (remainingBytes == 0) {
-            request.body().close();
-
-            return new RequestLineReader(context);
+            throw new IllegalStateException("Content length has already been reached.");
         }
 
         remainingBytes--;
 
         request.body().append(requestByte);
+
+        if (remainingBytes == 0) {
+            request.body().close();
+
+            return new RequestLineReader(context);
+        }
 
         return this;
     }
