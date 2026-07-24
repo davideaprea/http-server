@@ -1,9 +1,9 @@
 package reader.dto;
 
-import shared.RequestBodyStream;
+import shared.streaming.BodyBytesEnqueue;
 
 public record ContentLengthRequest(
-        RequestBodyStream body,
+        BodyBytesEnqueue body,
         long bytesNumber
 ) {
 }

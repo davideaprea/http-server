@@ -2,9 +2,9 @@ package reader;
 
 import reader.dto.RequestContext;
 import reader.util.CRLFSequenceStateTracker;
-import shared.RequestBodyStream;
 import shared.exception.ResponseStatusException;
 import shared.model.Status;
+import shared.streaming.BodyBytesEnqueue;
 
 public class ChunkedBodyReader extends ReadingState {
     private boolean isReadingChunkSize = true;
@@ -12,10 +12,10 @@ public class ChunkedBodyReader extends ReadingState {
     private long remainingChunkBytes = 0;
     private long currentChunkBytes = 0;
 
-    private final RequestBodyStream bodyStream;
+    private final BodyBytesEnqueue bodyStream;
     private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
 
-    public ChunkedBodyReader(RequestBodyStream bodyStream, RequestContext context) {
+    public ChunkedBodyReader(BodyBytesEnqueue bodyStream, RequestContext context) {
         super(context);
 
         this.bodyStream = bodyStream;
@@ -38,7 +38,7 @@ public class ChunkedBodyReader extends ReadingState {
             }
         } else {
             if (remainingChunkBytes > 0) {
-                bodyStream.append(requestByte);
+                bodyStream.enqueue(requestByte);
                 remainingChunkBytes--;
             } else {
                 if (requestByte == '\n') {

@@ -1,7 +1,7 @@
 package shared.model;
 
 import parser.dto.Header;
-import shared.RequestBodyStream;
+import shared.streaming.BodyBytesDequeue;
 
 import java.util.*;
 
@@ -10,14 +10,14 @@ public record Request(
         Version version,
         RequestTarget target,
         Map<String, List<String>> headers,
-        RequestBodyStream body
+        BodyBytesDequeue body
 ) {
     public static final class Builder {
         private Method method;
         private Version version;
         private RequestTarget requestTarget;
         private final Map<String, List<String>> headers = new HashMap<>();
-        private RequestBodyStream body;
+        private BodyBytesDequeue body;
 
         public Builder method(Method method) {
             this.method = method;
@@ -44,7 +44,7 @@ public record Request(
             return this;
         }
 
-        public Builder body(RequestBodyStream body) {
+        public Builder body(BodyBytesDequeue body) {
             this.body = body;
 
             return this;

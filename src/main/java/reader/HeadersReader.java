@@ -5,8 +5,8 @@ import parser.dto.Header;
 import reader.dto.RequestContext;
 import reader.util.BodyReadingModeSelector;
 import reader.util.CRLFSequenceStateTracker;
-import shared.RequestBodyStream;
 import shared.model.Request;
+import shared.streaming.RequestBodyBytesQueue;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -31,7 +31,7 @@ public class HeadersReader extends ReadingState {
                 CRLFSequenceStateTracker.setCarriageReturn();
 
                 if (currentLine.isEmpty()) {
-                    Request request = requestBuilder.body(new RequestBodyStream()).build();
+                    Request request = requestBuilder.body(new RequestBodyBytesQueue()).build();
 
                     CompletableFuture.supplyAsync(
                             () -> context.router().handle(request),

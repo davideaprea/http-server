@@ -23,11 +23,9 @@ public class ContentLengthBodyReader extends ReadingState {
 
         remainingBytes--;
 
-        request.body().append(requestByte);
+        request.body().enqueue(requestByte);
 
         if (remainingBytes == 0) {
-            request.body().close();
-
             return new RequestLineReader(context);
         }
 
