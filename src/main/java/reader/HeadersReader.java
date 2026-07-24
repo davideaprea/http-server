@@ -2,12 +2,15 @@ package reader;
 
 import parser.HeaderParser;
 import parser.dto.Header;
+import reader.dto.ContentLengthRequest;
 import reader.dto.RequestContext;
-import reader.util.BodyReadingModeSelector;
 import reader.util.CRLFSequenceStateTracker;
+import shared.exception.ResponseStatusException;
 import shared.model.Request;
+import shared.model.Status;
 import shared.streaming.RequestBodyBytesQueue;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class HeadersReader extends ReadingState {
@@ -31,7 +34,8 @@ public class HeadersReader extends ReadingState {
                 CRLFSequenceStateTracker.setCarriageReturn();
 
                 if (currentLine.isEmpty()) {
-                    Request request = requestBuilder.body(new RequestBodyBytesQueue()).build();
+                    RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue();
+                    Request request = requestBuilder.body(requestBodyBytesQueue).build();
 
                     CompletableFuture.supplyAsync(
                             () -> context.router().handle(request),
@@ -39,7 +43,21 @@ public class HeadersReader extends ReadingState {
                     ).thenAccept(response -> {
                     });
 
-                    return BodyReadingModeSelector.evalFromRequest(request, context);
+                    Optional<Long> contentLengthValue = request.getContentLength();
+                    Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
+
+                    if (contentLengthValue.isEmpty() && transferEncodingValue.isEmpty()) {
+                        throw new ResponseStatusException("", Status.BAD_REQUEST);
+                    }
+
+                    if (contentLengthValue.isPresent()) {
+                        return new ContentLengthBodyReader(new ContentLengthRequest(
+                                requestBodyBytesQueue,
+                                contentLengthValue.get()
+                        ), context);
+                    }
+
+                    return new ChunkedBodyReader(requestBodyBytesQueue, context);
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 
