@@ -49,6 +49,8 @@ public class ChunkedBodyReader extends ReadingState {
                     isReadingChunkSize = true;
 
                     if (currentChunkBytes == 0) {
+                        bodyStream.enqueue((byte) -1);
+
                         return new RequestLineReader(context);
                     }
                 } else {

@@ -11,4 +11,9 @@ public class ResponseStatusException extends RuntimeException {
         super(message);
         this.status = status;
     }
+
+    public ResponseStatusException(Status status) {
+        super();
+        this.status = status;
+    }
 }

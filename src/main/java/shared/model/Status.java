@@ -6,6 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum Status {
+    REQUEST_TIMEOUT(408, "REQUEST TIMEOUT"),
     INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERROR"),
     NOT_IMPLEMENTED(501, "NOT IMPLEMENTED"),
     NOT_FOUND(404, "NOT FOUND"),
