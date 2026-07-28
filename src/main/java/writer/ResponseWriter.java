@@ -1,44 +1,32 @@
 package writer;
 
-import lombok.AllArgsConstructor;
-import shared.model.Response;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.function.Consumer;
 
-import java.io.*;
-import java.util.Map;
+public class ResponseWriter implements Consumer<byte[]> {
+    private final OutputStream socketOutputStream;
+    private final Queue<byte[]> bodyChunks = new LinkedList<>();
 
-@AllArgsConstructor
-public class ResponseWriter {
-    private final OutputStream clientOutputStream;
+    public ResponseWriter(OutputStream socketOutputStream) {
+        this.socketOutputStream = socketOutputStream;
+    }
 
-    public void write(Response response) {
+    public void flush() {
         try {
-            clientOutputStream.write("%s %s %s\r\n".formatted(
-                    response.version().getValue(),
-                    response.status().getCode(),
-                    response.status().getName()
-            ).getBytes());
-
-            for (Map.Entry<String, String> h : response.headers().entrySet()) {
-                clientOutputStream.write("%s: %s\r\n".formatted(h.getKey(), h.getValue()).getBytes());
-            }
-
-            clientOutputStream.write("\r\n".getBytes());
-            clientOutputStream.flush();
-
-            InputStream responseBodyStream = response.body();
-
-            try (responseBodyStream) {
-                byte[] buffer = new byte[8192];
-                int bytesNumber;
-
-                while ((bytesNumber = responseBodyStream.read(buffer)) != -1) {
-                    clientOutputStream.write(buffer, 0, bytesNumber);
-                }
-
-                clientOutputStream.flush();
+            while (!bodyChunks.isEmpty()) {
+                socketOutputStream.write(bodyChunks.poll());
+                socketOutputStream.flush();
             }
         } catch (IOException e) {
             System.out.println("Client disconnected.");
         }
+    }
+
+    @Override
+    public void accept(byte[] bodyChunk) {
+        bodyChunks.add(bodyChunk);
     }
 }

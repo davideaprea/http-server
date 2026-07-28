@@ -1,11 +1,13 @@
 package server;
 
+import reader.ReadingState;
 import reader.RequestLineReader;
 import reader.dto.RequestContext;
+import writer.ResponseWriter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -50,16 +52,24 @@ public class Server {
                     SocketChannel client = ((ServerSocketChannel) key.channel()).accept();
 
                     client.configureBlocking(false);
-                    client.register(selector, SelectionKey.OP_READ, new RequestLineReader(new RequestContext(configuration.router(), executor)));
+                    client.register(selector, SelectionKey.OP_READ, new ClientSocketContext(
+                            new ResponseWriter(client.socket().getOutputStream()),
+                            new RequestLineReader(new RequestContext(configuration.router(), executor))
+                    ));
                 } else if (key.isReadable()) {
-                    SocketChannel client = (SocketChannel) key.channel();
-                    ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
-                    int bytesRead;
+                    InputStream clientInputStream = ((SocketChannel) key.channel()).socket().getInputStream();
+                    ClientSocketContext clientSocketContext = (ClientSocketContext) key.attachment();
 
-                    while ((bytesRead = client.read(byteBuffer)) > 0) {
+                    int currentByte;
 
+                    while ((currentByte = clientInputStream.read()) > 0) {
+                        ReadingState nextReadingState = clientSocketContext
+                                .getReadingState()
+                                .eval((byte) currentByte);
+                        clientSocketContext.setReadingState(nextReadingState);
                     }
                 } else if (key.isWritable()) {
+
                 }
             }
         }
