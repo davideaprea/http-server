@@ -1,11 +1,14 @@
 package parser;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import shared.model.RequestTarget;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RequestTargetParser {
     public static RequestTarget from(String requestTarget) {
         int paramsStartIndex = requestTarget.indexOf('?');

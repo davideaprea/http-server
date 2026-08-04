@@ -9,11 +9,9 @@ import shared.model.Status;
 import shared.model.Version;
 
 public class RequestLineParserTest {
-    private final RequestLineParser requestLineParser = new RequestLineParser();
-
     @Test
     void testValid() {
-        RequestLine requestLine = requestLineParser.from("POST /a/b/c HTTP/1.1");
+        RequestLine requestLine = RequestLineParser.from("POST /a/b/c HTTP/1.1");
 
         Assertions.assertEquals(new RequestLine(
                 Method.POST,
@@ -26,7 +24,7 @@ public class RequestLineParserTest {
     void testInvalidMethod() {
         var ex = Assertions.assertThrows(
                 ResponseStatusException.class,
-                () -> requestLineParser.from("INVALID-METHOD /a/b/c HTTP/1.1")
+                () -> RequestLineParser.from("INVALID-METHOD /a/b/c HTTP/1.1")
         );
 
         Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());
@@ -36,7 +34,7 @@ public class RequestLineParserTest {
     void testInvalidVersion() {
         var ex = Assertions.assertThrows(
                 ResponseStatusException.class,
-                () -> requestLineParser.from("POST /a/b/c INVALID-VERSION")
+                () -> RequestLineParser.from("POST /a/b/c INVALID-VERSION")
         );
 
         Assertions.assertEquals(Status.VERSION_NOT_SUPPORTED, ex.getStatus());
@@ -46,7 +44,7 @@ public class RequestLineParserTest {
     void testMissingPart() {
         var ex = Assertions.assertThrows(
                 ResponseStatusException.class,
-                () -> requestLineParser.from("POST HTTP/1.1")
+                () -> RequestLineParser.from("POST HTTP/1.1")
         );
 
         Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());

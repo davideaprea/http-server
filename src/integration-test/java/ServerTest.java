@@ -31,7 +31,7 @@ public class ServerTest {
                                         HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
                                         HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf("Hello world".length())
                                 ),
-                                new ByteArrayInputStream("Hello world".getBytes())
+                                new ResponseBody(new ByteArrayInputStream("Hello world".getBytes()))
                         ),
                         Method.GET,
                         "/resource/path"

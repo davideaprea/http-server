@@ -52,10 +52,18 @@ public class Server {
                     SocketChannel client = ((ServerSocketChannel) key.channel()).accept();
 
                     client.configureBlocking(false);
-                    client.register(selector, SelectionKey.OP_READ, new ClientSocketContext(
-                            new ResponseWriter(client, responseWriter -> key.interestOps(key.interestOps() | SelectionKey.OP_WRITE)),
+
+                    SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
+                    ResponseWriter writer = new ResponseWriter(client, responseWriter -> {
+                        clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_WRITE);
+                        selector.wakeup();
+                    });
+                    ClientSocketContext context = new ClientSocketContext(
+                            writer,
                             new RequestLineReader(new RequestContext(configuration.router(), executor))
-                    ));
+                    );
+
+                    clientKey.attach(context);
                 } else if (key.isReadable()) {
                     InputStream clientInputStream = ((SocketChannel) key.channel()).socket().getInputStream();
                     ClientSocketContext clientSocketContext = (ClientSocketContext) key.attachment();

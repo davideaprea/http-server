@@ -9,18 +9,16 @@ import java.util.List;
 import java.util.Map;
 
 public class RequestTargetParserTest {
-    private final RequestTargetParser requestTargetParser = new RequestTargetParser();
-
     @Test
     void parseValid() {
-        RequestTarget requestTarget = requestTargetParser.from("/target");
+        RequestTarget requestTarget = RequestTargetParser.from("/target");
 
         Assertions.assertEquals(new RequestTarget("/target", new HashMap<>()), requestTarget);
     }
 
     @Test
     void parseWithParams() {
-        RequestTarget requestTarget = requestTargetParser.from("/target?a=1&&b=2&name=John=Doe&a=3");
+        RequestTarget requestTarget = RequestTargetParser.from("/target?a=1&&b=2&name=John=Doe&a=3");
 
         Assertions.assertEquals(new RequestTarget(
                 "/target",

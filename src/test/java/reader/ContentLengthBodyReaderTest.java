@@ -10,7 +10,7 @@ public class ContentLengthBodyReaderTest {
     @Test
     void a() {
         ReadingState reader = new ContentLengthBodyReader(
-                new ContentLengthRequest(new RequestBodyStream(), 1),
+                new ContentLengthRequest(Mockito.mock(), 1),
                 Mockito.mock(RequestContext.class)
         ).eval((byte) 0);
 
@@ -20,7 +20,7 @@ public class ContentLengthBodyReaderTest {
     @Test
     void b() {
         ReadingState reader = new ContentLengthBodyReader(
-                new ContentLengthRequest(new RequestBodyStream(), 2),
+                new ContentLengthRequest(Mockito.mock(), 2),
                 Mockito.mock(RequestContext.class)
         ).eval((byte) 0);
 
@@ -30,7 +30,7 @@ public class ContentLengthBodyReaderTest {
     @Test
     void c() {
         ReadingState reader = new ContentLengthBodyReader(
-                new ContentLengthRequest(new RequestBodyStream(), 0),
+                new ContentLengthRequest(Mockito.mock(), 0),
                 Mockito.mock(RequestContext.class)
         );
 

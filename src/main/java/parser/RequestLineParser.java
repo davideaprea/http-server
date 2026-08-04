@@ -1,5 +1,7 @@
 package parser;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import parser.dto.RequestLine;
 import shared.exception.ResponseStatusException;
 import shared.model.Method;
@@ -8,6 +10,7 @@ import shared.model.Version;
 
 import java.util.NoSuchElementException;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RequestLineParser {
     public static RequestLine from(String rawRequestLine) {
         String[] splitRequestLine = rawRequestLine.split(" ");
