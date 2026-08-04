@@ -53,7 +53,7 @@ public class Server {
 
                     client.configureBlocking(false);
                     client.register(selector, SelectionKey.OP_READ, new ClientSocketContext(
-                            new ResponseWriter(client.socket().getOutputStream()),
+                            new ResponseWriter(client, responseWriter -> key.interestOps(key.interestOps() | SelectionKey.OP_WRITE)),
                             new RequestLineReader(new RequestContext(configuration.router(), executor))
                     ));
                 } else if (key.isReadable()) {
@@ -69,7 +69,7 @@ public class Server {
                         clientSocketContext.setReadingState(nextReadingState);
                     }
                 } else if (key.isWritable()) {
-
+                    ((ClientSocketContext) key.attachment()).getResponseWriter().flush();
                 }
             }
         }
