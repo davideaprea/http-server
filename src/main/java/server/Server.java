@@ -3,7 +3,7 @@ package server;
 import reader.ReadingState;
 import reader.RequestLineReader;
 import reader.dto.RequestContext;
-import shared.streaming.RequestQueue;
+import common.streaming.RequestQueue;
 import writer.ResponseWriter;
 
 import java.io.IOException;

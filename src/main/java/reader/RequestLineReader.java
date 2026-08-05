@@ -4,8 +4,8 @@ import parser.RequestLineParser;
 import parser.RequestTargetParser;
 import parser.dto.RequestLine;
 import reader.util.CRLFSequenceStateTracker;
-import shared.model.Request;
-import shared.streaming.RequestQueue;
+import common.model.Request;
+import common.streaming.RequestQueue;
 
 public class RequestLineReader extends ReadingState {
     private final StringBuilder requestLineBuilder = new StringBuilder();

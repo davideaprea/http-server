@@ -4,11 +4,11 @@ import parser.HeaderParser;
 import parser.dto.Header;
 import reader.dto.ContentLengthRequest;
 import reader.util.CRLFSequenceStateTracker;
-import shared.exception.ResponseStatusException;
-import shared.model.Request;
-import shared.model.Status;
-import shared.streaming.RequestBodyBytesQueue;
-import shared.streaming.RequestQueue;
+import common.exception.ResponseStatusException;
+import common.model.Request;
+import common.model.Status;
+import common.streaming.RequestBodyBytesQueue;
+import common.streaming.RequestQueue;
 
 import java.util.Optional;
 

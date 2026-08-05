@@ -1,6 +1,6 @@
 package reader.dto;
 
-import shared.streaming.BodyBytesEnqueue;
+import common.streaming.BodyBytesEnqueue;
 
 public record ContentLengthRequest(
         BodyBytesEnqueue body,

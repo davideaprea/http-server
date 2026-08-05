@@ -1,7 +1,7 @@
 package reader.util;
 
-import shared.exception.ResponseStatusException;
-import shared.model.Status;
+import common.exception.ResponseStatusException;
+import common.model.Status;
 
 public class CRLFSequenceStateTracker {
     private Boolean isLineFeed;

@@ -1,10 +1,10 @@
 package reader;
 
 import reader.util.CRLFSequenceStateTracker;
-import shared.exception.ResponseStatusException;
-import shared.model.Status;
-import shared.streaming.BodyBytesEnqueue;
-import shared.streaming.RequestQueue;
+import common.exception.ResponseStatusException;
+import common.model.Status;
+import common.streaming.BodyBytesEnqueue;
+import common.streaming.RequestQueue;
 
 public class ChunkedBodyReader extends ReadingState {
     private boolean isReadingChunkSize = true;

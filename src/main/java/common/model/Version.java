@@ -1,4 +1,4 @@
-package shared.model;
+package common.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

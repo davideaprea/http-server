@@ -3,7 +3,8 @@ import router.dto.HandlerCreateCommand;
 import router.model.Router;
 import server.Server;
 import server.ServerConfiguration;
-import shared.model.*;
+import common.model.*;
+import common.streaming.ResponseBody;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;

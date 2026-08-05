@@ -3,8 +3,8 @@ package parser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import parser.dto.Header;
-import shared.exception.ResponseStatusException;
-import shared.model.Status;
+import common.exception.ResponseStatusException;
+import common.model.Status;
 
 public class HeaderParserTest {
     @Test

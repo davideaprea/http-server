@@ -3,11 +3,11 @@ package router.model;
 import lombok.AllArgsConstructor;
 import router.dto.HandlerCreateCommand;
 import router.exception.ConflictingRoutesException;
-import shared.exception.ResponseStatusException;
-import shared.model.Method;
-import shared.model.Request;
-import shared.model.Response;
-import shared.model.Status;
+import common.exception.ResponseStatusException;
+import common.model.Method;
+import common.model.Request;
+import common.model.Response;
+import common.model.Status;
 
 import java.util.HashMap;
 import java.util.Map;

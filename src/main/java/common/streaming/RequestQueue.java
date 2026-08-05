@@ -1,8 +1,8 @@
-package shared.streaming;
+package common.streaming;
 
 import reader.dto.RequestContext;
-import shared.model.Request;
-import shared.model.Response;
+import common.model.Request;
+import common.model.Response;
 
 import java.util.HashMap;
 import java.util.LinkedList;

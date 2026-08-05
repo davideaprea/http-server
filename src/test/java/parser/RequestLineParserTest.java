@@ -3,10 +3,10 @@ package parser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import parser.dto.RequestLine;
-import shared.exception.ResponseStatusException;
-import shared.model.Method;
-import shared.model.Status;
-import shared.model.Version;
+import common.exception.ResponseStatusException;
+import common.model.Method;
+import common.model.Status;
+import common.model.Version;
 
 public class RequestLineParserTest {
     @Test

@@ -1,7 +1,7 @@
-package shared.model;
+package common.model;
 
 import parser.dto.Header;
-import shared.streaming.BodyBytesDequeue;
+import common.streaming.BodyBytesDequeue;
 
 import java.util.*;
 

@@ -1,4 +1,6 @@
-package shared.model;
+package common.model;
+
+import common.streaming.ResponseBody;
 
 import java.util.Map;
 

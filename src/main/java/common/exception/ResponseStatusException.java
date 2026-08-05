@@ -1,7 +1,7 @@
-package shared.exception;
+package common.exception;
 
 import lombok.Getter;
-import shared.model.Status;
+import common.model.Status;
 
 @Getter
 public class ResponseStatusException extends RuntimeException {

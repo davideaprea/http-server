@@ -1,6 +1,6 @@
 package parser;
 
-import shared.model.RequestTarget;
+import common.model.RequestTarget;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

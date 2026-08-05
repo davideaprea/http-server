@@ -1,6 +1,6 @@
 package reader;
 
-import shared.streaming.RequestQueue;
+import common.streaming.RequestQueue;
 
 public abstract class ReadingState {
     protected final RequestQueue requestQueue;

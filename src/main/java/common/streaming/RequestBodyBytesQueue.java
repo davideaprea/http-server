@@ -1,7 +1,7 @@
-package shared.streaming;
+package common.streaming;
 
-import shared.exception.ResponseStatusException;
-import shared.model.Status;
+import common.exception.ResponseStatusException;
+import common.model.Status;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

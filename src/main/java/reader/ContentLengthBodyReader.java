@@ -1,7 +1,7 @@
 package reader;
 
 import reader.dto.ContentLengthRequest;
-import shared.streaming.RequestQueue;
+import common.streaming.RequestQueue;
 
 public class ContentLengthBodyReader extends ReadingState {
     private final ContentLengthRequest request;

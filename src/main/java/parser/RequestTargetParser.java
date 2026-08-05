@@ -2,7 +2,7 @@ package parser;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import shared.model.RequestTarget;
+import common.model.RequestTarget;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

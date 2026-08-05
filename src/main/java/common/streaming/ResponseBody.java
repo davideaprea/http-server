@@ -1,4 +1,4 @@
-package shared.model;
+package common.streaming;
 
 import lombok.AllArgsConstructor;
 

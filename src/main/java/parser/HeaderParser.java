@@ -2,8 +2,8 @@ package parser;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import shared.exception.ResponseStatusException;
-import shared.model.Status;
+import common.exception.ResponseStatusException;
+import common.model.Status;
 import parser.dto.Header;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

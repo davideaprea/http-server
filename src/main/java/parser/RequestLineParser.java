@@ -3,10 +3,10 @@ package parser;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import parser.dto.RequestLine;
-import shared.exception.ResponseStatusException;
-import shared.model.Method;
-import shared.model.Status;
-import shared.model.Version;
+import common.exception.ResponseStatusException;
+import common.model.Method;
+import common.model.Status;
+import common.model.Version;
 
 import java.util.NoSuchElementException;
 

@@ -1,7 +1,7 @@
 package router.model;
 
-import shared.model.Request;
-import shared.model.Response;
+import common.model.Request;
+import common.model.Response;
 
 public interface RequestHandler {
     Response handle(Request request);
