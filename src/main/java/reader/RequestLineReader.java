@@ -2,18 +2,18 @@ package reader;
 
 import parser.RequestLineParser;
 import parser.RequestTargetParser;
-import reader.dto.RequestContext;
 import parser.dto.RequestLine;
 import reader.util.CRLFSequenceStateTracker;
 import shared.model.Request;
+import shared.streaming.RequestQueue;
 
 public class RequestLineReader extends ReadingState {
     private final StringBuilder requestLineBuilder = new StringBuilder();
     private final Request.Builder requestBuilder = new Request.Builder();
     private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
 
-    public RequestLineReader(RequestContext context) {
-        super(context);
+    public RequestLineReader(RequestQueue requestQueue) {
+        super(requestQueue);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class RequestLineReader extends ReadingState {
                         .version(requestLine.version())
                         .requestTarget(RequestTargetParser.from(requestLine.requestTarget()));
 
-                return new HeadersReader(requestBuilder, context);
+                return new HeadersReader(requestBuilder, requestQueue);
             }
             default -> requestLineBuilder.append(c);
         }

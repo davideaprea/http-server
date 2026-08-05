@@ -1,10 +1,10 @@
 package reader;
 
-import reader.dto.RequestContext;
 import reader.util.CRLFSequenceStateTracker;
 import shared.exception.ResponseStatusException;
 import shared.model.Status;
 import shared.streaming.BodyBytesEnqueue;
+import shared.streaming.RequestQueue;
 
 public class ChunkedBodyReader extends ReadingState {
     private boolean isReadingChunkSize = true;
@@ -15,8 +15,8 @@ public class ChunkedBodyReader extends ReadingState {
     private final BodyBytesEnqueue bodyStream;
     private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
 
-    public ChunkedBodyReader(BodyBytesEnqueue bodyStream, RequestContext context) {
-        super(context);
+    public ChunkedBodyReader(BodyBytesEnqueue bodyStream, RequestQueue requestQueue) {
+        super(requestQueue);
 
         this.bodyStream = bodyStream;
     }
@@ -51,7 +51,7 @@ public class ChunkedBodyReader extends ReadingState {
                     if (currentChunkBytes == 0) {
                         bodyStream.enqueue((byte) -1);
 
-                        return new RequestLineReader(context);
+                        return new RequestLineReader(requestQueue);
                     }
                 } else {
                     throw new ResponseStatusException("Malformed request.", Status.BAD_REQUEST);

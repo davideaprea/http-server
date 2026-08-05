@@ -4,11 +4,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reader.dto.RequestContext;
+import shared.streaming.RequestQueue;
 
 public class RequestLineReaderTest {
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
-        RequestLineReader reader = new RequestLineReader(Mockito.mock(RequestContext.class));
+        RequestLineReader reader = new RequestLineReader(Mockito.mock(RequestQueue.class));
         ReadingState result = reader.eval((byte) 'G');
 
         Assertions.assertSame(reader, result);
@@ -16,7 +17,7 @@ public class RequestLineReaderTest {
 
     @Test
     void shouldRemainInSameStateWhenReceivingLineFeed() {
-        RequestContext context = Mockito.mock(RequestContext.class);
+        RequestQueue context = Mockito.mock(RequestQueue.class);
         RequestLineReader reader = new RequestLineReader(context);
         ReadingState result = reader.eval((byte) '\n');
 
@@ -25,7 +26,7 @@ public class RequestLineReaderTest {
 
     @Test
     void shouldPassInReadingHeadersState() {
-        RequestContext context = Mockito.mock(RequestContext.class);
+        RequestQueue context = Mockito.mock(RequestQueue.class);
         String rawRequest = "GET /path HTTP/1.1";
         ReadingState state = new RequestLineReader(context);
 

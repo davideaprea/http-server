@@ -3,23 +3,22 @@ package reader;
 import parser.HeaderParser;
 import parser.dto.Header;
 import reader.dto.ContentLengthRequest;
-import reader.dto.RequestContext;
 import reader.util.CRLFSequenceStateTracker;
 import shared.exception.ResponseStatusException;
 import shared.model.Request;
 import shared.model.Status;
 import shared.streaming.RequestBodyBytesQueue;
+import shared.streaming.RequestQueue;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class HeadersReader extends ReadingState {
     private final Request.Builder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
     private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
 
-    public HeadersReader(Request.Builder requestBuilder, RequestContext context) {
-        super(context);
+    public HeadersReader(Request.Builder requestBuilder, RequestQueue requestQueue) {
+        super(requestQueue);
 
         this.requestBuilder = requestBuilder;
     }
@@ -37,11 +36,7 @@ public class HeadersReader extends ReadingState {
                     RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue();
                     Request request = requestBuilder.body(requestBodyBytesQueue).build();
 
-                    CompletableFuture.supplyAsync(
-                            () -> context.router().handle(request),
-                            context.executorService()
-                    ).thenAccept(response -> {
-                    });
+                    requestQueue.enqueue(request);
 
                     Optional<Long> contentLengthValue = request.getContentLength();
                     Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
@@ -54,10 +49,10 @@ public class HeadersReader extends ReadingState {
                         return new ContentLengthBodyReader(new ContentLengthRequest(
                                 requestBodyBytesQueue,
                                 contentLengthValue.get()
-                        ), context);
+                        ), requestQueue);
                     }
 
-                    return new ChunkedBodyReader(requestBodyBytesQueue, context);
+                    return new ChunkedBodyReader(requestBodyBytesQueue, requestQueue);
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 

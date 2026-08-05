@@ -1,12 +1,12 @@
 package reader;
 
-import reader.dto.RequestContext;
+import shared.streaming.RequestQueue;
 
 public abstract class ReadingState {
-    protected final RequestContext context;
+    protected final RequestQueue requestQueue;
 
-    public ReadingState(RequestContext context) {
-        this.context = context;
+    protected ReadingState(RequestQueue requestQueue) {
+        this.requestQueue = requestQueue;
     }
 
     public abstract ReadingState eval(byte requestByte);

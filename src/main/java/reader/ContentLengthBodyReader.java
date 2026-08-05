@@ -1,15 +1,15 @@
 package reader;
 
 import reader.dto.ContentLengthRequest;
-import reader.dto.RequestContext;
+import shared.streaming.RequestQueue;
 
 public class ContentLengthBodyReader extends ReadingState {
     private final ContentLengthRequest request;
 
     private long remainingBytes;
 
-    public ContentLengthBodyReader(ContentLengthRequest request, RequestContext context) {
-        super(context);
+    public ContentLengthBodyReader(ContentLengthRequest request, RequestQueue requestQueue) {
+        super(requestQueue);
 
         this.request = request;
         remainingBytes = request.bytesNumber();
@@ -26,7 +26,7 @@ public class ContentLengthBodyReader extends ReadingState {
         if (remainingBytes == 0) {
             request.body().enqueue((byte) -1);
 
-            return new RequestLineReader(context);
+            return new RequestLineReader(requestQueue);
         } else {
             request.body().enqueue(requestByte);
         }

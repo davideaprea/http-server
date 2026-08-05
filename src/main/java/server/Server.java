@@ -3,6 +3,7 @@ package server;
 import reader.ReadingState;
 import reader.RequestLineReader;
 import reader.dto.RequestContext;
+import shared.streaming.RequestQueue;
 import writer.ResponseWriter;
 
 import java.io.IOException;
@@ -58,9 +59,10 @@ public class Server {
                         clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_WRITE);
                         selector.wakeup();
                     });
+                    RequestContext requestContext = new RequestContext(configuration.router(), executor, writer);
                     ClientSocketContext context = new ClientSocketContext(
                             writer,
-                            new RequestLineReader(new RequestContext(configuration.router(), executor))
+                            new RequestLineReader(new RequestQueue(requestContext))
                     );
 
                     clientKey.attach(context);

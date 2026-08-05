@@ -3,11 +3,8 @@ package reader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import reader.dto.RequestContext;
-import router.model.Router;
 import shared.model.Request;
-
-import java.util.concurrent.ExecutorService;
+import shared.streaming.RequestQueue;
 
 public class HeadersReaderTest {
     @Test
@@ -54,13 +51,9 @@ public class HeadersReaderTest {
     }
 
     private HeadersReader withMocks() {
-        Router router = Mockito.mock(Router.class);
-        ExecutorService executor = Mockito.mock(ExecutorService.class);
-        RequestContext context = new RequestContext(router, executor);
-
         return new HeadersReader(
                 new Request.Builder(),
-                context
+                Mockito.mock(RequestQueue.class)
         );
     }
 }
