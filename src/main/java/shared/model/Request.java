@@ -38,7 +38,7 @@ public record Request(
         }
 
         public Builder header(Header header) {
-            headers.putIfAbsent(header.name(), new ArrayList<>());
+            headers.putIfAbsent(header.name().toLowerCase(), new ArrayList<>());
             headers.get(header.name()).add(header.value());
 
             return this;

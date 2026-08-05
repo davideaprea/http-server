@@ -1,27 +1,27 @@
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import router.model.Router;
+import org.junit.jupiter.api.*;
 import router.dto.HandlerCreateCommand;
+import router.model.Router;
 import server.Server;
 import server.ServerConfiguration;
 import shared.model.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Map;
 
-public class ServerTest {
+class ServerTest {
+
+    private static final int PORT = 8000;
+
     private Server server;
     private Thread serverThread;
 
     @BeforeEach
-    void setup() {
+    void setup() throws Exception {
         Router router = new Router.Builder()
                 .add(new HandlerCreateCommand(
                         request -> new Response(
@@ -29,25 +29,30 @@ public class ServerTest {
                                 Status.OK,
                                 Map.of(
                                         HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
-                                        HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf("Hello world".length())
+                                        HeaderKey.CONTENT_LENGTH.getValue(), "11"
                                 ),
-                                new ResponseBody(new ByteArrayInputStream("Hello world".getBytes()))
+                                new ResponseBody(
+                                        new ByteArrayInputStream("Hello world".getBytes())
+                                )
                         ),
                         Method.GET,
                         "/resource/path"
                 ))
                 .build();
-        ServerConfiguration serverConfiguration = new ServerConfiguration(0, 3, router);
-        server = new Server(serverConfiguration);
+
+        server = new Server(new ServerConfiguration(PORT, 3, router));
+
         serverThread = new Thread(() -> {
             try {
                 server.start();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
 
         serverThread.start();
+
+        Thread.sleep(100);
     }
 
     @AfterEach
@@ -57,18 +62,18 @@ public class ServerTest {
     }
 
     @Test
-    void test() {
+    void test() throws Exception {
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:%d/resource/path".formatted(8000)))
+                    .uri(URI.create("http://localhost:" + PORT + "/resource/path"))
                     .GET()
+                    .version(HttpClient.Version.HTTP_1_1)
+                    .timeout(Duration.ofSeconds(5))
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             Assertions.assertEquals(200, response.statusCode());
             Assertions.assertEquals("Hello world", response.body());
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
         }
     }
 }

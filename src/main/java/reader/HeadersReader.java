@@ -41,7 +41,7 @@ public class HeadersReader extends ReadingState {
                     Optional<Long> contentLengthValue = request.getContentLength();
                     Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
 
-                    if (contentLengthValue.isEmpty() && transferEncodingValue.isEmpty()) {
+                    if (contentLengthValue.isPresent() && transferEncodingValue.isPresent()) {
                         throw new ResponseStatusException("", Status.BAD_REQUEST);
                     }
 
@@ -52,7 +52,11 @@ public class HeadersReader extends ReadingState {
                         ), requestQueue);
                     }
 
-                    return new ChunkedBodyReader(requestBodyBytesQueue, requestQueue);
+                    if (transferEncodingValue.isPresent()) {
+                        return new ChunkedBodyReader(requestBodyBytesQueue, requestQueue);
+                    }
+
+                    return new RequestLineReader(requestQueue);
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 

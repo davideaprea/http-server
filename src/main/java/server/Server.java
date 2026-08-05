@@ -7,8 +7,8 @@ import shared.streaming.RequestQueue;
 import writer.ResponseWriter;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -67,16 +67,18 @@ public class Server {
 
                     clientKey.attach(context);
                 } else if (key.isReadable()) {
-                    InputStream clientInputStream = ((SocketChannel) key.channel()).socket().getInputStream();
+                    SocketChannel socketChannel = (SocketChannel) key.channel();
                     ClientSocketContext clientSocketContext = (ClientSocketContext) key.attachment();
+                    ByteBuffer buffer = ByteBuffer.allocate(4096);
 
-                    int currentByte;
+                    while (socketChannel.read(buffer) > 0) {
+                        for (byte reqByte : buffer.array()) {
+                            ReadingState nextReadingState = clientSocketContext
+                                    .getReadingState()
+                                    .eval(reqByte);
 
-                    while ((currentByte = clientInputStream.read()) > 0) {
-                        ReadingState nextReadingState = clientSocketContext
-                                .getReadingState()
-                                .eval((byte) currentByte);
-                        clientSocketContext.setReadingState(nextReadingState);
+                            clientSocketContext.setReadingState(nextReadingState);
+                        }
                     }
                 } else if (key.isWritable()) {
                     ((ClientSocketContext) key.attachment()).getResponseWriter().flush();

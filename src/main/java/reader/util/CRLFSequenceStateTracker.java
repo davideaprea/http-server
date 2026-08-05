@@ -4,10 +4,10 @@ import shared.exception.ResponseStatusException;
 import shared.model.Status;
 
 public class CRLFSequenceStateTracker {
-    private boolean isLineFeed = false;
+    private Boolean isLineFeed;
 
     public void setLineFeed() {
-        if (isLineFeed) {
+        if (isLineFeed != null && isLineFeed) {
             throw new ResponseStatusException("", Status.BAD_REQUEST);
         }
 
@@ -15,7 +15,7 @@ public class CRLFSequenceStateTracker {
     }
 
     public void setCarriageReturn() {
-        if (!isLineFeed) {
+        if (isLineFeed != null && !isLineFeed) {
             throw new ResponseStatusException("", Status.BAD_REQUEST);
         }
 
