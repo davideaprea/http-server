@@ -12,7 +12,7 @@ import common.streaming.RequestQueue;
 
 import java.util.Optional;
 
-public class HeadersReader extends ReadingState {
+public class HeadersReader extends RequestReader {
     private final Request.Builder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
     private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
@@ -24,7 +24,7 @@ public class HeadersReader extends ReadingState {
     }
 
     @Override
-    public ReadingState eval(byte requestByte) {
+    public RequestReader eval(byte requestByte) {
         char c = (char) requestByte;
 
         switch (c) {

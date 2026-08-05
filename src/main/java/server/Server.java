@@ -1,6 +1,6 @@
 package server;
 
-import reader.ReadingState;
+import reader.RequestReader;
 import reader.RequestLineReader;
 import reader.dto.RequestContext;
 import common.streaming.RequestQueue;
@@ -73,11 +73,11 @@ public class Server {
 
                     while (socketChannel.read(buffer) > 0) {
                         for (byte reqByte : buffer.array()) {
-                            ReadingState nextReadingState = clientSocketContext
-                                    .getReadingState()
+                            RequestReader nextRequestReader = clientSocketContext
+                                    .getRequestReader()
                                     .eval(reqByte);
 
-                            clientSocketContext.setReadingState(nextReadingState);
+                            clientSocketContext.setRequestReader(nextRequestReader);
                         }
                     }
                 } else if (key.isWritable()) {

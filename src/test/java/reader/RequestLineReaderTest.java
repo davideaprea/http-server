@@ -9,7 +9,7 @@ public class RequestLineReaderTest {
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
         RequestLineReader reader = new RequestLineReader(Mockito.mock(RequestQueue.class));
-        ReadingState result = reader.eval((byte) 'G');
+        RequestReader result = reader.eval((byte) 'G');
 
         Assertions.assertSame(reader, result);
     }
@@ -18,7 +18,7 @@ public class RequestLineReaderTest {
     void shouldRemainInSameStateWhenReceivingLineFeed() {
         RequestQueue context = Mockito.mock(RequestQueue.class);
         RequestLineReader reader = new RequestLineReader(context);
-        ReadingState result = reader.eval((byte) '\n');
+        RequestReader result = reader.eval((byte) '\n');
 
         Assertions.assertSame(reader, result);
     }
@@ -27,7 +27,7 @@ public class RequestLineReaderTest {
     void shouldPassInReadingHeadersState() {
         RequestQueue context = Mockito.mock(RequestQueue.class);
         String rawRequest = "GET /path HTTP/1.1";
-        ReadingState state = new RequestLineReader(context);
+        RequestReader state = new RequestLineReader(context);
 
         for(int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);

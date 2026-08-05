@@ -3,7 +3,7 @@ package reader;
 import reader.dto.ContentLengthRequest;
 import common.streaming.RequestQueue;
 
-public class ContentLengthBodyReader extends ReadingState {
+public class ContentLengthBodyReader extends RequestReader {
     private final ContentLengthRequest request;
 
     private long remainingBytes;
@@ -16,7 +16,7 @@ public class ContentLengthBodyReader extends ReadingState {
     }
 
     @Override
-    public ReadingState eval(byte requestByte) {
+    public RequestReader eval(byte requestByte) {
         if (remainingBytes == 0) {
             throw new IllegalStateException("Content length has already been reached.");
         }

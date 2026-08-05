@@ -6,7 +6,7 @@ import common.model.Status;
 import common.streaming.BodyBytesEnqueue;
 import common.streaming.RequestQueue;
 
-public class ChunkedBodyReader extends ReadingState {
+public class ChunkedBodyReader extends RequestReader {
     private boolean isReadingChunkSize = true;
     private StringBuilder chunkSizeBuilder = new StringBuilder();
     private long remainingChunkBytes = 0;
@@ -22,7 +22,7 @@ public class ChunkedBodyReader extends ReadingState {
     }
 
     @Override
-    public ReadingState eval(byte requestByte) {
+    public RequestReader eval(byte requestByte) {
         if (isReadingChunkSize) {
             if (requestByte == '\n') {
                 CRLFSequenceStateTracker.setLineFeed();

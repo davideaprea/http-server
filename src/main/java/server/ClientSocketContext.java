@@ -3,7 +3,7 @@ package server;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import reader.ReadingState;
+import reader.RequestReader;
 import writer.ResponseWriter;
 
 @Getter
@@ -12,5 +12,5 @@ public class ClientSocketContext {
     private final ResponseWriter responseWriter;
 
     @Setter
-    private ReadingState readingState;
+    private RequestReader requestReader;
 }

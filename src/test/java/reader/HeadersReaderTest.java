@@ -10,7 +10,7 @@ public class HeadersReaderTest {
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
         HeadersReader reader = withMocks();
-        ReadingState result = reader.eval((byte) 'G');
+        RequestReader result = reader.eval((byte) 'G');
 
         Assertions.assertSame(reader, result);
     }
@@ -18,7 +18,7 @@ public class HeadersReaderTest {
     @Test
     void shouldRemainInSameStateWhenReceivingLineFeed() {
         HeadersReader reader = withMocks();
-        ReadingState result = reader.eval((byte) '\n');
+        RequestReader result = reader.eval((byte) '\n');
 
         Assertions.assertSame(reader, result);
     }
@@ -26,7 +26,7 @@ public class HeadersReaderTest {
     @Test
     void shouldStayInReadingHeadersState() {
         String rawRequest = "Header-Name: header-value" + '\n' + '\r';
-        ReadingState state = withMocks();
+        RequestReader state = withMocks();
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);
@@ -40,7 +40,7 @@ public class HeadersReaderTest {
     void shouldPassInReadingHeadersState() {
         String crlf = "\n" + '\r';
         String rawRequest = "Content-Length: 10" + crlf + crlf;
-        ReadingState state = withMocks();
+        RequestReader state = withMocks();
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);

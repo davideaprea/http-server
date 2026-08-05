@@ -7,7 +7,7 @@ import reader.util.CRLFSequenceStateTracker;
 import common.model.Request;
 import common.streaming.RequestQueue;
 
-public class RequestLineReader extends ReadingState {
+public class RequestLineReader extends RequestReader {
     private final StringBuilder requestLineBuilder = new StringBuilder();
     private final Request.Builder requestBuilder = new Request.Builder();
     private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
@@ -17,7 +17,7 @@ public class RequestLineReader extends ReadingState {
     }
 
     @Override
-    public ReadingState eval(byte requestByte) {
+    public RequestReader eval(byte requestByte) {
         char c = (char) requestByte;
 
         switch (c) {
