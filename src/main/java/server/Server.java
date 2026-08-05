@@ -36,7 +36,7 @@ public class Server {
         serverChannel.bind(new InetSocketAddress(configuration.port()));
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-        while (serverChannel.isOpen()) {
+        while (selector.isOpen() && serverChannel.isOpen()) {
             selector.select();
 
             Iterator<SelectionKey> keys = selector.selectedKeys().iterator();

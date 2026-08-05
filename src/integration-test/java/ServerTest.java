@@ -46,7 +46,7 @@ class ServerTest {
             try {
                 server.start();
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Test server closed.");
             }
         });
 
