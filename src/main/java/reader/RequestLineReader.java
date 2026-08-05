@@ -5,7 +5,6 @@ import parser.RequestTargetParser;
 import parser.dto.RequestLine;
 import reader.util.CRLFSequenceStateTracker;
 import common.model.Request;
-import common.streaming.RequestQueue;
 
 public class RequestLineReader extends RequestReader {
     private final StringBuilder requestLineBuilder = new StringBuilder();

@@ -4,7 +4,6 @@ import reader.util.CRLFSequenceStateTracker;
 import common.exception.ResponseStatusException;
 import common.model.Status;
 import common.streaming.BodyBytesEnqueue;
-import common.streaming.RequestQueue;
 
 public class ChunkedBodyReader extends RequestReader {
     private boolean isReadingChunkSize = true;

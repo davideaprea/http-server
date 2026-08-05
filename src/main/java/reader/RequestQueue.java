@@ -1,4 +1,4 @@
-package common.streaming;
+package reader;
 
 import reader.dto.RequestContext;
 import common.model.Request;
