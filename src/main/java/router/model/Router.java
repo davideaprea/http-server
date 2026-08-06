@@ -1,13 +1,13 @@
 package router.model;
 
-import lombok.AllArgsConstructor;
-import router.dto.HandlerCreateCommand;
-import router.exception.ConflictingRoutesException;
 import common.exception.ResponseStatusException;
 import common.model.Method;
 import common.model.Request;
 import common.model.Response;
 import common.model.Status;
+import lombok.AllArgsConstructor;
+import router.dto.HandlerCreateCommand;
+import router.exception.ConflictingRoutesException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,23 +48,19 @@ public class Router {
 
             for (String segmentName : pathSegments) {
                 var segmentChildren = currSegment.children;
+                currSegment = segmentChildren.getOrDefault(
+                        segmentName,
+                        segmentChildren.put(segmentName, Segment.withDefaults())
+                );
+            }
 
-                if (segmentChildren.containsKey(segmentName)) {
-                    currSegment = segmentChildren.get(segmentName);
-                } else {
-                    var segment = Segment.withDefaults();
-
-                    segmentChildren.put(segmentName, segment);
-
-                    currSegment = segment;
+            currSegment.methodHandlers.compute(command.method(), (k, v) -> {
+                if (v != null) {
+                    throw new ConflictingRoutesException(command.path(), command.method());
                 }
-            }
 
-            if (currSegment.methodHandlers.containsKey(command.method())) {
-                throw new ConflictingRoutesException(command.path(), command.method());
-            }
-
-            currSegment.methodHandlers.put(command.method(), command.handler());
+                return command.handler();
+            });
 
             return this;
         }
