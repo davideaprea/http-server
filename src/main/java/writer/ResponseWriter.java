@@ -10,9 +10,9 @@ import java.util.function.Consumer;
 public class ResponseWriter implements Consumer<byte[]> {
     private final SocketChannel socketChannel;
     private final Queue<ByteBuffer> bodyChunks = new LinkedList<>();
-    private final Consumer<ResponseWriter> newBodyChunkEventConsumer;
+    private final Runnable newBodyChunkEventConsumer;
 
-    public ResponseWriter(SocketChannel socketChannel, Consumer<ResponseWriter> newBodyChunkEventConsumer) {
+    public ResponseWriter(SocketChannel socketChannel, Runnable newBodyChunkEventConsumer) {
         this.socketChannel = socketChannel;
         this.newBodyChunkEventConsumer = newBodyChunkEventConsumer;
     }
@@ -39,6 +39,6 @@ public class ResponseWriter implements Consumer<byte[]> {
     @Override
     public void accept(byte[] bodyChunk) {
         bodyChunks.add(ByteBuffer.wrap(bodyChunk));
-        newBodyChunkEventConsumer.accept(this);
+        newBodyChunkEventConsumer.run();
     }
 }

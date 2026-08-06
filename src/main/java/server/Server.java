@@ -55,7 +55,7 @@ public class Server {
                     client.configureBlocking(false);
 
                     SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
-                    ResponseWriter writer = new ResponseWriter(client, responseWriter -> {
+                    ResponseWriter writer = new ResponseWriter(client, () -> {
                         clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_WRITE);
                         selector.wakeup();
                     });
