@@ -48,10 +48,7 @@ public class Router {
 
             for (String segmentName : pathSegments) {
                 var segmentChildren = currSegment.children;
-                currSegment = segmentChildren.getOrDefault(
-                        segmentName,
-                        segmentChildren.put(segmentName, Segment.withDefaults())
-                );
+                currSegment = segmentChildren.computeIfAbsent(segmentName, k -> Segment.withDefaults());
             }
 
             currSegment.methodHandlers.compute(command.method(), (k, v) -> {
