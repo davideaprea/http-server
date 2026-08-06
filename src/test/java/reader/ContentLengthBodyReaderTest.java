@@ -7,7 +7,7 @@ import reader.dto.ContentLengthRequest;
 
 public class ContentLengthBodyReaderTest {
     @Test
-    void a() {
+    void shouldGoToRequestLineReadingAfterProcessingLastByte() {
         RequestReader reader = new ContentLengthBodyReader(
                 new ContentLengthRequest(Mockito.mock(), 1),
                 Mockito.mock(RequestQueue.class)
@@ -17,7 +17,7 @@ public class ContentLengthBodyReaderTest {
     }
 
     @Test
-    void b() {
+    void shouldRemainInSameState() {
         RequestReader reader = new ContentLengthBodyReader(
                 new ContentLengthRequest(Mockito.mock(), 2),
                 Mockito.mock(RequestQueue.class)
@@ -27,7 +27,7 @@ public class ContentLengthBodyReaderTest {
     }
 
     @Test
-    void c() {
+    void shouldThrowExceptionWhenReadingCompletedBody() {
         RequestReader reader = new ContentLengthBodyReader(
                 new ContentLengthRequest(Mockito.mock(), 0),
                 Mockito.mock(RequestQueue.class)
