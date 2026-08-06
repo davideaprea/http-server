@@ -1,11 +1,14 @@
 package reader;
 
+import common.model.HeaderKey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import common.model.Request;
 
 public class HeadersReaderTest {
+    private static final String CRLF = "\n" + '\r';
+
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
         HeadersReader reader = withMocks();
@@ -36,9 +39,8 @@ public class HeadersReaderTest {
     }
 
     @Test
-    void shouldPassInReadingHeadersState() {
-        String crlf = "\n" + '\r';
-        String rawRequest = "Content-Length: 10" + crlf + crlf;
+    void shouldPassInReadingContentLengthBodyState() {
+        String rawRequest = HeaderKey.CONTENT_LENGTH.getValue() + ": 10" + CRLF + CRLF;
         RequestReader state = withMocks();
 
         for (int i = 0; i < rawRequest.length(); i++) {
@@ -47,6 +49,19 @@ public class HeadersReaderTest {
         }
 
         Assertions.assertInstanceOf(ContentLengthBodyReader.class, state);
+    }
+
+    @Test
+    void shouldPassInReadingChunkedBodyState() {
+        String rawRequest = HeaderKey.TRANSFER_ENCODING.getValue() + ": chunked" + CRLF + CRLF;
+        RequestReader state = withMocks();
+
+        for (int i = 0; i < rawRequest.length(); i++) {
+            char c = rawRequest.charAt(i);
+            state = state.eval((byte) c);
+        }
+
+        Assertions.assertInstanceOf(ChunkedBodyReader.class, state);
     }
 
     private HeadersReader withMocks() {
