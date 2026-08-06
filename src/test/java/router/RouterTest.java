@@ -18,7 +18,7 @@ public class RouterTest {
                 Version.HTTP_1_1,
                 Status.OK,
                 Map.of(),
-                new ResponseBody(InputStream.nullInputStream())
+                null
         );
         HandlerCreateCommand command = new HandlerCreateCommand(
                 request -> mockResponse,
