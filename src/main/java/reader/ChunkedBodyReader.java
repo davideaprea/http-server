@@ -23,27 +23,29 @@ public class ChunkedBodyReader extends RequestReader {
     @Override
     public RequestReader eval(byte requestByte) {
         if (isReadingChunkSize) {
-            if (requestByte == '\n') {
-                CRLFSequenceStateTracker.setLineFeed();
-            } else if (requestByte == '\r') {
+            char currChar = (char) requestByte;
+
+            if (currChar == '\r') {
                 CRLFSequenceStateTracker.setCarriageReturn();
+            } else if (currChar == '\n') {
+                CRLFSequenceStateTracker.setLineFeed();
 
                 isReadingChunkSize = false;
                 currentChunkBytes = Long.parseLong(chunkSizeBuilder.toString(), 16);
                 remainingChunkBytes = currentChunkBytes;
                 chunkSizeBuilder = new StringBuilder();
             } else {
-                chunkSizeBuilder.append(requestByte);
+                chunkSizeBuilder.append(currChar);
             }
         } else {
             if (remainingChunkBytes > 0) {
                 bodyStream.enqueue(requestByte);
                 remainingChunkBytes--;
             } else {
-                if (requestByte == '\n') {
-                    CRLFSequenceStateTracker.setLineFeed();
-                } else if (requestByte == '\r') {
+                if ((char) requestByte == '\r') {
                     CRLFSequenceStateTracker.setCarriageReturn();
+                } else if ((char) requestByte == '\n') {
+                    CRLFSequenceStateTracker.setLineFeed();
 
                     isReadingChunkSize = true;
 
