@@ -7,7 +7,7 @@ import org.mockito.Mockito;
 import common.model.Request;
 
 public class HeadersReaderTest {
-    private static final String CRLF = "\n" + '\r';
+    private static final String CRLF = "\r" + '\n';
 
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
@@ -18,16 +18,16 @@ public class HeadersReaderTest {
     }
 
     @Test
-    void shouldRemainInSameStateWhenReceivingLineFeed() {
+    void shouldRemainInSameStateWhenReceivingCarriageReturn() {
         HeadersReader reader = withMocks();
-        RequestReader result = reader.eval((byte) '\n');
+        RequestReader result = reader.eval((byte) '\r');
 
         Assertions.assertSame(reader, result);
     }
 
     @Test
     void shouldStayInReadingHeadersState() {
-        String rawRequest = "Header-Name: header-value" + '\n' + '\r';
+        String rawRequest = "Header-Name: header-value" + CRLF;
         RequestReader state = withMocks();
 
         for (int i = 0; i < rawRequest.length(); i++) {
