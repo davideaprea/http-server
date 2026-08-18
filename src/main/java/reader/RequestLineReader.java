@@ -1,15 +1,17 @@
 package reader;
 
+import common.exception.ResponseStatusException;
+import common.model.Request;
+import common.model.Status;
 import parser.RequestLineParser;
 import parser.RequestTargetParser;
 import parser.dto.RequestLine;
-import reader.util.CRLFSequenceStateTracker;
-import common.model.Request;
 
 public class RequestLineReader extends RequestReader {
     private final StringBuilder requestLineBuilder = new StringBuilder();
     private final Request.Builder requestBuilder = new Request.Builder();
-    private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
+
+    private ReadingState readingState = ReadingState.NORMAL;
 
     public RequestLineReader(RequestQueue requestQueue) {
         super(requestQueue);
@@ -20,9 +22,10 @@ public class RequestLineReader extends RequestReader {
         char c = (char) requestByte;
 
         switch (c) {
-            case '\n' -> CRLFSequenceStateTracker.setLineFeed();
-            case '\r' -> {
-                CRLFSequenceStateTracker.setCarriageReturn();
+            case '\n' -> {
+                if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
+                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                }
 
                 RequestLine requestLine = RequestLineParser.from(requestLineBuilder.toString());
 
@@ -31,7 +34,16 @@ public class RequestLineReader extends RequestReader {
                         .version(requestLine.version())
                         .requestTarget(RequestTargetParser.from(requestLine.requestTarget()));
 
+                readingState = ReadingState.NORMAL;
+
                 return new HeadersReader(requestBuilder, requestQueue);
+            }
+            case '\r' -> {
+                if (!ReadingState.NORMAL.equals(readingState)) {
+                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                }
+
+                readingState = ReadingState.CARRIAGE_RETURN;
             }
             default -> requestLineBuilder.append(c);
         }

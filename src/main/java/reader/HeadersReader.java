@@ -3,7 +3,6 @@ package reader;
 import parser.HeaderParser;
 import parser.dto.Header;
 import reader.dto.ContentLengthRequest;
-import reader.util.CRLFSequenceStateTracker;
 import common.exception.ResponseStatusException;
 import common.model.Request;
 import common.model.Status;
@@ -14,7 +13,9 @@ import java.util.Optional;
 public class HeadersReader extends RequestReader {
     private final Request.Builder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
-    private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
+
+    private ReadingState readingState = ReadingState.NORMAL;
+
 
     public HeadersReader(Request.Builder requestBuilder, RequestQueue requestQueue) {
         super(requestQueue);
@@ -27,9 +28,17 @@ public class HeadersReader extends RequestReader {
         char c = (char) requestByte;
 
         switch (c) {
-            case '\n' -> CRLFSequenceStateTracker.setLineFeed();
             case '\r' -> {
-                CRLFSequenceStateTracker.setCarriageReturn();
+                if (!ReadingState.NORMAL.equals(readingState)) {
+                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                }
+
+                readingState = ReadingState.CARRIAGE_RETURN;
+            }
+            case '\n' -> {
+                if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
+                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                }
 
                 if (currentLine.isEmpty()) {
                     RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue();
@@ -62,6 +71,8 @@ public class HeadersReader extends RequestReader {
                     requestBuilder.header(header);
                     currentLine.setLength(0);
                 }
+
+                readingState = ReadingState.NORMAL;
             }
             default -> currentLine.append(c);
         }

@@ -1,6 +1,5 @@
 package reader;
 
-import reader.util.CRLFSequenceStateTracker;
 import common.exception.ResponseStatusException;
 import common.model.Status;
 import common.streaming.BodyBytesEnqueue;
@@ -10,9 +9,9 @@ public class ChunkedBodyReader extends RequestReader {
     private StringBuilder chunkSizeBuilder = new StringBuilder();
     private long remainingChunkBytes = 0;
     private long currentChunkBytes = 0;
+    private ReadingState readingState = ReadingState.NORMAL;
 
     private final BodyBytesEnqueue bodyStream;
-    private final CRLFSequenceStateTracker CRLFSequenceStateTracker = new CRLFSequenceStateTracker();
 
     public ChunkedBodyReader(BodyBytesEnqueue bodyStream, RequestQueue requestQueue) {
         super(requestQueue);
@@ -26,10 +25,17 @@ public class ChunkedBodyReader extends RequestReader {
             char currChar = (char) requestByte;
 
             if (currChar == '\r') {
-                CRLFSequenceStateTracker.setCarriageReturn();
-            } else if (currChar == '\n') {
-                CRLFSequenceStateTracker.setLineFeed();
+                if (!ReadingState.NORMAL.equals(readingState)) {
+                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                }
 
+                readingState = ReadingState.CARRIAGE_RETURN;
+            } else if (currChar == '\n') {
+                if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
+                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                }
+
+                readingState = ReadingState.NORMAL;
                 isReadingChunkSize = false;
                 currentChunkBytes = Long.parseLong(chunkSizeBuilder.toString(), 16);
                 remainingChunkBytes = currentChunkBytes;
@@ -43,10 +49,17 @@ public class ChunkedBodyReader extends RequestReader {
                 remainingChunkBytes--;
             } else {
                 if ((char) requestByte == '\r') {
-                    CRLFSequenceStateTracker.setCarriageReturn();
-                } else if ((char) requestByte == '\n') {
-                    CRLFSequenceStateTracker.setLineFeed();
+                    if (!ReadingState.NORMAL.equals(readingState)) {
+                        throw new ResponseStatusException(Status.BAD_REQUEST);
+                    }
 
+                    readingState = ReadingState.CARRIAGE_RETURN;
+                } else if ((char) requestByte == '\n') {
+                    if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
+                        throw new ResponseStatusException(Status.BAD_REQUEST);
+                    }
+
+                    readingState = ReadingState.NORMAL;
                     isReadingChunkSize = true;
 
                     if (currentChunkBytes == 0) {
