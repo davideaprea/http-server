@@ -62,6 +62,7 @@ public class Server {
                     RequestContext requestContext = new RequestContext(configuration.router(), executor, writer);
                     ClientSocketContext context = new ClientSocketContext(
                             writer,
+                            ByteBuffer.allocateDirect(8192),
                             new RequestLineReader(new RequestQueue(requestContext))
                     );
 
@@ -69,16 +70,22 @@ public class Server {
                 } else if (key.isReadable()) {
                     SocketChannel socketChannel = (SocketChannel) key.channel();
                     ClientSocketContext clientSocketContext = (ClientSocketContext) key.attachment();
-                    ByteBuffer buffer = ByteBuffer.allocate(4096);
+                    ByteBuffer buffer = clientSocketContext.getReadBuffer();
 
-                    while (socketChannel.read(buffer) > 0) {
-                        for (byte reqByte : buffer.array()) {
+                    int bytesRead;
+
+                    while ((bytesRead = socketChannel.read(buffer)) > 0) {
+                        buffer.flip();
+
+                        while (buffer.hasRemaining()) {
                             RequestReader nextRequestReader = clientSocketContext
                                     .getRequestReader()
-                                    .eval(reqByte);
+                                    .eval(buffer.get());
 
                             clientSocketContext.setRequestReader(nextRequestReader);
                         }
+
+                        buffer.clear();
                     }
                 } else if (key.isWritable()) {
                     ((ClientSocketContext) key.attachment()).getResponseWriter().flush();
