@@ -3,13 +3,13 @@ package writer;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class ResponseWriter implements Consumer<byte[]> {
     private final SocketChannel socketChannel;
-    private final Queue<ByteBuffer> bodyChunks = new LinkedList<>();
+    private final Queue<ByteBuffer> bodyChunks = new ConcurrentLinkedQueue<>();
     private final Runnable newBodyChunkEventConsumer;
 
     public ResponseWriter(SocketChannel socketChannel, Runnable newBodyChunkEventConsumer) {
