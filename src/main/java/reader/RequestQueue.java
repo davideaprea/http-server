@@ -4,16 +4,16 @@ import reader.dto.RequestContext;
 import common.model.Request;
 import common.model.Response;
 
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RequestQueue {
     private final RequestContext context;
-    private final Queue<Request> requestsQueue = new LinkedList<>();
-    private final Map<Request, Response> completedRequests = new HashMap<>();
+    private final Queue<Request> requestsQueue = new ConcurrentLinkedQueue<>();
+    private final Map<Request, Response> completedRequests = new ConcurrentHashMap<>();
 
     public RequestQueue(RequestContext context) {
         this.context = context;
