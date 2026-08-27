@@ -10,19 +10,17 @@ import java.util.function.Consumer;
 
 public class ClientOutputChannel implements Consumer<byte[]> {
     private final SelectionKey clientKey;
-    private final SocketChannel socketChannel;
     private final Queue<ByteBuffer> bodyChunks = new ConcurrentLinkedQueue<>();
 
-    public ClientOutputChannel(SelectionKey clientKey, SocketChannel socketChannel) {
+    public ClientOutputChannel(SelectionKey clientKey) {
         this.clientKey = clientKey;
-        this.socketChannel = socketChannel;
     }
 
     public void flush() {
         try {
             while (!bodyChunks.isEmpty()) {
                 ByteBuffer buffer = bodyChunks.peek();
-                int written = socketChannel.write(buffer);
+                int written = ((SocketChannel) clientKey.channel()).write(buffer);
 
                 if (written == 0) {
                     return;

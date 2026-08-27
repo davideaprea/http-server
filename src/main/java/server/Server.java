@@ -55,7 +55,7 @@ public class Server {
                     client.configureBlocking(false);
 
                     SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
-                    ClientOutputChannel writer = new ClientOutputChannel(clientKey, client);
+                    ClientOutputChannel writer = new ClientOutputChannel(clientKey);
                     RequestContext requestContext = new RequestContext(configuration.router(), executor, writer);
                     ClientSocketContext context = new ClientSocketContext(
                             writer,
