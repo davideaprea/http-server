@@ -18,8 +18,14 @@ public class ContentLengthBodyReader extends RequestReader {
     @Override
     public RequestReader eval(byte requestByte) {
         if (remainingBytes == 0) {
-            throw new IllegalStateException("Content length has already been reached.");
+            RequestReader reader = new RequestLineReader(requestQueue);
+
+            reader.eval(requestByte);
+
+            return reader;
         }
+
+        request.body().enqueue(requestByte);
 
         remainingBytes--;
 
@@ -27,8 +33,6 @@ public class ContentLengthBodyReader extends RequestReader {
             request.body().enqueue((byte) -1);
 
             return new RequestLineReader(requestQueue);
-        } else {
-            request.body().enqueue(requestByte);
         }
 
         return this;
