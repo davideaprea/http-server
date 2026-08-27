@@ -44,9 +44,6 @@ public class HeadersReader extends RequestReader {
                 if (currentLine.isEmpty()) {
                     RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue();
                     Request request = requestBuilder.body(requestBodyBytesQueue).build();
-
-                    requestQueue.enqueue(request);
-
                     Optional<Long> contentLengthValue = request.getContentLength();
                     Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
 
@@ -54,20 +51,24 @@ public class HeadersReader extends RequestReader {
                         throw new ResponseStatusException("", Status.BAD_REQUEST);
                     }
 
+                    RequestReader nextReader;
+
                     if (contentLengthValue.filter(v -> v > 0).isPresent()) {
-                        return new ContentLengthBodyReader(new ContentLengthRequest(
+                        nextReader = new ContentLengthBodyReader(new ContentLengthRequest(
                                 requestBodyBytesQueue,
                                 contentLengthValue.get()
                         ), requestQueue);
+                    } else if (transferEncodingValue.isPresent()) {
+                        nextReader = new ChunkedBodyReader(requestBodyBytesQueue, requestQueue);
+                    } else {
+                        requestBodyBytesQueue.enqueue(-1);
+
+                        nextReader = new RequestLineReader(requestQueue);
                     }
 
-                    if (transferEncodingValue.isPresent()) {
-                        return new ChunkedBodyReader(requestBodyBytesQueue, requestQueue);
-                    }
+                    requestQueue.enqueue(request);
 
-                    requestBodyBytesQueue.enqueue(-1);
-
-                    return new RequestLineReader(requestQueue);
+                    return nextReader;
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 
