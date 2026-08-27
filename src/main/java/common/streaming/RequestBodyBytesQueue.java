@@ -7,7 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class RequestBodyBytesQueue implements BodyBytesDequeue, BodyBytesEnqueue {
-    private final BlockingQueue<Integer> bufferedBytes = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Byte> bufferedBytes = new LinkedBlockingQueue<>();
 
     private boolean isClosed = false;
 
@@ -21,13 +21,13 @@ public class RequestBodyBytesQueue implements BodyBytesDequeue, BodyBytesEnqueue
         }
 
         try {
-            bufferedBytes.put((int) bodyByte);
+            bufferedBytes.put(bodyByte);
         } catch (InterruptedException e) {
             throw new ResponseStatusException(Status.REQUEST_TIMEOUT);
         }
     }
 
-    public int dequeue() {
+    public byte dequeue() {
         if (isClosed && bufferedBytes.isEmpty()) {
             return -1;
         }
