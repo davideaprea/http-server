@@ -23,13 +23,21 @@ public class RequestQueue {
         requestsQueue.add(request);
 
         CompletableFuture.supplyAsync(
-                () -> context.router().handle(request),
-                context.executorService()
-        ).thenAccept(response -> {
-            completedRequests.put(request, response);
+                        () -> context.router().handle(request),
+                        context.executorService()
+                )
+                .thenAccept(response -> {
+                    completedRequests.put(request, response);
 
-            processCompletedRequests();
-        });
+                    processCompletedRequests();
+                })
+                .handle((res, ex) -> {
+                    if (ex != null) {
+                        return ex;
+                    }
+
+                    return res;
+                });
     }
 
     private void processCompletedRequests() {
