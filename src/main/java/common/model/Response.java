@@ -11,7 +11,7 @@ public record Response(
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("%s %s %s\n\r".formatted(
+        stringBuilder.append("%s %s %s\r\n".formatted(
                 version.getValue(),
                 status.getCode(),
                 status.getName()
