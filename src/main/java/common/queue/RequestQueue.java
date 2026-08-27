@@ -41,13 +41,7 @@ public class RequestQueue {
 
         Response response = completedRequests.get(request);
 
-        context.responseWriter().accept((response.responseLine() + "\r\n").getBytes());
-
-        for (Map.Entry<String, String> h : response.headers().entrySet()) {
-            context.responseWriter().accept("%s: %s\r\n".formatted(h.getKey(), h.getValue()).getBytes());
-        }
-
-        context.responseWriter().accept("\r\n".getBytes());
+        context.responseWriter().accept((response + "\r\n").getBytes());
 
         response.body().subscribe(
                 context.responseWriter(),

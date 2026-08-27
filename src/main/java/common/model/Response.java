@@ -8,11 +8,19 @@ public record Response(
         Map<String, String> headers,
         ResponseBody body
 ) {
-    public String responseLine() {
-        return "%s %s %s".formatted(
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("%s %s %s\n\r".formatted(
                 version.getValue(),
                 status.getCode(),
                 status.getName()
-        );
+        ));
+
+        for (Map.Entry<String, String> h : headers.entrySet()) {
+            stringBuilder.append("%s: %s\r\n".formatted(h.getKey(), h.getValue()));
+        }
+
+        return stringBuilder.toString();
     }
 }
