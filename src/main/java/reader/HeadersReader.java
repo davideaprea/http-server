@@ -65,6 +65,8 @@ public class HeadersReader extends RequestReader {
                         return new ChunkedBodyReader(requestBodyBytesQueue, requestQueue);
                     }
 
+                    requestBodyBytesQueue.enqueue(-1);
+
                     return new RequestLineReader(requestQueue);
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
