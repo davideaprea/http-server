@@ -1,8 +1,8 @@
 package common.queue;
 
-import reader.dto.RequestContext;
 import common.model.Request;
 import common.model.Response;
+import reader.dto.RequestContext;
 
 import java.util.Map;
 import java.util.Queue;
@@ -41,11 +41,7 @@ public class RequestQueue {
 
         Response response = completedRequests.get(request);
 
-        context.responseWriter().accept("%s %s %s\r\n".formatted(
-                response.version().getValue(),
-                response.status().getCode(),
-                response.status().getName()
-        ).getBytes());
+        context.responseWriter().accept((response.responseLine() + "\r\n").getBytes());
 
         for (Map.Entry<String, String> h : response.headers().entrySet()) {
             context.responseWriter().accept("%s: %s\r\n".formatted(h.getKey(), h.getValue()).getBytes());

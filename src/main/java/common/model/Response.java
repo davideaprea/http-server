@@ -8,4 +8,11 @@ public record Response(
         Map<String, String> headers,
         ResponseBody body
 ) {
+    public String responseLine() {
+        return "%s %s %s".formatted(
+                version.getValue(),
+                status.getCode(),
+                status.getName()
+        );
+    }
 }
