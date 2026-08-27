@@ -54,7 +54,7 @@ public class HeadersReader extends RequestReader {
                         throw new ResponseStatusException("", Status.BAD_REQUEST);
                     }
 
-                    if (contentLengthValue.isPresent()) {
+                    if (contentLengthValue.filter(v -> v > 0).isPresent()) {
                         return new ContentLengthBodyReader(new ContentLengthRequest(
                                 requestBodyBytesQueue,
                                 contentLengthValue.get()
