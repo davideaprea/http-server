@@ -1,7 +1,5 @@
 package common.model;
 
-import common.streaming.ResponseBody;
-
 import java.util.Map;
 
 public record Response(

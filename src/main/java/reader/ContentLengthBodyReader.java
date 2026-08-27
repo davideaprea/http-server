@@ -1,5 +1,6 @@
 package reader;
 
+import common.queue.RequestQueue;
 import reader.dto.ContentLengthRequest;
 
 public class ContentLengthBodyReader extends RequestReader {

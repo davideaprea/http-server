@@ -1,4 +1,4 @@
-package common.streaming;
+package common.queue;
 
 public interface BodyBytesDequeue {
     byte dequeue();

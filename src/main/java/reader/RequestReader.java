@@ -1,5 +1,7 @@
 package reader;
 
+import common.queue.RequestQueue;
+
 public abstract class RequestReader {
     protected final RequestQueue requestQueue;
 

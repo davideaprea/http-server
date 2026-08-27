@@ -1,7 +1,7 @@
 package common.model;
 
 import parser.dto.Header;
-import common.streaming.BodyBytesDequeue;
+import common.queue.BodyBytesDequeue;
 
 import java.util.*;
 

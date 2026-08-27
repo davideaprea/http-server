@@ -1,12 +1,13 @@
 package reader;
 
+import common.queue.RequestQueue;
 import parser.HeaderParser;
 import parser.dto.Header;
 import reader.dto.ContentLengthRequest;
 import common.exception.ResponseStatusException;
 import common.model.Request;
 import common.model.Status;
-import common.streaming.RequestBodyBytesQueue;
+import common.queue.RequestBodyBytesQueue;
 
 import java.util.Optional;
 

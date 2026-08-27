@@ -1,4 +1,4 @@
-package common.streaming;
+package common.model;
 
 import java.util.function.Consumer;
 

@@ -1,4 +1,4 @@
-package common.streaming;
+package common.queue;
 
 import common.exception.ResponseStatusException;
 import common.model.Status;

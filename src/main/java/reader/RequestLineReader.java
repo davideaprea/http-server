@@ -3,6 +3,7 @@ package reader;
 import common.exception.ResponseStatusException;
 import common.model.Request;
 import common.model.Status;
+import common.queue.RequestQueue;
 import parser.RequestLineParser;
 import parser.RequestTargetParser;
 import parser.dto.RequestLine;

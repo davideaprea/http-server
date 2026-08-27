@@ -2,7 +2,8 @@ package reader;
 
 import common.exception.ResponseStatusException;
 import common.model.Status;
-import common.streaming.BodyBytesEnqueue;
+import common.queue.BodyBytesEnqueue;
+import common.queue.RequestQueue;
 
 public class ChunkedBodyReader extends RequestReader {
     private boolean isReadingChunkSize = true;

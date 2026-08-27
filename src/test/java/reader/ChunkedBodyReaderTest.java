@@ -1,6 +1,6 @@
 package reader;
 
-import common.streaming.RequestBodyBytesQueue;
+import common.queue.RequestBodyBytesQueue;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

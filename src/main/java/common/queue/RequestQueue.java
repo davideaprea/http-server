@@ -1,4 +1,4 @@
-package reader;
+package common.queue;
 
 import reader.dto.RequestContext;
 import common.model.Request;
