@@ -1,14 +1,13 @@
 package server;
 
-import reader.RequestReader;
-import reader.RequestLineReader;
+import client.Client;
+import client.ClientInputChannel;
 import reader.dto.RequestContext;
 import common.queue.RequestQueue;
 import client.ClientOutputChannel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -55,37 +54,19 @@ public class Server {
                     client.configureBlocking(false);
 
                     SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
-                    ClientOutputChannel writer = new ClientOutputChannel(clientKey);
-                    RequestContext requestContext = new RequestContext(configuration.router(), executor, writer);
-                    ClientSocketContext context = new ClientSocketContext(
-                            writer,
-                            ByteBuffer.allocateDirect(8192),
-                            new RequestLineReader(new RequestQueue(requestContext))
-                    );
+                    ClientOutputChannel outputChannel = new ClientOutputChannel(clientKey);
+                    RequestContext requestContext = new RequestContext(configuration.router(), executor, outputChannel);
 
-                    clientKey.attach(context);
+                    clientKey.attach(new Client(
+                            new ClientInputChannel(client, new RequestQueue(requestContext)),
+                            outputChannel
+                    ));
                 } else if (key.isReadable()) {
                     SocketChannel socketChannel = (SocketChannel) key.channel();
-                    ClientSocketContext clientSocketContext = (ClientSocketContext) key.attachment();
-                    ByteBuffer buffer = clientSocketContext.getReadBuffer();
 
-                    int bytesRead;
-
-                    while ((bytesRead = socketChannel.read(buffer)) > 0) {
-                        buffer.flip();
-
-                        while (buffer.hasRemaining()) {
-                            RequestReader nextRequestReader = clientSocketContext
-                                    .getRequestReader()
-                                    .eval(buffer.get());
-
-                            clientSocketContext.setRequestReader(nextRequestReader);
-                        }
-
-                        buffer.clear();
-                    }
+                    ((Client) key.attachment()).inputChannel().read();
                 } else if (key.isWritable()) {
-                    ((ClientSocketContext) key.attachment()).getClientOutputChannel().flush();
+                    ((Client) key.attachment()).outputChannel().flush();
                 }
             }
         }
