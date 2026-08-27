@@ -1,20 +1,21 @@
-package writer;
+package client;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
-public class ResponseWriter implements Consumer<byte[]> {
+public class ClientOutputChannel implements Consumer<byte[]> {
+    private final SelectionKey clientKey;
     private final SocketChannel socketChannel;
     private final Queue<ByteBuffer> bodyChunks = new ConcurrentLinkedQueue<>();
-    private final Runnable newBodyChunkEventConsumer;
 
-    public ResponseWriter(SocketChannel socketChannel, Runnable newBodyChunkEventConsumer) {
+    public ClientOutputChannel(SelectionKey clientKey, SocketChannel socketChannel) {
+        this.clientKey = clientKey;
         this.socketChannel = socketChannel;
-        this.newBodyChunkEventConsumer = newBodyChunkEventConsumer;
     }
 
     public void flush() {
@@ -39,6 +40,7 @@ public class ResponseWriter implements Consumer<byte[]> {
     @Override
     public void accept(byte[] bodyChunk) {
         bodyChunks.add(ByteBuffer.wrap(bodyChunk));
-        newBodyChunkEventConsumer.run();
+        clientKey.selector().wakeup();
+        clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_WRITE);
     }
 }

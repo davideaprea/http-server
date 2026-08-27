@@ -4,7 +4,7 @@ import reader.RequestReader;
 import reader.RequestLineReader;
 import reader.dto.RequestContext;
 import common.queue.RequestQueue;
-import writer.ResponseWriter;
+import client.ClientOutputChannel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -55,10 +55,7 @@ public class Server {
                     client.configureBlocking(false);
 
                     SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
-                    ResponseWriter writer = new ResponseWriter(client, () -> {
-                        clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_WRITE);
-                        selector.wakeup();
-                    });
+                    ClientOutputChannel writer = new ClientOutputChannel(clientKey, client);
                     RequestContext requestContext = new RequestContext(configuration.router(), executor, writer);
                     ClientSocketContext context = new ClientSocketContext(
                             writer,
@@ -88,7 +85,7 @@ public class Server {
                         buffer.clear();
                     }
                 } else if (key.isWritable()) {
-                    ((ClientSocketContext) key.attachment()).getResponseWriter().flush();
+                    ((ClientSocketContext) key.attachment()).getClientOutputChannel().flush();
                 }
             }
         }

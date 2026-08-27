@@ -49,10 +49,10 @@ public class RequestQueue {
 
         Response response = completedRequests.get(request);
 
-        context.responseWriter().accept((response + "\r\n").getBytes());
+        context.clientOutputChannel().accept((response + "\r\n").getBytes());
 
         response.body().subscribe(
-                context.responseWriter(),
+                context.clientOutputChannel(),
                 () -> {
                     requestsQueue.poll();
                     completedRequests.remove(request);
