@@ -1,5 +1,5 @@
 package common.queue;
 
 public interface BodyBytesDequeue {
-    byte dequeue();
+    int dequeue();
 }
