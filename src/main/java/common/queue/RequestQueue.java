@@ -55,7 +55,7 @@ public class RequestQueue {
         clientOutputChannel.write((response + "\r\n").getBytes());
 
         response.body().subscribe(
-                bytes -> clientOutputChannel.write(bytes),
+                clientOutputChannel::write,
                 () -> {
                     requestsQueue.poll();
                     completedRequests.remove(request);
