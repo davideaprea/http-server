@@ -56,7 +56,7 @@ public class Server {
                     ClientOutputChannel outputChannel = new ClientOutputChannel(clientKey);
 
                     clientKey.attach(new Client(
-                            new ClientInputChannel(client, new RequestQueue(configuration.router(), executor, outputChannel)),
+                            new ClientInputChannel(clientKey, new RequestQueue(configuration.router(), executor, outputChannel)),
                             outputChannel
                     ));
                 } else if (key.isReadable()) {
