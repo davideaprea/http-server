@@ -2,7 +2,6 @@ package server;
 
 import client.Client;
 import client.ClientInputChannel;
-import reader.dto.RequestContext;
 import common.queue.RequestQueue;
 import client.ClientOutputChannel;
 
@@ -55,10 +54,9 @@ public class Server {
 
                     SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
                     ClientOutputChannel outputChannel = new ClientOutputChannel(clientKey);
-                    RequestContext requestContext = new RequestContext(configuration.router(), executor, outputChannel);
 
                     clientKey.attach(new Client(
-                            new ClientInputChannel(client, new RequestQueue(requestContext)),
+                            new ClientInputChannel(client, new RequestQueue(configuration.router(), executor, outputChannel)),
                             outputChannel
                     ));
                 } else if (key.isReadable()) {

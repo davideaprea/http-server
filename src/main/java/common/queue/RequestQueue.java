@@ -1,31 +1,34 @@
 package common.queue;
 
+import client.ClientOutputChannel;
 import common.model.Request;
 import common.model.Response;
-import reader.dto.RequestContext;
+import router.model.Router;
 
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 
 public class RequestQueue {
-    private final RequestContext context;
+    private final Router router;
+    private final ExecutorService executorService;
+    private final ClientOutputChannel clientOutputChannel;
     private final Queue<Request> requestsQueue = new ConcurrentLinkedQueue<>();
     private final Map<Request, Response> completedRequests = new ConcurrentHashMap<>();
 
-    public RequestQueue(RequestContext context) {
-        this.context = context;
+    public RequestQueue(Router router, ExecutorService executorService, ClientOutputChannel clientOutputChannel) {
+        this.router = router;
+        this.executorService = executorService;
+        this.clientOutputChannel = clientOutputChannel;
     }
 
     public void enqueue(Request request) {
         requestsQueue.add(request);
 
-        CompletableFuture.supplyAsync(
-                        () -> context.router().handle(request),
-                        context.executorService()
-                )
+        CompletableFuture.supplyAsync(() -> router.handle(request), executorService)
                 .thenAccept(response -> {
                     completedRequests.put(request, response);
 
@@ -49,10 +52,10 @@ public class RequestQueue {
 
         Response response = completedRequests.get(request);
 
-        context.clientOutputChannel().accept((response + "\r\n").getBytes());
+        clientOutputChannel.accept((response + "\r\n").getBytes());
 
         response.body().subscribe(
-                context.clientOutputChannel(),
+                clientOutputChannel,
                 () -> {
                     requestsQueue.poll();
                     completedRequests.remove(request);
