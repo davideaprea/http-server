@@ -6,9 +6,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
 
-public class ClientOutputChannel extends ClientChannel implements Consumer<byte[]> {
+public class ClientOutputChannel extends ClientChannel {
     private final Queue<ByteBuffer> bodyChunks = new ConcurrentLinkedQueue<>();
 
     public ClientOutputChannel(SelectionKey clientKey) {
@@ -34,8 +33,7 @@ public class ClientOutputChannel extends ClientChannel implements Consumer<byte[
         }
     }
 
-    @Override
-    public void accept(byte[] bodyChunk) {
+    public void write(byte[] bodyChunk) {
         bodyChunks.add(ByteBuffer.wrap(bodyChunk));
         clientKey.selector().wakeup();
         clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_WRITE);

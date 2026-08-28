@@ -52,10 +52,10 @@ public class RequestQueue {
 
         Response response = completedRequests.get(request);
 
-        clientOutputChannel.accept((response + "\r\n").getBytes());
+        clientOutputChannel.write((response + "\r\n").getBytes());
 
         response.body().subscribe(
-                clientOutputChannel,
+                bytes -> clientOutputChannel.write(bytes),
                 () -> {
                     requestsQueue.poll();
                     completedRequests.remove(request);
