@@ -1,13 +1,12 @@
 package reader;
 
-import common.queue.RequestQueue;
-import parser.HeaderParser;
-import parser.dto.Header;
-import reader.dto.ContentLengthRequest;
 import common.exception.ResponseStatusException;
 import common.model.Request;
 import common.model.Status;
 import common.queue.RequestBodyBytesQueue;
+import common.queue.RequestQueue;
+import parser.HeaderParser;
+import parser.dto.Header;
 
 import java.util.Optional;
 
@@ -54,10 +53,11 @@ public class HeadersReader extends RequestReader {
                     RequestReader nextReader;
 
                     if (contentLengthValue.filter(v -> v > 0).isPresent()) {
-                        nextReader = new ContentLengthBodyReader(new ContentLengthRequest(
+                        nextReader = new ContentLengthBodyReader(
                                 requestBodyBytesQueue,
-                                contentLengthValue.get()
-                        ), requestQueue);
+                                contentLengthValue.get(),
+                                requestQueue
+                        );
                     } else if (transferEncodingValue.isPresent()) {
                         nextReader = new ChunkedBodyReader(requestBodyBytesQueue, requestQueue);
                     } else {

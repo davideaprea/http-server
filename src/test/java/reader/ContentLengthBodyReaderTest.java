@@ -4,13 +4,12 @@ import common.queue.RequestQueue;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import reader.dto.ContentLengthRequest;
 
 public class ContentLengthBodyReaderTest {
     @Test
     void shouldGoToRequestLineReadingAfterProcessingLastByte() {
         RequestReader reader = new ContentLengthBodyReader(
-                new ContentLengthRequest(Mockito.mock(), 1),
+                Mockito.mock(), 1,
                 Mockito.mock(RequestQueue.class)
         ).eval((byte) 0);
 
@@ -20,7 +19,7 @@ public class ContentLengthBodyReaderTest {
     @Test
     void shouldRemainInSameState() {
         RequestReader reader = new ContentLengthBodyReader(
-                new ContentLengthRequest(Mockito.mock(), 2),
+                Mockito.mock(), 2,
                 Mockito.mock(RequestQueue.class)
         ).eval((byte) 0);
 
@@ -30,7 +29,7 @@ public class ContentLengthBodyReaderTest {
     @Test
     void shouldThrowExceptionWhenReadingCompletedBody() {
         RequestReader reader = new ContentLengthBodyReader(
-                new ContentLengthRequest(Mockito.mock(), 0),
+                Mockito.mock(), 0,
                 Mockito.mock(RequestQueue.class)
         );
 
