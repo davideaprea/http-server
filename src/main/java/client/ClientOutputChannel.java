@@ -8,12 +8,11 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
-public class ClientOutputChannel implements Consumer<byte[]> {
-    private final SelectionKey clientKey;
+public class ClientOutputChannel extends ClientChannel implements Consumer<byte[]> {
     private final Queue<ByteBuffer> bodyChunks = new ConcurrentLinkedQueue<>();
 
     public ClientOutputChannel(SelectionKey clientKey) {
-        this.clientKey = clientKey;
+        super(clientKey);
     }
 
     public void flush() {
@@ -31,7 +30,7 @@ public class ClientOutputChannel implements Consumer<byte[]> {
                 }
             }
         } catch (IOException e) {
-            System.out.println("Client disconnected.");
+            close();
         }
     }
 

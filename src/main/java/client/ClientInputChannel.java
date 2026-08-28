@@ -9,14 +9,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-public class ClientInputChannel {
-    private final SelectionKey clientKey;
+public class ClientInputChannel extends ClientChannel {
     private final ByteBuffer buffer;
 
     private RequestReader requestReader;
 
     public ClientInputChannel(SelectionKey clientKey, RequestQueue requestQueue) {
-        this.clientKey = clientKey;
+        super(clientKey);
+
         buffer = ByteBuffer.allocateDirect(8192);
         requestReader = new RequestLineReader(requestQueue);
     }
@@ -47,16 +47,6 @@ public class ClientInputChannel {
 
         if (bytesRead == -1) {
             close();
-        }
-    }
-
-    private void close() {
-        clientKey.cancel();
-
-        try {
-            ((SocketChannel) clientKey.channel()).close();
-        } catch (IOException e) {
-            System.out.println("Error while closing socket channel: " + e.getMessage());
         }
     }
 }
