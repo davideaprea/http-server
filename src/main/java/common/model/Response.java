@@ -1,12 +1,13 @@
 package common.model;
 
+import java.io.InputStream;
 import java.util.Map;
 
 public record Response(
         Version version,
         Status status,
         Map<String, String> headers,
-        ResponseBody body
+        InputStream body
 ) {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
