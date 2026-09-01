@@ -1,18 +1,18 @@
 package reader;
 
-import common.queue.BodyBytesEnqueue;
+import common.queue.RequestBodyBytesQueue;
 import common.queue.RequestQueue;
 
 public class ContentLengthBodyReader extends RequestReader {
-    private final BodyBytesEnqueue bodyBytesEnqueue;
+    private final RequestBodyBytesQueue requestBodyBytesQueue;
 
     private long remainingBytes;
 
-    public ContentLengthBodyReader(BodyBytesEnqueue body, long bytesNumber, RequestQueue requestQueue) {
+    public ContentLengthBodyReader(long bytesNumber, RequestQueue requestQueue, RequestBodyBytesQueue requestBodyBytesQueue) {
         super(requestQueue);
 
-        this.bodyBytesEnqueue = body;
         remainingBytes = bytesNumber;
+        this.requestBodyBytesQueue = requestBodyBytesQueue;
     }
 
     @Override
@@ -25,12 +25,12 @@ public class ContentLengthBodyReader extends RequestReader {
             return reader;
         }
 
-        bodyBytesEnqueue.enqueue(requestByte);
+        requestBodyBytesQueue.enqueue(requestByte);
 
         remainingBytes--;
 
         if (remainingBytes == 0) {
-            bodyBytesEnqueue.enqueue((byte) -1);
+            requestBodyBytesQueue.enqueue((byte) -1);
 
             return new RequestLineReader(requestQueue);
         }

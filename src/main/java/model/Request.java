@@ -1,7 +1,7 @@
 package model;
 
 import common.MultiValueMap;
-import common.queue.BodyBytesDequeue;
+import common.queue.RequestBodyBytesQueue;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +21,7 @@ public class Request {
 
     private final MultiValueMap<String, String> queryParams;
     private final MultiValueMap<String, String> headers;
-    private final BodyBytesDequeue body;
+    private final RequestBodyBytesQueue body;
 
     public Optional<Long> getContentLength() {
         return Optional

@@ -59,12 +59,12 @@ public class HeadersReader extends RequestReader {
 
                     if (contentLengthValue.filter(v -> v > 0).isPresent()) {
                         nextReader = new ContentLengthBodyReader(
-                                requestBodyBytesQueue,
                                 contentLengthValue.get(),
-                                requestQueue
+                                requestQueue,
+                                requestBodyBytesQueue
                         );
                     } else if (transferEncodingValue.isPresent()) {
-                        nextReader = new ChunkedBodyReader(requestBodyBytesQueue, requestQueue);
+                        nextReader = new ChunkedBodyReader(requestQueue, requestBodyBytesQueue);
                     } else {
                         requestBodyBytesQueue.enqueue(-1);
 

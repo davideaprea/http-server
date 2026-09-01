@@ -1,8 +1,8 @@
 package reader;
 
 import common.exception.ResponseStatusException;
+import common.queue.RequestBodyBytesQueue;
 import model.Status;
-import common.queue.BodyBytesEnqueue;
 import common.queue.RequestQueue;
 
 public class ChunkedBodyReader extends RequestReader {
@@ -12,12 +12,12 @@ public class ChunkedBodyReader extends RequestReader {
     private long currentChunkBytes = 0;
     private ReadingState readingState = ReadingState.NORMAL;
 
-    private final BodyBytesEnqueue bodyStream;
+    private final RequestBodyBytesQueue requestBodyBytesQueue;
 
-    public ChunkedBodyReader(BodyBytesEnqueue bodyStream, RequestQueue requestQueue) {
+    public ChunkedBodyReader(RequestQueue requestQueue, RequestBodyBytesQueue requestBodyBytesQueue) {
         super(requestQueue);
 
-        this.bodyStream = bodyStream;
+        this.requestBodyBytesQueue = requestBodyBytesQueue;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ChunkedBodyReader extends RequestReader {
             }
         } else {
             if (remainingChunkBytes > 0) {
-                bodyStream.enqueue(requestByte);
+                requestBodyBytesQueue.enqueue(requestByte);
                 remainingChunkBytes--;
             } else {
                 if ((char) requestByte == '\r') {
@@ -64,7 +64,7 @@ public class ChunkedBodyReader extends RequestReader {
                     isReadingChunkSize = true;
 
                     if (currentChunkBytes == 0) {
-                        bodyStream.enqueue((byte) -1);
+                        requestBodyBytesQueue.enqueue((byte) -1);
 
                         return new RequestLineReader(requestQueue);
                     }

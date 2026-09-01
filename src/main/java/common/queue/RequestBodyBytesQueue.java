@@ -6,7 +6,7 @@ import model.Status;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class RequestBodyBytesQueue implements BodyBytesDequeue, BodyBytesEnqueue {
+public class RequestBodyBytesQueue {
     private final BlockingQueue<Integer> bufferedBytes = new LinkedBlockingQueue<>();
 
     public void enqueue(int bodyByte) {
