@@ -1,7 +1,7 @@
 package common.queue;
 
 import common.exception.ResponseStatusException;
-import common.model.Status;
+import model.Status;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

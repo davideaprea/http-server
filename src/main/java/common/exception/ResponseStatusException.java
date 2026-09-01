@@ -1,7 +1,7 @@
 package common.exception;
 
 import lombok.Getter;
-import common.model.Status;
+import model.Status;
 
 @Getter
 public class ResponseStatusException extends RuntimeException {

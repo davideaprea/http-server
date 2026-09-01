@@ -1,10 +1,10 @@
 package common.queue;
 
 import client.ClientOutputChannel;
-import common.model.Request;
-import common.model.Response;
-import common.model.Status;
-import common.model.Version;
+import model.Request;
+import model.Response;
+import model.Status;
+import model.Version;
 import router.model.Router;
 
 import java.io.ByteArrayInputStream;

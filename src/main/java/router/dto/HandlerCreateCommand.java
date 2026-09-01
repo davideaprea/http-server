@@ -1,7 +1,7 @@
 package router.dto;
 
 import router.model.RequestHandler;
-import common.model.Method;
+import model.Method;
 
 public record HandlerCreateCommand(
         RequestHandler handler,

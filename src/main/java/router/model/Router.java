@@ -1,10 +1,10 @@
 package router.model;
 
 import common.exception.ResponseStatusException;
-import common.model.Method;
-import common.model.Request;
-import common.model.Response;
-import common.model.Status;
+import model.Method;
+import model.Request;
+import model.Response;
+import model.Status;
 import lombok.AllArgsConstructor;
 import router.dto.HandlerCreateCommand;
 import router.exception.ConflictingRoutesException;
@@ -18,7 +18,7 @@ public class Router {
     private final Segment root;
 
     public Response handle(Request request) {
-        String[] pathSegments = request.target().url().split("/");
+        String[] pathSegments = request.getUrl().split("/");
         Segment currSegment = root;
 
         for (String segmentName : pathSegments) {
@@ -31,7 +31,7 @@ public class Router {
         }
 
         return Optional
-                .ofNullable(currSegment.methodHandlers.get(request.method()))
+                .ofNullable(currSegment.methodHandlers.get(request.getMethod()))
                 .map(handler -> handler.handle(request))
                 .orElseThrow(() -> new ResponseStatusException(
                         "The requested path is not configured for this method.",

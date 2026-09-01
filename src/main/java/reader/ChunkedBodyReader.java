@@ -1,7 +1,7 @@
 package reader;
 
 import common.exception.ResponseStatusException;
-import common.model.Status;
+import model.Status;
 import common.queue.BodyBytesEnqueue;
 import common.queue.RequestQueue;
 

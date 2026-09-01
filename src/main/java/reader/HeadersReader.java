@@ -1,8 +1,9 @@
 package reader;
 
+import common.MultiValueMap;
 import common.exception.ResponseStatusException;
-import common.model.Request;
-import common.model.Status;
+import model.Request;
+import model.Status;
 import common.queue.RequestBodyBytesQueue;
 import common.queue.RequestQueue;
 import parser.HeaderParser;
@@ -11,13 +12,14 @@ import parser.dto.Header;
 import java.util.Optional;
 
 public class HeadersReader extends RequestReader {
-    private final Request.Builder requestBuilder;
+    private final Request.RequestBuilder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
+    private final MultiValueMap<String, String> headers = new MultiValueMap<>();
 
     private ReadingState readingState = ReadingState.NORMAL;
 
 
-    public HeadersReader(Request.Builder requestBuilder, RequestQueue requestQueue) {
+    public HeadersReader(Request.RequestBuilder requestBuilder, RequestQueue requestQueue) {
         super(requestQueue);
 
         this.requestBuilder = requestBuilder;
@@ -42,7 +44,10 @@ public class HeadersReader extends RequestReader {
 
                 if (currentLine.isEmpty()) {
                     RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue();
-                    Request request = requestBuilder.body(requestBodyBytesQueue).build();
+                    Request request = requestBuilder
+                            .headers(headers)
+                            .body(requestBodyBytesQueue)
+                            .build();
                     Optional<Long> contentLengthValue = request.getContentLength();
                     Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
 
@@ -72,7 +77,7 @@ public class HeadersReader extends RequestReader {
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 
-                    requestBuilder.header(header);
+                    headers.add(header.name(), header.value());
                     currentLine.setLength(0);
                 }
 

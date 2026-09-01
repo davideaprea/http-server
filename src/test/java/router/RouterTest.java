@@ -1,11 +1,13 @@
 package router;
 
+import common.MultiValueMap;
+import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import parser.dto.RequestTarget;
 import router.dto.HandlerCreateCommand;
 import router.model.Router;
 import common.exception.ResponseStatusException;
-import common.model.*;
 
 import java.util.Map;
 
@@ -30,8 +32,9 @@ public class RouterTest {
         Response response = router.handle(new Request(
                 command.method(),
                 Version.HTTP_1_1,
-                new RequestTarget(command.path(), Map.of()),
-                Map.of(),
+                command.path(),
+                new MultiValueMap<>(),
+                new MultiValueMap<>(),
                 null
         ));
 
@@ -51,8 +54,9 @@ public class RouterTest {
         var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
                 command.method(),
                 Version.HTTP_1_1,
-                new RequestTarget("/non/existing/path", Map.of()),
-                Map.of(),
+                "/non/existing/path",
+                new MultiValueMap<>(),
+                new MultiValueMap<>(),
                 null
         )));
 
@@ -72,8 +76,9 @@ public class RouterTest {
         var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
                 Method.POST,
                 Version.HTTP_1_1,
-                new RequestTarget(command.path(), Map.of()),
-                Map.of(),
+                command.path(),
+                new MultiValueMap<>(),
+                new MultiValueMap<>(),
                 null
         )));
 

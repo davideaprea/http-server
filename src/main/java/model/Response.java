@@ -1,4 +1,4 @@
-package common.model;
+package model;
 
 import java.io.InputStream;
 import java.util.Map;

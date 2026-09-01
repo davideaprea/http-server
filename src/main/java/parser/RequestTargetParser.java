@@ -1,8 +1,9 @@
 package parser;
 
+import common.MultiValueMap;
+import parser.dto.RequestTarget;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import common.model.RequestTarget;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -13,7 +14,7 @@ public final class RequestTargetParser {
     public static RequestTarget from(String requestTarget) {
         int paramsStartIndex = requestTarget.indexOf('?');
         String path = paramsStartIndex > -1 ? requestTarget.substring(0, paramsStartIndex) : requestTarget;
-        Map<String, List<String>> queryParams = new HashMap<>();
+        MultiValueMap<String, String> queryParams = new MultiValueMap<>();
 
         if (paramsStartIndex > -1 && paramsStartIndex + 1 < requestTarget.length()) {
             String rawQuery = requestTarget.substring(paramsStartIndex + 1);
@@ -27,7 +28,7 @@ public final class RequestTargetParser {
                         String key = URLDecoder.decode(rawKey, StandardCharsets.UTF_8);
                         String value = URLDecoder.decode(rawValue, StandardCharsets.UTF_8);
 
-                        queryParams.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
+                        queryParams.add(key, value);
                     });
         }
 

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import parser.dto.Header;
 import common.exception.ResponseStatusException;
-import common.model.Status;
+import model.Status;
 
 public class HeaderParserTest {
     @Test

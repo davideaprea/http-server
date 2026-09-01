@@ -1,11 +1,11 @@
 package reader;
 
-import common.model.HeaderKey;
+import model.HeaderKey;
 import common.queue.RequestQueue;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import common.model.Request;
+import model.Request;
 
 public class HeadersReaderTest {
     private static final String CRLF = "\r" + '\n';
@@ -67,7 +67,7 @@ public class HeadersReaderTest {
 
     private HeadersReader withMocks() {
         return new HeadersReader(
-                new Request.Builder(),
+                Request.builder(),
                 Mockito.mock(RequestQueue.class)
         );
     }

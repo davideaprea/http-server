@@ -1,32 +1,28 @@
 package parser;
 
-import common.model.RequestTarget;
+import common.MultiValueMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import parser.dto.RequestTarget;
 
 public class RequestTargetParserTest {
     @Test
     void parseValid() {
         RequestTarget requestTarget = RequestTargetParser.from("/target");
 
-        Assertions.assertEquals(new RequestTarget("/target", new HashMap<>()), requestTarget);
+        Assertions.assertEquals(new RequestTarget("/target", new MultiValueMap<>()), requestTarget);
     }
 
     @Test
     void parseWithParams() {
         RequestTarget requestTarget = RequestTargetParser.from("/target?a=1&&b=2&name=John=Doe&a=3");
-
         Assertions.assertEquals(new RequestTarget(
                 "/target",
-                Map.of(
-                        "a", List.of("1", "3"),
-                        "b", List.of("2"),
-                        "name", List.of("John=Doe")
-                )
+                new MultiValueMap<String, String>()
+                        .add("a", "1")
+                        .add("a", "3")
+                        .add("b", "2")
+                        .add("name", "John=Doe")
         ), requestTarget);
     }
 }

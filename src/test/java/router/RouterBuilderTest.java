@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import router.dto.HandlerCreateCommand;
 import router.exception.ConflictingRoutesException;
 import router.model.Router;
-import common.model.Method;
+import model.Method;
 
 public class RouterBuilderTest {
     @Test

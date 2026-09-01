@@ -3,7 +3,7 @@ package parser;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import common.exception.ResponseStatusException;
-import common.model.Status;
+import model.Status;
 import parser.dto.Header;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

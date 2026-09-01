@@ -1,6 +1,6 @@
 package router.exception;
 
-import common.model.Method;
+import model.Method;
 
 public class ConflictingRoutesException extends RuntimeException {
     public ConflictingRoutesException(String path, Method method) {

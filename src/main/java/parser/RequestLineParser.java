@@ -4,9 +4,9 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import parser.dto.RequestLine;
 import common.exception.ResponseStatusException;
-import common.model.Method;
-import common.model.Status;
-import common.model.Version;
+import model.Method;
+import model.Status;
+import model.Version;
 
 import java.util.NoSuchElementException;
 

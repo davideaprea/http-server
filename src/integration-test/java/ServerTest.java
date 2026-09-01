@@ -1,4 +1,4 @@
-import common.model.*;
+import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +8,7 @@ import router.model.Router;
 import server.Server;
 import server.ServerConfiguration;
 
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -33,10 +34,7 @@ class ServerTest {
                                         HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
                                         HeaderKey.CONTENT_LENGTH.getValue(), "11"
                                 ),
-                                (onBodyChunk, onBodyEnd) -> {
-                                    onBodyChunk.accept("Hello world".getBytes());
-                                    onBodyEnd.run();
-                                }
+                                new ByteArrayInputStream("Hello world".getBytes())
                         ),
                         Method.GET,
                         "/resource/path"

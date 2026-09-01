@@ -1,8 +1,9 @@
 package reader;
 
 import common.exception.ResponseStatusException;
-import common.model.Request;
-import common.model.Status;
+import parser.dto.RequestTarget;
+import model.Request;
+import model.Status;
 import common.queue.RequestQueue;
 import parser.RequestLineParser;
 import parser.RequestTargetParser;
@@ -10,7 +11,7 @@ import parser.dto.RequestLine;
 
 public class RequestLineReader extends RequestReader {
     private final StringBuilder requestLineBuilder = new StringBuilder();
-    private final Request.Builder requestBuilder = new Request.Builder();
+    private final Request.RequestBuilder requestBuilder = Request.builder();
 
     private ReadingState readingState = ReadingState.NORMAL;
 
@@ -29,11 +30,13 @@ public class RequestLineReader extends RequestReader {
                 }
 
                 RequestLine requestLine = RequestLineParser.from(requestLineBuilder.toString());
+                RequestTarget requestTarget = RequestTargetParser.from(requestLine.requestTarget());
 
                 requestBuilder
                         .method(requestLine.method())
                         .version(requestLine.version())
-                        .requestTarget(RequestTargetParser.from(requestLine.requestTarget()));
+                        .url(requestTarget.url())
+                        .queryParams(requestTarget.queryParams());
 
                 readingState = ReadingState.NORMAL;
 
