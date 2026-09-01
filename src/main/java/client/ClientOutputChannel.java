@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ClientOutputChannel extends ClientChannel {
-    private final Queue<ByteBuffer> bodyChunks = new ConcurrentLinkedQueue<>();
+    private final BlockingQueue<ByteBuffer> bodyChunks = new LinkedBlockingQueue<>();
 
     public ClientOutputChannel(SelectionKey clientKey) {
         super(clientKey);
@@ -34,7 +34,12 @@ public class ClientOutputChannel extends ClientChannel {
     }
 
     public void write(byte[] bodyChunk) {
-        bodyChunks.add(ByteBuffer.wrap(bodyChunk));
+        try {
+            bodyChunks.put(ByteBuffer.wrap(bodyChunk));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         clientKey.selector().wakeup();
         clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_WRITE);
     }
