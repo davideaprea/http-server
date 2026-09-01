@@ -10,17 +10,17 @@ import router.model.Router;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
 public class RequestQueue {
     private final Router router;
     private final ExecutorService executorService;
     private final ClientOutputChannel clientOutputChannel;
-    private final Queue<Request> requestsQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Request> requestsQueue = new LinkedList<>();
 
     private boolean isProcessing = false;
 
