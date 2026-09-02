@@ -1,17 +1,23 @@
 package parser;
 
 import common.MultiValueMap;
-import parser.dto.RequestTarget;
+import common.exception.ResponseStatusException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import model.Status;
+import parser.dto.RequestTarget;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RequestTargetParser {
     public static RequestTarget from(String requestTarget) {
+        if (!requestTarget.startsWith("/")) {
+            throw new ResponseStatusException("Request URI must start with a backslash.", Status.BAD_REQUEST);
+        }
+
         int paramsStartIndex = requestTarget.indexOf('?');
         String path = paramsStartIndex > -1 ? requestTarget.substring(0, paramsStartIndex) : requestTarget;
         MultiValueMap<String, String> queryParams = new MultiValueMap<>();

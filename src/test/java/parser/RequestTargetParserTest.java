@@ -1,6 +1,7 @@
 package parser;
 
 import common.MultiValueMap;
+import common.exception.ResponseStatusException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import parser.dto.RequestTarget;
@@ -14,6 +15,14 @@ public class RequestTargetParserTest {
     }
 
     @Test
+    void parseInvalid() {
+        Assertions.assertThrows(
+                ResponseStatusException.class,
+                () -> RequestTargetParser.from("target")
+        );
+    }
+
+    @Test
     void parseWithParams() {
         RequestTarget requestTarget = RequestTargetParser.from("/target?a=1&&b=2&name=John=Doe&a=3");
         Assertions.assertEquals(new RequestTarget(
@@ -24,5 +33,13 @@ public class RequestTargetParserTest {
                         .add("b", "2")
                         .add("name", "John=Doe")
         ), requestTarget);
+    }
+
+    @Test
+    void parseWithEmptyParams() {
+        Assertions.assertEquals(
+                new RequestTarget("/", new MultiValueMap<>()),
+                RequestTargetParser.from("/?")
+        );
     }
 }
