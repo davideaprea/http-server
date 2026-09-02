@@ -1,16 +1,16 @@
 package reader;
 
-import common.queue.RequestBodyBytesQueue;
+import model.RequestBody;
 import client.ClientRequestsQueue;
 
 public class ContentLengthBodyReader extends RequestReader {
-    private final RequestBodyBytesQueue requestBodyBytesQueue;
+    private final RequestBody requestBody;
 
     private long remainingBytes;
 
-    protected ContentLengthBodyReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, RequestBodyBytesQueue requestBodyBytesQueue, long remainingBytes) {
+    protected ContentLengthBodyReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, RequestBody requestBody, long remainingBytes) {
         super(clientRequestsQueue, onReadingAvailable);
-        this.requestBodyBytesQueue = requestBodyBytesQueue;
+        this.requestBody = requestBody;
         this.remainingBytes = remainingBytes;
     }
 
@@ -24,16 +24,16 @@ public class ContentLengthBodyReader extends RequestReader {
             return new ReadResult(reader, ReadResult.NextAction.PROCEED);
         }
 
-        requestBodyBytesQueue.enqueue(requestByte);
+        requestBody.enqueue(requestByte);
 
         remainingBytes--;
 
         if (remainingBytes == 0) {
-            requestBodyBytesQueue.enqueue((byte) -1);
+            requestBody.enqueue((byte) -1);
 
             return new ReadResult(new RequestLineReader(clientRequestsQueue, onReadingAvailable), ReadResult.NextAction.PROCEED);
         }
 
-        return new ReadResult(this, requestBodyBytesQueue.isFull() ? ReadResult.NextAction.WAIT : ReadResult.NextAction.PROCEED);
+        return new ReadResult(this, requestBody.isFull() ? ReadResult.NextAction.WAIT : ReadResult.NextAction.PROCEED);
     }
 }

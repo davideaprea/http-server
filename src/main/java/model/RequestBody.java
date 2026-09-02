@@ -1,20 +1,19 @@
-package common.queue;
+package model;
 
 import common.exception.ResponseStatusException;
-import model.Status;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class RequestBodyBytesQueue {
+public class RequestBody {
     private static final int MAX = 8192;
 
     private final BlockingQueue<Integer> bufferedBytes = new LinkedBlockingQueue<>(MAX);
     private final Runnable onSpaceFreed;
     private final AtomicBoolean isFull = new AtomicBoolean(false);
 
-    public RequestBodyBytesQueue(Runnable onSpaceFreed) {
+    public RequestBody(Runnable onSpaceFreed) {
         this.onSpaceFreed = onSpaceFreed;
     }
 

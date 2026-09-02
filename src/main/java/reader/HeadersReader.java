@@ -2,7 +2,7 @@ package reader;
 
 import common.util.MultiValueMap;
 import common.exception.ResponseStatusException;
-import common.queue.RequestBodyBytesQueue;
+import model.RequestBody;
 import client.ClientRequestsQueue;
 import model.Request;
 import model.Status;
@@ -41,10 +41,10 @@ public class HeadersReader extends RequestReader {
                 }
 
                 if (currentLine.isEmpty()) {
-                    RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue(onReadingAvailable);
+                    RequestBody requestBody = new RequestBody(onReadingAvailable);
                     Request request = requestBuilder
                             .headers(headers)
-                            .body(requestBodyBytesQueue)
+                            .body(requestBody)
                             .build();
                     Optional<Long> contentLengthValue = request.getContentLength();
                     Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
@@ -59,13 +59,13 @@ public class HeadersReader extends RequestReader {
                         nextReader = new ContentLengthBodyReader(
                                 clientRequestsQueue,
                                 onReadingAvailable,
-                                requestBodyBytesQueue,
+                                requestBody,
                                 contentLengthValue.get()
                         );
                     } else if (transferEncodingValue.isPresent()) {
-                        nextReader = new ChunkedBodyReader(clientRequestsQueue, onReadingAvailable, requestBodyBytesQueue);
+                        nextReader = new ChunkedBodyReader(clientRequestsQueue, onReadingAvailable, requestBody);
                     } else {
-                        requestBodyBytesQueue.enqueue(-1);
+                        requestBody.enqueue(-1);
 
                         nextReader = new RequestLineReader(clientRequestsQueue, onReadingAvailable);
                     }

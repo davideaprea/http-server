@@ -1,6 +1,6 @@
 package reader;
 
-import common.queue.RequestBodyBytesQueue;
+import model.RequestBody;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -10,13 +10,13 @@ public class ChunkedBodyReaderTest {
     @Test
     void shouldParseSingleChunk() {
         String content = "0123456789";
-        RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue(() -> {});
+        RequestBody requestBody = new RequestBody(() -> {});
         RequestReader reader = evaluateBody(
                 new ChunkedBodyReader(null, () -> {
-                }, requestBodyBytesQueue),
+                }, requestBody),
                 "A\r\n%s\r\n0\r\n\r\n".formatted(content)
         );
-        String body = buildBody(requestBodyBytesQueue);
+        String body = buildBody(requestBody);
 
         Assertions.assertInstanceOf(RequestLineReader.class, reader);
         Assertions.assertEquals(content, body);
@@ -24,13 +24,13 @@ public class ChunkedBodyReaderTest {
 
     @Test
     void shouldParseMultipleChunks() {
-        RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue(() -> {});
+        RequestBody requestBody = new RequestBody(() -> {});
         RequestReader reader = evaluateBody(
                 new ChunkedBodyReader(null, () -> {
-                }, requestBodyBytesQueue),
+                }, requestBody),
                 "5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n"
         );
-        String body = buildBody(requestBodyBytesQueue);
+        String body = buildBody(requestBody);
 
         Assertions.assertInstanceOf(RequestLineReader.class, reader);
         Assertions.assertEquals("hello world", body);
@@ -46,11 +46,11 @@ public class ChunkedBodyReaderTest {
         return curr;
     }
 
-    private String buildBody(RequestBodyBytesQueue requestBodyBytesQueue) {
+    private String buildBody(RequestBody requestBody) {
         StringBuilder body = new StringBuilder();
         int bodyByte;
 
-        while ((bodyByte = requestBodyBytesQueue.dequeue()) != -1) {
+        while ((bodyByte = requestBody.dequeue()) != -1) {
             body.append((char) bodyByte);
         }
 

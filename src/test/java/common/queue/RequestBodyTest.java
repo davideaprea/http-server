@@ -1,13 +1,14 @@
 package common.queue;
 
+import model.RequestBody;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class RequestBodyBytesQueueTest {
+public class RequestBodyTest {
     @Test
     void a() {
-        RequestBodyBytesQueue queue = new RequestBodyBytesQueue(() -> {
+        RequestBody queue = new RequestBody(() -> {
         });
 
         for (int c = 1; c <= 8192; c++) {
@@ -20,7 +21,7 @@ public class RequestBodyBytesQueueTest {
     @Test
     void b() {
         Runnable onSpaceFreed = Mockito.mock(Runnable.class);
-        RequestBodyBytesQueue queue = new RequestBodyBytesQueue(onSpaceFreed);
+        RequestBody queue = new RequestBody(onSpaceFreed);
 
         for (int c = 1; c <= 8191; c++) {
             queue.enqueue(0);
@@ -35,7 +36,7 @@ public class RequestBodyBytesQueueTest {
     @Test
     void c() {
         Runnable onSpaceFreed = Mockito.mock(Runnable.class);
-        RequestBodyBytesQueue queue = new RequestBodyBytesQueue(onSpaceFreed);
+        RequestBody queue = new RequestBody(onSpaceFreed);
 
         for (int c = 1; c <= 8192; c++) {
             queue.enqueue(0);

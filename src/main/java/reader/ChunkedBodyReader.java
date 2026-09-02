@@ -1,7 +1,7 @@
 package reader;
 
 import common.exception.ResponseStatusException;
-import common.queue.RequestBodyBytesQueue;
+import model.RequestBody;
 import client.ClientRequestsQueue;
 import model.Status;
 
@@ -12,11 +12,11 @@ public class ChunkedBodyReader extends RequestReader {
     private long currentChunkBytes = 0;
     private ReadingState readingState = ReadingState.NORMAL;
 
-    private final RequestBodyBytesQueue requestBodyBytesQueue;
+    private final RequestBody requestBody;
 
-    protected ChunkedBodyReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, RequestBodyBytesQueue requestBodyBytesQueue) {
+    protected ChunkedBodyReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, RequestBody requestBody) {
         super(clientRequestsQueue, onReadingAvailable);
-        this.requestBodyBytesQueue = requestBodyBytesQueue;
+        this.requestBody = requestBody;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ChunkedBodyReader extends RequestReader {
             }
         } else {
             if (remainingChunkBytes > 0) {
-                requestBodyBytesQueue.enqueue(requestByte);
+                requestBody.enqueue(requestByte);
                 remainingChunkBytes--;
             } else {
                 if ((char) requestByte == '\r') {
@@ -63,7 +63,7 @@ public class ChunkedBodyReader extends RequestReader {
                     isReadingChunkSize = true;
 
                     if (currentChunkBytes == 0) {
-                        requestBodyBytesQueue.enqueue((byte) -1);
+                        requestBody.enqueue((byte) -1);
 
                         return new ReadResult(
                                 new RequestLineReader(clientRequestsQueue, onReadingAvailable),
@@ -76,6 +76,6 @@ public class ChunkedBodyReader extends RequestReader {
             }
         }
 
-        return new ReadResult(this, requestBodyBytesQueue.isFull() ? ReadResult.NextAction.WAIT : ReadResult.NextAction.PROCEED);
+        return new ReadResult(this, requestBody.isFull() ? ReadResult.NextAction.WAIT : ReadResult.NextAction.PROCEED);
     }
 }
