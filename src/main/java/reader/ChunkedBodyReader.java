@@ -2,7 +2,7 @@ package reader;
 
 import common.exception.ResponseStatusException;
 import common.queue.RequestBodyBytesQueue;
-import common.queue.RequestQueue;
+import client.ClientRequestsQueue;
 import model.Status;
 
 public class ChunkedBodyReader extends RequestReader {
@@ -14,8 +14,8 @@ public class ChunkedBodyReader extends RequestReader {
 
     private final RequestBodyBytesQueue requestBodyBytesQueue;
 
-    protected ChunkedBodyReader(RequestQueue requestQueue, Runnable onReadingAvailable, RequestBodyBytesQueue requestBodyBytesQueue) {
-        super(requestQueue, onReadingAvailable);
+    protected ChunkedBodyReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, RequestBodyBytesQueue requestBodyBytesQueue) {
+        super(clientRequestsQueue, onReadingAvailable);
         this.requestBodyBytesQueue = requestBodyBytesQueue;
     }
 
@@ -66,7 +66,7 @@ public class ChunkedBodyReader extends RequestReader {
                         requestBodyBytesQueue.enqueue((byte) -1);
 
                         return new ReadResult(
-                                new RequestLineReader(requestQueue, onReadingAvailable),
+                                new RequestLineReader(clientRequestsQueue, onReadingAvailable),
                                 ReadResult.NextAction.PROCEED
                         );
                     }

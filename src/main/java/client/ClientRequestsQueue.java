@@ -1,6 +1,5 @@
-package common.queue;
+package client;
 
-import client.ClientOutputChannel;
 import model.Request;
 import model.Response;
 import model.Status;
@@ -16,7 +15,7 @@ import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
-public class RequestQueue {
+public class ClientRequestsQueue {
     private final Router router;
     private final ExecutorService executorService;
     private final ClientOutputChannel clientOutputChannel;
@@ -24,7 +23,7 @@ public class RequestQueue {
 
     private boolean isProcessing = false;
 
-    public RequestQueue(Router router, ExecutorService executorService, ClientOutputChannel clientOutputChannel) {
+    public ClientRequestsQueue(Router router, ExecutorService executorService, ClientOutputChannel clientOutputChannel) {
         this.router = router;
         this.executorService = executorService;
         this.clientOutputChannel = clientOutputChannel;

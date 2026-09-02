@@ -1,6 +1,6 @@
 package reader;
 
-import common.queue.RequestQueue;
+import client.ClientRequestsQueue;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,7 +22,7 @@ public class ContentLengthBodyReaderTest {
 
     private ContentLengthBodyReader newContentLengthBodyReader(int bytesNumber) {
         return new ContentLengthBodyReader(
-                Mockito.mock(RequestQueue.class),
+                Mockito.mock(ClientRequestsQueue.class),
                 () -> {
                 },
                 Mockito.mock(),

@@ -1,6 +1,5 @@
 package client;
 
-import common.queue.RequestQueue;
 import reader.ReadResult;
 import reader.RequestLineReader;
 
@@ -14,12 +13,12 @@ public class ClientInputChannel extends ClientChannel {
 
     private ReadResult readResult;
 
-    public ClientInputChannel(SelectionKey clientKey, RequestQueue requestQueue) {
+    public ClientInputChannel(SelectionKey clientKey, ClientRequestsQueue clientRequestsQueue) {
         super(clientKey);
 
         buffer = ByteBuffer.allocateDirect(8192);
         readResult = new ReadResult(
-                new RequestLineReader(requestQueue, () -> {
+                new RequestLineReader(clientRequestsQueue, () -> {
                     clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_READ);
                     clientKey.selector().wakeup();
                 }),

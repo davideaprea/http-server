@@ -1,7 +1,7 @@
 package reader;
 
 import common.exception.ResponseStatusException;
-import common.queue.RequestQueue;
+import client.ClientRequestsQueue;
 import model.Request;
 import model.Status;
 import parser.RequestTargetParser;
@@ -13,8 +13,8 @@ public class RequestLineReader extends RequestReader {
 
     private ReadingState readingState = ReadingState.NORMAL;
 
-    public RequestLineReader(RequestQueue requestQueue, Runnable onReadingAvailable) {
-        super(requestQueue, onReadingAvailable);
+    public RequestLineReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable) {
+        super(clientRequestsQueue, onReadingAvailable);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class RequestLineReader extends RequestReader {
                 readingState = ReadingState.NORMAL;
 
                 return new ReadResult(
-                        new HeadersReader(requestQueue, onReadingAvailable, requestBuilder),
+                        new HeadersReader(clientRequestsQueue, onReadingAvailable, requestBuilder),
                         ReadResult.NextAction.PROCEED
                 );
             }

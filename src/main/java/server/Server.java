@@ -2,7 +2,7 @@ package server;
 
 import client.Client;
 import client.ClientInputChannel;
-import common.queue.RequestQueue;
+import client.ClientRequestsQueue;
 import client.ClientOutputChannel;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class Server {
                     ClientOutputChannel outputChannel = new ClientOutputChannel(clientKey);
 
                     clientKey.attach(new Client(
-                            new ClientInputChannel(clientKey, new RequestQueue(configuration.router(), executor, outputChannel)),
+                            new ClientInputChannel(clientKey, new ClientRequestsQueue(configuration.router(), executor, outputChannel)),
                             outputChannel
                     ));
                 } else if (key.isReadable()) {

@@ -3,7 +3,7 @@ package reader;
 import common.util.MultiValueMap;
 import common.exception.ResponseStatusException;
 import common.queue.RequestBodyBytesQueue;
-import common.queue.RequestQueue;
+import client.ClientRequestsQueue;
 import model.Request;
 import model.Status;
 import parser.HeaderParser;
@@ -18,8 +18,8 @@ public class HeadersReader extends RequestReader {
 
     private ReadingState readingState = ReadingState.NORMAL;
 
-    protected HeadersReader(RequestQueue requestQueue, Runnable onReadingAvailable, Request.RequestBuilder requestBuilder) {
-        super(requestQueue, onReadingAvailable);
+    protected HeadersReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, Request.RequestBuilder requestBuilder) {
+        super(clientRequestsQueue, onReadingAvailable);
         this.requestBuilder = requestBuilder;
     }
 
@@ -57,20 +57,20 @@ public class HeadersReader extends RequestReader {
 
                     if (contentLengthValue.filter(v -> v > 0).isPresent()) {
                         nextReader = new ContentLengthBodyReader(
-                                requestQueue,
+                                clientRequestsQueue,
                                 onReadingAvailable,
                                 requestBodyBytesQueue,
                                 contentLengthValue.get()
                         );
                     } else if (transferEncodingValue.isPresent()) {
-                        nextReader = new ChunkedBodyReader(requestQueue, onReadingAvailable, requestBodyBytesQueue);
+                        nextReader = new ChunkedBodyReader(clientRequestsQueue, onReadingAvailable, requestBodyBytesQueue);
                     } else {
                         requestBodyBytesQueue.enqueue(-1);
 
-                        nextReader = new RequestLineReader(requestQueue, onReadingAvailable);
+                        nextReader = new RequestLineReader(clientRequestsQueue, onReadingAvailable);
                     }
 
-                    requestQueue.enqueue(request);
+                    clientRequestsQueue.enqueue(request);
 
                     return new ReadResult(
                             nextReader,

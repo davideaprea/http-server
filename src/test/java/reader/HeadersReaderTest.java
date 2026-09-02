@@ -1,6 +1,6 @@
 package reader;
 
-import common.queue.RequestQueue;
+import client.ClientRequestsQueue;
 import model.HeaderKey;
 import model.Request;
 import org.junit.jupiter.api.Assertions;
@@ -67,7 +67,7 @@ public class HeadersReaderTest {
 
     private HeadersReader withMocks() {
         return new HeadersReader(
-                Mockito.mock(RequestQueue.class),
+                Mockito.mock(ClientRequestsQueue.class),
                 () -> {
                 },
                 Request.builder()

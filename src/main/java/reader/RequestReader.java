@@ -1,13 +1,13 @@
 package reader;
 
-import common.queue.RequestQueue;
+import client.ClientRequestsQueue;
 
 public abstract class RequestReader {
-    protected final RequestQueue requestQueue;
+    protected final ClientRequestsQueue clientRequestsQueue;
     protected final Runnable onReadingAvailable;
 
-    protected RequestReader(RequestQueue requestQueue, Runnable onReadingAvailable) {
-        this.requestQueue = requestQueue;
+    protected RequestReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable) {
+        this.clientRequestsQueue = clientRequestsQueue;
         this.onReadingAvailable = onReadingAvailable;
     }
 
