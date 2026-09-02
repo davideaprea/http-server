@@ -12,17 +12,16 @@ public class RequestBodyBytesQueue {
 
     private final BlockingQueue<Integer> bufferedBytes = new LinkedBlockingQueue<>(MAX);
     private final Runnable onSpaceFreed;
-
-    private AtomicBoolean isFull = new AtomicBoolean(false);
+    private final AtomicBoolean isFull = new AtomicBoolean(false);
 
     public RequestBodyBytesQueue(Runnable onSpaceFreed) {
         this.onSpaceFreed = onSpaceFreed;
     }
 
     public void enqueue(int bodyByte) {
-        boolean hasValueBeenAdded = bufferedBytes.offer(bodyByte);
+        bufferedBytes.offer(bodyByte);
 
-        if (!hasValueBeenAdded) {
+        if (bufferedBytes.size() == MAX) {
             isFull.set(true);
         }
     }
