@@ -22,6 +22,13 @@ public class HeaderParserTest {
     }
 
     @Test
+    void testMissingName() {
+        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> HeaderParser.from(": value"));
+
+        Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
     void testInvalidHeaderName() {
         var ex = Assertions.assertThrows(ResponseStatusException.class, () -> HeaderParser.from("invalid name: value"));
 

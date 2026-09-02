@@ -1,8 +1,8 @@
 package parser;
 
+import common.exception.ResponseStatusException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import common.exception.ResponseStatusException;
 import model.Status;
 import parser.dto.Header;
 
@@ -18,7 +18,7 @@ public final class HeaderParser {
         final String headerName = headerLine.substring(0, separatorIndex);
         final String headerValue = headerLine.substring(separatorIndex + 1).trim();
 
-        if (headerName.contains(" ")) {
+        if (headerName.isEmpty() || headerName.chars().anyMatch(Character::isWhitespace)) {
             throw new ResponseStatusException("Header name contains invalid space characters.", Status.BAD_REQUEST);
         }
 
