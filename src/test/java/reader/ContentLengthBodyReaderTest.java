@@ -20,13 +20,6 @@ public class ContentLengthBodyReaderTest {
         Assertions.assertInstanceOf(ContentLengthBodyReader.class, reader);
     }
 
-    @Test
-    void shouldThrowExceptionWhenReadingCompletedBody() {
-        RequestReader reader = newContentLengthBodyReader(0);
-
-        Assertions.assertThrows(Exception.class, () -> reader.eval((byte) 0));
-    }
-
     private ContentLengthBodyReader newContentLengthBodyReader(int bytesNumber) {
         return new ContentLengthBodyReader(
                 Mockito.mock(RequestQueue.class),

@@ -15,10 +15,10 @@ public class RequestLineReaderTest {
     }
 
     @Test
-    void shouldRemainInSameStateWhenReceivingLineFeed() {
+    void shouldRemainInSameStateWhenReceivingCarriageReturn() {
         RequestQueue context = Mockito.mock(RequestQueue.class);
         RequestLineReader reader = new RequestLineReader(context, () -> {});
-        RequestReader result = reader.eval((byte) '\n').nextReader();
+        RequestReader result = reader.eval((byte) '\r').nextReader();
 
         Assertions.assertSame(reader, result);
     }
@@ -34,8 +34,8 @@ public class RequestLineReaderTest {
             state = state.eval((byte) c).nextReader();
         }
 
-        state = state.eval((byte) '\n').nextReader();
         state = state.eval((byte) '\r').nextReader();
+        state = state.eval((byte) '\n').nextReader();
 
         Assertions.assertInstanceOf(HeadersReader.class, state);
     }
