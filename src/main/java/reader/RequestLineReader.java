@@ -4,9 +4,7 @@ import common.exception.ResponseStatusException;
 import common.queue.RequestQueue;
 import model.Request;
 import model.Status;
-import parser.RequestLineParser;
 import parser.RequestTargetParser;
-import parser.dto.RequestLine;
 import parser.dto.RequestTarget;
 
 public class RequestLineReader extends RequestReader {
@@ -29,12 +27,11 @@ public class RequestLineReader extends RequestReader {
                     throw new ResponseStatusException(Status.BAD_REQUEST);
                 }
 
-                RequestLine requestLine = RequestLineParser.from(requestLineBuilder.toString());
-                RequestTarget requestTarget = RequestTargetParser.from(requestLine.requestTarget());
+                RequestTarget requestTarget = RequestTargetParser.from(requestLineBuilder.toString());
 
                 requestBuilder
-                        .method(requestLine.method())
-                        .version(requestLine.version())
+                        .method(requestTarget.method())
+                        .version(requestTarget.version())
                         .url(requestTarget.url())
                         .queryParams(requestTarget.queryParams());
 
