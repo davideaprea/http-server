@@ -1,6 +1,6 @@
 package model;
 
-import common.MultiValueMap;
+import common.util.MultiValueMap;
 import common.queue.RequestBodyBytesQueue;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

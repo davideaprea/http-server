@@ -1,6 +1,6 @@
 package reader;
 
-import common.MultiValueMap;
+import common.util.MultiValueMap;
 import common.exception.ResponseStatusException;
 import common.queue.RequestBodyBytesQueue;
 import common.queue.RequestQueue;

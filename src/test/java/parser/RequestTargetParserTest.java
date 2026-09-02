@@ -1,6 +1,6 @@
 package parser;
 
-import common.MultiValueMap;
+import common.util.MultiValueMap;
 import common.exception.ResponseStatusException;
 import model.Method;
 import model.Status;

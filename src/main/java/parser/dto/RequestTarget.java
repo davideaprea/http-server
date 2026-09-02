@@ -1,6 +1,6 @@
 package parser.dto;
 
-import common.MultiValueMap;
+import common.util.MultiValueMap;
 import model.Method;
 import model.Version;
 
