@@ -1,4 +1,4 @@
-package router.model;
+package router;
 
 import model.Request;
 import model.Response;

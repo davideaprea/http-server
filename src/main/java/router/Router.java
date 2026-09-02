@@ -1,4 +1,4 @@
-package router.model;
+package router;
 
 import common.exception.ResponseStatusException;
 import model.Method;

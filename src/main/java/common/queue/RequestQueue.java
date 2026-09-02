@@ -5,7 +5,7 @@ import model.Request;
 import model.Response;
 import model.Status;
 import model.Version;
-import router.model.Router;
+import router.Router;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -4,9 +4,7 @@ import common.MultiValueMap;
 import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import parser.dto.RequestTarget;
 import router.dto.HandlerCreateCommand;
-import router.model.Router;
 import common.exception.ResponseStatusException;
 
 import java.util.Map;

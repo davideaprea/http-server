@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import router.dto.HandlerCreateCommand;
-import router.model.Router;
+import router.Router;
 import server.Server;
 import server.ServerConfiguration;
 
