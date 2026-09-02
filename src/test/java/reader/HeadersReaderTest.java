@@ -1,11 +1,11 @@
 package reader;
 
-import model.HeaderKey;
 import common.queue.RequestQueue;
+import model.HeaderKey;
+import model.Request;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import model.Request;
 
 public class HeadersReaderTest {
     private static final String CRLF = "\r" + '\n';
@@ -13,7 +13,7 @@ public class HeadersReaderTest {
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
         HeadersReader reader = withMocks();
-        RequestReader result = reader.eval((byte) 'G');
+        RequestReader result = reader.eval((byte) 'G').nextReader();
 
         Assertions.assertSame(reader, result);
     }
@@ -21,7 +21,7 @@ public class HeadersReaderTest {
     @Test
     void shouldRemainInSameStateWhenReceivingCarriageReturn() {
         HeadersReader reader = withMocks();
-        RequestReader result = reader.eval((byte) '\r');
+        RequestReader result = reader.eval((byte) '\r').nextReader();
 
         Assertions.assertSame(reader, result);
     }
@@ -33,7 +33,7 @@ public class HeadersReaderTest {
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);
-            state = state.eval((byte) c);
+            state = state.eval((byte) c).nextReader();
         }
 
         Assertions.assertInstanceOf(HeadersReader.class, state);
@@ -46,7 +46,7 @@ public class HeadersReaderTest {
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);
-            state = state.eval((byte) c);
+            state = state.eval((byte) c).nextReader();
         }
 
         Assertions.assertInstanceOf(ContentLengthBodyReader.class, state);
@@ -59,7 +59,7 @@ public class HeadersReaderTest {
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);
-            state = state.eval((byte) c);
+            state = state.eval((byte) c).nextReader();
         }
 
         Assertions.assertInstanceOf(ChunkedBodyReader.class, state);
@@ -67,8 +67,10 @@ public class HeadersReaderTest {
 
     private HeadersReader withMocks() {
         return new HeadersReader(
-                Request.builder(),
-                Mockito.mock(RequestQueue.class)
+                Mockito.mock(RequestQueue.class),
+                () -> {
+                },
+                Request.builder()
         );
     }
 }

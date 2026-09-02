@@ -8,14 +8,14 @@ import org.mockito.Mockito;
 public class ContentLengthBodyReaderTest {
     @Test
     void shouldGoToRequestLineReadingAfterProcessingLastByte() {
-        RequestReader reader = newContentLengthBodyReader(1).eval((byte) 0);
+        RequestReader reader = newContentLengthBodyReader(1).eval((byte) 0).nextReader();
 
         Assertions.assertInstanceOf(RequestLineReader.class, reader);
     }
 
     @Test
     void shouldRemainInSameState() {
-        RequestReader reader = newContentLengthBodyReader(2).eval((byte) 0);
+        RequestReader reader = newContentLengthBodyReader(2).eval((byte) 0).nextReader();
 
         Assertions.assertInstanceOf(ContentLengthBodyReader.class, reader);
     }
@@ -29,9 +29,11 @@ public class ContentLengthBodyReaderTest {
 
     private ContentLengthBodyReader newContentLengthBodyReader(int bytesNumber) {
         return new ContentLengthBodyReader(
-                bytesNumber,
                 Mockito.mock(RequestQueue.class),
-                Mockito.mock()
+                () -> {
+                },
+                Mockito.mock(),
+                bytesNumber
         );
     }
 }

@@ -5,23 +5,45 @@ import model.Status;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RequestBodyBytesQueue {
-    private final BlockingQueue<Integer> bufferedBytes = new LinkedBlockingQueue<>();
+    private static final int MAX = 8192;
+
+    private final BlockingQueue<Integer> bufferedBytes = new LinkedBlockingQueue<>(MAX);
+    private final Runnable onSpaceFreed;
+
+    private AtomicBoolean isFull = new AtomicBoolean(false);
+
+    public RequestBodyBytesQueue(Runnable onSpaceFreed) {
+        this.onSpaceFreed = onSpaceFreed;
+    }
 
     public void enqueue(int bodyByte) {
-        try {
-            bufferedBytes.put(bodyByte);
-        } catch (InterruptedException e) {
-            throw new ResponseStatusException(Status.REQUEST_TIMEOUT);
+        boolean hasValueBeenAdded = bufferedBytes.offer(bodyByte);
+
+        if (!hasValueBeenAdded) {
+            isFull.set(true);
         }
     }
 
     public int dequeue() {
         try {
-            return bufferedBytes.take();
+            int bodyByte = bufferedBytes.take();
+
+            if (isFull.get()) {
+                isFull.set(false);
+
+                onSpaceFreed.run();
+            }
+
+            return bodyByte;
         } catch (InterruptedException e) {
             throw new ResponseStatusException(Status.REQUEST_TIMEOUT);
         }
+    }
+
+    public boolean isFull() {
+        return isFull.get();
     }
 }

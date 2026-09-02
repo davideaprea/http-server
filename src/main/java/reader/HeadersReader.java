@@ -2,10 +2,10 @@ package reader;
 
 import common.MultiValueMap;
 import common.exception.ResponseStatusException;
-import model.Request;
-import model.Status;
 import common.queue.RequestBodyBytesQueue;
 import common.queue.RequestQueue;
+import model.Request;
+import model.Status;
 import parser.HeaderParser;
 import parser.dto.Header;
 
@@ -18,15 +18,13 @@ public class HeadersReader extends RequestReader {
 
     private ReadingState readingState = ReadingState.NORMAL;
 
-
-    public HeadersReader(Request.RequestBuilder requestBuilder, RequestQueue requestQueue) {
-        super(requestQueue);
-
+    protected HeadersReader(RequestQueue requestQueue, Runnable onReadingAvailable, Request.RequestBuilder requestBuilder) {
+        super(requestQueue, onReadingAvailable);
         this.requestBuilder = requestBuilder;
     }
 
     @Override
-    public RequestReader eval(byte requestByte) {
+    public ReadResult eval(byte requestByte) {
         char c = (char) requestByte;
 
         switch (c) {
@@ -43,7 +41,7 @@ public class HeadersReader extends RequestReader {
                 }
 
                 if (currentLine.isEmpty()) {
-                    RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue();
+                    RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue(onReadingAvailable);
                     Request request = requestBuilder
                             .headers(headers)
                             .body(requestBodyBytesQueue)
@@ -59,21 +57,25 @@ public class HeadersReader extends RequestReader {
 
                     if (contentLengthValue.filter(v -> v > 0).isPresent()) {
                         nextReader = new ContentLengthBodyReader(
-                                contentLengthValue.get(),
                                 requestQueue,
-                                requestBodyBytesQueue
+                                onReadingAvailable,
+                                requestBodyBytesQueue,
+                                contentLengthValue.get()
                         );
                     } else if (transferEncodingValue.isPresent()) {
-                        nextReader = new ChunkedBodyReader(requestQueue, requestBodyBytesQueue);
+                        nextReader = new ChunkedBodyReader(requestQueue, onReadingAvailable, requestBodyBytesQueue);
                     } else {
                         requestBodyBytesQueue.enqueue(-1);
 
-                        nextReader = new RequestLineReader(requestQueue);
+                        nextReader = new RequestLineReader(requestQueue, onReadingAvailable);
                     }
 
                     requestQueue.enqueue(request);
 
-                    return nextReader;
+                    return new ReadResult(
+                            nextReader,
+                            ReadResult.NextAction.PROCEED
+                    );
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 
@@ -86,6 +88,9 @@ public class HeadersReader extends RequestReader {
             default -> currentLine.append(c);
         }
 
-        return this;
+        return new ReadResult(
+                this,
+                ReadResult.NextAction.PROCEED
+        );
     }
 }

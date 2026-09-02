@@ -8,21 +8,20 @@ public class ContentLengthBodyReader extends RequestReader {
 
     private long remainingBytes;
 
-    public ContentLengthBodyReader(long bytesNumber, RequestQueue requestQueue, RequestBodyBytesQueue requestBodyBytesQueue) {
-        super(requestQueue);
-
-        remainingBytes = bytesNumber;
+    protected ContentLengthBodyReader(RequestQueue requestQueue, Runnable onReadingAvailable, RequestBodyBytesQueue requestBodyBytesQueue, long remainingBytes) {
+        super(requestQueue, onReadingAvailable);
         this.requestBodyBytesQueue = requestBodyBytesQueue;
+        this.remainingBytes = remainingBytes;
     }
 
     @Override
-    public RequestReader eval(byte requestByte) {
+    public ReadResult eval(byte requestByte) {
         if (remainingBytes == 0) {
-            RequestReader reader = new RequestLineReader(requestQueue);
+            RequestReader reader = new RequestLineReader(requestQueue, onReadingAvailable);
 
             reader.eval(requestByte);
 
-            return reader;
+            return new ReadResult(reader, ReadResult.NextAction.PROCEED);
         }
 
         requestBodyBytesQueue.enqueue(requestByte);
@@ -32,9 +31,9 @@ public class ContentLengthBodyReader extends RequestReader {
         if (remainingBytes == 0) {
             requestBodyBytesQueue.enqueue((byte) -1);
 
-            return new RequestLineReader(requestQueue);
+            return new ReadResult(new RequestLineReader(requestQueue, onReadingAvailable), ReadResult.NextAction.PROCEED);
         }
 
-        return this;
+        return new ReadResult(this, requestBodyBytesQueue.isFull() ? ReadResult.NextAction.WAIT : ReadResult.NextAction.PROCEED);
     }
 }

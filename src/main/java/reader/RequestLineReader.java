@@ -1,13 +1,13 @@
 package reader;
 
 import common.exception.ResponseStatusException;
-import parser.dto.RequestTarget;
+import common.queue.RequestQueue;
 import model.Request;
 import model.Status;
-import common.queue.RequestQueue;
 import parser.RequestLineParser;
 import parser.RequestTargetParser;
 import parser.dto.RequestLine;
+import parser.dto.RequestTarget;
 
 public class RequestLineReader extends RequestReader {
     private final StringBuilder requestLineBuilder = new StringBuilder();
@@ -15,12 +15,12 @@ public class RequestLineReader extends RequestReader {
 
     private ReadingState readingState = ReadingState.NORMAL;
 
-    public RequestLineReader(RequestQueue requestQueue) {
-        super(requestQueue);
+    public RequestLineReader(RequestQueue requestQueue, Runnable onReadingAvailable) {
+        super(requestQueue, onReadingAvailable);
     }
 
     @Override
-    public RequestReader eval(byte requestByte) {
+    public ReadResult eval(byte requestByte) {
         char c = (char) requestByte;
 
         switch (c) {
@@ -40,7 +40,10 @@ public class RequestLineReader extends RequestReader {
 
                 readingState = ReadingState.NORMAL;
 
-                return new HeadersReader(requestBuilder, requestQueue);
+                return new ReadResult(
+                        new HeadersReader(requestQueue, onReadingAvailable, requestBuilder),
+                        ReadResult.NextAction.PROCEED
+                );
             }
             case '\r' -> {
                 if (!ReadingState.NORMAL.equals(readingState)) {
@@ -52,6 +55,9 @@ public class RequestLineReader extends RequestReader {
             default -> requestLineBuilder.append(c);
         }
 
-        return this;
+        return new ReadResult(
+                this,
+                ReadResult.NextAction.PROCEED
+        );
     }
 }

@@ -2,8 +2,8 @@ package reader;
 
 import common.exception.ResponseStatusException;
 import common.queue.RequestBodyBytesQueue;
-import model.Status;
 import common.queue.RequestQueue;
+import model.Status;
 
 public class ChunkedBodyReader extends RequestReader {
     private boolean isReadingChunkSize = true;
@@ -14,14 +14,13 @@ public class ChunkedBodyReader extends RequestReader {
 
     private final RequestBodyBytesQueue requestBodyBytesQueue;
 
-    public ChunkedBodyReader(RequestQueue requestQueue, RequestBodyBytesQueue requestBodyBytesQueue) {
-        super(requestQueue);
-
+    protected ChunkedBodyReader(RequestQueue requestQueue, Runnable onReadingAvailable, RequestBodyBytesQueue requestBodyBytesQueue) {
+        super(requestQueue, onReadingAvailable);
         this.requestBodyBytesQueue = requestBodyBytesQueue;
     }
 
     @Override
-    public RequestReader eval(byte requestByte) {
+    public ReadResult eval(byte requestByte) {
         if (isReadingChunkSize) {
             char currChar = (char) requestByte;
 
@@ -66,7 +65,10 @@ public class ChunkedBodyReader extends RequestReader {
                     if (currentChunkBytes == 0) {
                         requestBodyBytesQueue.enqueue((byte) -1);
 
-                        return new RequestLineReader(requestQueue);
+                        return new ReadResult(
+                                new RequestLineReader(requestQueue, onReadingAvailable),
+                                ReadResult.NextAction.PROCEED
+                        );
                     }
                 } else {
                     throw new ResponseStatusException("Malformed request.", Status.BAD_REQUEST);
@@ -74,6 +76,6 @@ public class ChunkedBodyReader extends RequestReader {
             }
         }
 
-        return this;
+        return new ReadResult(this, requestBodyBytesQueue.isFull() ? ReadResult.NextAction.WAIT : ReadResult.NextAction.PROCEED);
     }
 }

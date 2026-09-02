@@ -1,8 +1,8 @@
 package client;
 
 import common.queue.RequestQueue;
+import reader.ReadResult;
 import reader.RequestLineReader;
-import reader.RequestReader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,22 +12,34 @@ import java.nio.channels.SocketChannel;
 public class ClientInputChannel extends ClientChannel {
     private final ByteBuffer buffer;
 
-    private RequestReader requestReader;
+    private ReadResult readResult;
 
     public ClientInputChannel(SelectionKey clientKey, RequestQueue requestQueue) {
         super(clientKey);
 
         buffer = ByteBuffer.allocateDirect(8192);
-        requestReader = new RequestLineReader(requestQueue);
+        readResult = new ReadResult(
+                new RequestLineReader(requestQueue, () -> {
+                    clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_READ);
+                    clientKey.selector().wakeup();
+                }),
+                ReadResult.NextAction.PROCEED
+        );
     }
 
     public void read() {
+        if (readResult.nextAction().equals(ReadResult.NextAction.WAIT)) {
+            return;
+        }
+
         SocketChannel client = (SocketChannel) clientKey.channel();
         int bytesRead;
 
         while (true) {
             try {
-                if (!((bytesRead = client.read(buffer)) > 0)) break;
+                bytesRead = client.read(buffer);
+
+                if (bytesRead <= 0) break;
             } catch (IOException e) {
                 System.out.println("Error while reading from client socket: " + e.getMessage());
 
@@ -38,8 +50,12 @@ public class ClientInputChannel extends ClientChannel {
 
             buffer.flip();
 
-            while (buffer.hasRemaining()) {
-                requestReader = requestReader.eval(buffer.get());
+            while (buffer.hasRemaining() && readResult.nextAction().equals(ReadResult.NextAction.PROCEED)) {
+                readResult = readResult.nextReader().eval(buffer.get());
+            }
+
+            if (readResult.nextAction().equals(ReadResult.NextAction.WAIT)) {
+                clientKey.interestOps(clientKey.interestOps() & ~SelectionKey.OP_READ);
             }
 
             buffer.clear();

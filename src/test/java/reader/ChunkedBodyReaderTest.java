@@ -10,9 +10,10 @@ public class ChunkedBodyReaderTest {
     @Test
     void shouldParseSingleChunk() {
         String content = "0123456789";
-        RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue();
+        RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue(() -> {});
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(null, requestBodyBytesQueue),
+                new ChunkedBodyReader(null, () -> {
+                }, requestBodyBytesQueue),
                 "A\r\n%s\r\n0\r\n\r\n".formatted(content)
         );
         String body = buildBody(requestBodyBytesQueue);
@@ -23,9 +24,10 @@ public class ChunkedBodyReaderTest {
 
     @Test
     void shouldParseMultipleChunks() {
-        RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue();
+        RequestBodyBytesQueue requestBodyBytesQueue = new RequestBodyBytesQueue(() -> {});
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(null, requestBodyBytesQueue),
+                new ChunkedBodyReader(null, () -> {
+                }, requestBodyBytesQueue),
                 "5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n"
         );
         String body = buildBody(requestBodyBytesQueue);
@@ -38,7 +40,7 @@ public class ChunkedBodyReaderTest {
         RequestReader curr = reader;
 
         for (byte b : content.getBytes(StandardCharsets.US_ASCII)) {
-            curr = reader.eval(b);
+            curr = reader.eval(b).nextReader();
         }
 
         return curr;
