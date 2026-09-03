@@ -1,14 +1,15 @@
 package router;
 
 import common.exception.ResponseStatusException;
+import lombok.AllArgsConstructor;
 import model.Method;
 import model.Request;
 import model.Response;
 import model.Status;
-import lombok.AllArgsConstructor;
 import router.dto.HandlerCreateCommand;
 import router.exception.ConflictingRoutesException;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +59,19 @@ public class Router {
 
                 return command.handler();
             });
+
+            if (Method.HEAD.equals(command.method())) {
+                currSegment.methodHandlers.put(command.method(), request -> {
+                    Response response = command.handler().handle(request);
+
+                    return new Response(
+                            response.version(),
+                            response.status(),
+                            response.headers(),
+                            InputStream.nullInputStream()
+                    );
+                });
+            }
 
             return this;
         }
