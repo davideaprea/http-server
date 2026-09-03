@@ -1,9 +1,6 @@
 package client;
 
-import model.Request;
-import model.Response;
-import model.Status;
-import model.Version;
+import model.*;
 import router.Router;
 
 import java.io.ByteArrayInputStream;
@@ -56,14 +53,33 @@ public class ClientRequestsQueue {
 
                     clientOutputChannel.write((response + "\r\n").getBytes());
 
-                    byte[] bodyBytes = new byte[8192];
+                    if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
+                        byte[] bodyBytes = new byte[8192];
 
-                    try (InputStream bodyStream = response.body()) {
-                        while (bodyStream.read(bodyBytes) != -1) {
-                            clientOutputChannel.write(bodyBytes);
+                        try (InputStream bodyStream = response.body()) {
+                            while (bodyStream.read(bodyBytes) != -1) {
+                                clientOutputChannel.write(bodyBytes);
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
                         }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                    } else {
+                        byte[] bodyBytes = new byte[8192];
+
+                        try (InputStream bodyStream = response.body()) {
+                            int totalBytesRead;
+
+                            while ((totalBytesRead = bodyStream.read(bodyBytes)) != -1) {
+                                clientOutputChannel.write(String.valueOf(totalBytesRead).getBytes());
+                                clientOutputChannel.write("\r\n".getBytes());
+                                clientOutputChannel.write(bodyBytes);
+                                clientOutputChannel.write("\r\n".getBytes());
+                            }
+
+                            clientOutputChannel.write("0\r\n\r\n".getBytes());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
 
                     return response;
