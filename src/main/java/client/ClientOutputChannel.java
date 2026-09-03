@@ -39,6 +39,8 @@ public class ClientOutputChannel extends ClientChannel {
         try {
             bodyChunks.put(ByteBuffer.wrap(bodyChunk));
         } catch (InterruptedException e) {
+            close();
+
             throw new RuntimeException(e);
         }
 
