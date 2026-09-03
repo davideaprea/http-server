@@ -1,11 +1,9 @@
 package reader;
 
 import common.util.MultiValueMap;
-import common.exception.ResponseStatusException;
 import model.RequestBody;
 import client.ClientRequestsQueue;
 import model.Request;
-import model.Status;
 import parser.HeaderParser;
 import parser.dto.Header;
 
@@ -30,14 +28,14 @@ public class HeadersReader extends RequestReader {
         switch (c) {
             case '\r' -> {
                 if (!ReadingState.NORMAL.equals(readingState)) {
-                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                    throw new IllegalStateException();
                 }
 
                 readingState = ReadingState.CARRIAGE_RETURN;
             }
             case '\n' -> {
                 if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
-                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                    throw new IllegalStateException();
                 }
 
                 if (currentLine.isEmpty()) {
@@ -50,7 +48,7 @@ public class HeadersReader extends RequestReader {
                     Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
 
                     if (contentLengthValue.isPresent() && transferEncodingValue.isPresent()) {
-                        throw new ResponseStatusException("", Status.BAD_REQUEST);
+                        throw new IllegalStateException("Both content length and transfer encoding headers are present.");
                     }
 
                     RequestReader nextReader;

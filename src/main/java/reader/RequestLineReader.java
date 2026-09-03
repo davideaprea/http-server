@@ -1,9 +1,7 @@
 package reader;
 
-import common.exception.ResponseStatusException;
 import client.ClientRequestsQueue;
 import model.Request;
-import model.Status;
 import parser.RequestTargetParser;
 import parser.dto.RequestTarget;
 
@@ -24,7 +22,7 @@ public class RequestLineReader extends RequestReader {
         switch (c) {
             case '\n' -> {
                 if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
-                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                    throw new IllegalStateException();
                 }
 
                 RequestTarget requestTarget = RequestTargetParser.from(requestLineBuilder.toString());
@@ -44,7 +42,7 @@ public class RequestLineReader extends RequestReader {
             }
             case '\r' -> {
                 if (!ReadingState.NORMAL.equals(readingState)) {
-                    throw new ResponseStatusException(Status.BAD_REQUEST);
+                    throw new IllegalStateException();
                 }
 
                 readingState = ReadingState.CARRIAGE_RETURN;
