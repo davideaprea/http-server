@@ -28,6 +28,8 @@ public class ClientOutputChannel extends ClientChannel {
                     bodyChunks.poll();
                 }
             }
+
+            clientKey.interestOps(clientKey.interestOps() & ~SelectionKey.OP_WRITE);
         } catch (IOException e) {
             close();
         }
