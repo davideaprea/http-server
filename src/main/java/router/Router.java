@@ -1,14 +1,11 @@
 package router;
 
-import common.exception.ResponseStatusException;
 import lombok.AllArgsConstructor;
-import model.Method;
-import model.Request;
-import model.Response;
-import model.Status;
+import model.*;
 import router.dto.HandlerCreateCommand;
 import router.exception.ConflictingRoutesException;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,20 +20,26 @@ public class Router {
         Segment currSegment = root;
 
         for (String segmentName : pathSegments) {
-            currSegment = Optional
-                    .ofNullable(currSegment.children.get(segmentName))
-                    .orElseThrow(() -> new ResponseStatusException(
-                            "Couldn't find the requested path.",
-                            Status.NOT_FOUND
-                    ));
+            currSegment = currSegment.children.get(segmentName);
+
+            if (currSegment == null) {
+                return new Response(
+                        Version.HTTP_1_1,
+                        Status.NOT_FOUND,
+                        Map.of(),
+                        new ByteArrayInputStream("Couldn't find the requested path.".getBytes())
+                );
+            }
         }
 
         return Optional
                 .ofNullable(currSegment.methodHandlers.get(request.getMethod()))
                 .map(handler -> handler.handle(request))
-                .orElseThrow(() -> new ResponseStatusException(
-                        "The requested path is not configured for this method.",
-                        Status.NOT_IMPLEMENTED
+                .orElse(new Response(
+                        Version.HTTP_1_1,
+                        Status.METHOD_NOT_ALLOWED,
+                        Map.of(),
+                        new ByteArrayInputStream("The requested path is not configured for this method.".getBytes())
                 ));
     }
 

@@ -80,6 +80,6 @@ public class RouterTest {
                 null
         )));
 
-        Assertions.assertEquals(Status.NOT_IMPLEMENTED, ex.getStatus());
+        Assertions.assertEquals(Status.METHOD_NOT_ALLOWED, ex.getStatus());
     }
 }

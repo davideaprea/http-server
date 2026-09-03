@@ -12,7 +12,8 @@ public enum Status {
     NOT_FOUND(404, "NOT FOUND"),
     VERSION_NOT_SUPPORTED(505, "VERSION NOT SUPPORTED"),
     BAD_REQUEST(400, "BAD REQUEST"),
-    OK(200, "OK");
+    OK(200, "OK"),
+    METHOD_NOT_ALLOWED(405, "METHOD NOT ALLOWED");
 
     private final int code;
     private final String name;
