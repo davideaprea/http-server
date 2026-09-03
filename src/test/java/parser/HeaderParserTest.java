@@ -3,8 +3,6 @@ package parser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import parser.dto.Header;
-import common.exception.ResponseStatusException;
-import model.Status;
 
 public class HeaderParserTest {
     @Test
@@ -16,22 +14,16 @@ public class HeaderParserTest {
 
     @Test
     void testMissingColon() {
-        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> HeaderParser.from("name value"));
-
-        Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> HeaderParser.from("name value"));
     }
 
     @Test
     void testMissingName() {
-        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> HeaderParser.from(": value"));
-
-        Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> HeaderParser.from(": value"));
     }
 
     @Test
     void testInvalidHeaderName() {
-        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> HeaderParser.from("invalid name: value"));
-
-        Assertions.assertEquals(Status.BAD_REQUEST, ex.getStatus());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> HeaderParser.from("invalid name: value"));
     }
 }

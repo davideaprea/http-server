@@ -5,7 +5,6 @@ import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import router.dto.HandlerCreateCommand;
-import common.exception.ResponseStatusException;
 
 import java.util.Map;
 
@@ -49,16 +48,16 @@ public class RouterTest {
         Router router = new Router.Builder()
                 .add(command)
                 .build();
-        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
+        Response response = router.handle(new Request(
                 command.method(),
                 Version.HTTP_1_1,
                 "/non/existing/path",
                 new MultiValueMap<>(),
                 new MultiValueMap<>(),
                 null
-        )));
+        ));
 
-        Assertions.assertEquals(Status.NOT_FOUND, ex.getStatus());
+        Assertions.assertEquals(Status.NOT_FOUND, response.status());
     }
 
     @Test
@@ -71,15 +70,15 @@ public class RouterTest {
         Router router = new Router.Builder()
                 .add(command)
                 .build();
-        var ex = Assertions.assertThrows(ResponseStatusException.class, () -> router.handle(new Request(
+        Response response = router.handle(new Request(
                 Method.POST,
                 Version.HTTP_1_1,
                 command.path(),
                 new MultiValueMap<>(),
                 new MultiValueMap<>(),
                 null
-        )));
+        ));
 
-        Assertions.assertEquals(Status.METHOD_NOT_ALLOWED, ex.getStatus());
+        Assertions.assertEquals(Status.METHOD_NOT_ALLOWED, response.status());
     }
 }
