@@ -1,18 +1,15 @@
 package parser;
 
 import common.util.MultiValueMap;
-import common.exception.ResponseStatusException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import model.Method;
-import model.Status;
 import model.Version;
 import parser.dto.RequestTarget;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RequestTargetParser {
@@ -20,13 +17,13 @@ public final class RequestTargetParser {
         String[] splitRequestLine = rawRequestLine.split(" ");
 
         if (splitRequestLine.length != 3) {
-            throw new ResponseStatusException("Request line is malformed.", Status.BAD_REQUEST);
+            throw new IllegalArgumentException("Request line is malformed.");
         }
 
         String requestTarget = splitRequestLine[1];
 
         if (!requestTarget.startsWith("/")) {
-            throw new ResponseStatusException("Request URI must start with a backslash.", Status.BAD_REQUEST);
+            throw new IllegalArgumentException("Request URI must start with a backslash.");
         }
 
         int paramsStartIndex = requestTarget.indexOf('?');
@@ -50,26 +47,10 @@ public final class RequestTargetParser {
         }
 
         return new RequestTarget(
-                parseMethod(splitRequestLine[0]),
-                parseVersion(splitRequestLine[2]),
+                Method.valueOf(splitRequestLine[0]),
+                Version.fromValue(splitRequestLine[2]),
                 path,
                 queryParams
         );
-    }
-
-    private static Method parseMethod(String method) {
-        try {
-            return Method.valueOf(method);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException("Invalid method.", Status.BAD_REQUEST);
-        }
-    }
-
-    private static Version parseVersion(String version) {
-        try {
-            return Version.fromValue(version);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException("Unsupported HTTP version: " + version, Status.VERSION_NOT_SUPPORTED);
-        }
     }
 }
