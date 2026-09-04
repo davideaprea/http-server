@@ -1,6 +1,6 @@
 package parser;
 
-import common.util.MultiValueMap;
+import common.MultiValueMap;
 import model.Method;
 import model.Version;
 import org.junit.jupiter.api.Assertions;
