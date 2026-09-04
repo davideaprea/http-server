@@ -39,6 +39,14 @@ public class ClientInputChannel extends ClientChannel {
                 bytesRead = client.read(buffer);
 
                 if (bytesRead <= 0) break;
+
+                buffer.flip();
+
+                while (buffer.hasRemaining() && readResult.nextAction().equals(ReadResult.NextAction.PROCEED)) {
+                    readResult = readResult.nextReader().eval(buffer.get());
+                }
+
+                buffer.clear();
             } catch (IOException e) {
                 System.out.println("Error while reading from client socket: " + e.getMessage());
 
@@ -46,18 +54,10 @@ public class ClientInputChannel extends ClientChannel {
 
                 return;
             }
+        }
 
-            buffer.flip();
-
-            while (buffer.hasRemaining() && readResult.nextAction().equals(ReadResult.NextAction.PROCEED)) {
-                readResult = readResult.nextReader().eval(buffer.get());
-            }
-
-            if (readResult.nextAction().equals(ReadResult.NextAction.WAIT)) {
-                clientKey.interestOps(clientKey.interestOps() & ~SelectionKey.OP_READ);
-            }
-
-            buffer.clear();
+        if (readResult.nextAction().equals(ReadResult.NextAction.WAIT)) {
+            clientKey.interestOps(clientKey.interestOps() & ~SelectionKey.OP_READ);
         }
 
         if (bytesRead == -1) {
