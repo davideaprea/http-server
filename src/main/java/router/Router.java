@@ -74,8 +74,8 @@ public class Router {
                 return command.handler();
             });
 
-            if (Method.HEAD.equals(command.method())) {
-                currSegment.methodHandlers.put(command.method(), request -> {
+            if (Method.GET.equals(command.method())) {
+                currSegment.methodHandlers.put(Method.HEAD, request -> {
                     Response response = command.handler().handle(request);
 
                     return new Response(
