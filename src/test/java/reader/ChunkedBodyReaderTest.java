@@ -3,6 +3,7 @@ package reader;
 import model.RequestBody;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
 
@@ -13,7 +14,7 @@ public class ChunkedBodyReaderTest {
         RequestBody requestBody = new RequestBody(() -> {});
         RequestReader reader = evaluateBody(
                 new ChunkedBodyReader(null, () -> {
-                }, requestBody),
+                }, Mockito.mock(), requestBody),
                 "A\r\n%s\r\n0\r\n\r\n".formatted(content)
         );
         String body = buildBody(requestBody);
@@ -27,7 +28,7 @@ public class ChunkedBodyReaderTest {
         RequestBody requestBody = new RequestBody(() -> {});
         RequestReader reader = evaluateBody(
                 new ChunkedBodyReader(null, () -> {
-                }, requestBody),
+                }, Mockito.mock(), requestBody),
                 "5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n"
         );
         String body = buildBody(requestBody);

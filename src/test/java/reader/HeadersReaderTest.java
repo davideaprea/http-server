@@ -70,6 +70,7 @@ public class HeadersReaderTest {
                 Mockito.mock(ClientRequestsQueue.class),
                 () -> {
                 },
+                Mockito.mock(),
                 Request.builder()
         );
     }

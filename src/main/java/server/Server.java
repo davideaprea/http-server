@@ -14,10 +14,12 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class Server {
     private final ServerConfiguration configuration;
     private final ExecutorService executor;
+    private final ScheduledExecutorService timersScheduler = Executors.newScheduledThreadPool(1);
 
     private Selector selector;
 
@@ -56,7 +58,7 @@ public class Server {
                     ClientOutputChannel outputChannel = new ClientOutputChannel(clientKey);
 
                     clientKey.attach(new Client(
-                            new ClientInputChannel(clientKey, new ClientRequestsQueue(configuration.router(), executor, outputChannel)),
+                            new ClientInputChannel(timersScheduler, clientKey, new ClientRequestsQueue(configuration.router(), executor, outputChannel)),
                             outputChannel
                     ));
                 } else if (key.isReadable()) {

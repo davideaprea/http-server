@@ -26,6 +26,7 @@ public class ContentLengthBodyReaderTest {
                 () -> {
                 },
                 Mockito.mock(),
+                Mockito.mock(),
                 bytesNumber
         );
     }

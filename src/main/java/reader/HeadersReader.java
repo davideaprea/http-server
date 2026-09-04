@@ -1,6 +1,7 @@
 package reader;
 
 import common.MultiValueMap;
+import common.TimedOperation;
 import model.RequestBody;
 import client.channel.ClientRequestsQueue;
 import model.Request;
@@ -16,8 +17,8 @@ public class HeadersReader extends RequestReader {
 
     private ReadingState readingState = ReadingState.NORMAL;
 
-    protected HeadersReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, Request.RequestBuilder requestBuilder) {
-        super(clientRequestsQueue, onReadingAvailable);
+    protected HeadersReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, TimedOperation timedOperation, Request.RequestBuilder requestBuilder) {
+        super(clientRequestsQueue, onReadingAvailable, timedOperation);
         this.requestBuilder = requestBuilder;
     }
 
@@ -57,15 +58,16 @@ public class HeadersReader extends RequestReader {
                         nextReader = new ContentLengthBodyReader(
                                 clientRequestsQueue,
                                 onReadingAvailable,
+                                timedOperation,
                                 requestBody,
                                 contentLengthValue.get()
                         );
                     } else if (transferEncodingValue.isPresent()) {
-                        nextReader = new ChunkedBodyReader(clientRequestsQueue, onReadingAvailable, requestBody);
+                        nextReader = new ChunkedBodyReader(clientRequestsQueue, onReadingAvailable, timedOperation, requestBody);
                     } else {
                         requestBody.enqueue(-1);
 
-                        nextReader = new RequestLineReader(clientRequestsQueue, onReadingAvailable);
+                        nextReader = new RequestLineReader(clientRequestsQueue, onReadingAvailable, timedOperation);
                     }
 
                     clientRequestsQueue.enqueue(request);
