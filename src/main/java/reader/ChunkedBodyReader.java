@@ -69,7 +69,7 @@ public class ChunkedBodyReader extends RequestReader {
                         );
                     }
                 } else {
-                    throw new IllegalArgumentException("Malformed request.");
+                    throw new IllegalStateException("Malformed request.");
                 }
             }
         }
