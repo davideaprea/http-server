@@ -1,7 +1,5 @@
 package model;
 
-import common.exception.ResponseStatusException;
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,7 +35,7 @@ public class RequestBody {
 
             return bodyByte;
         } catch (InterruptedException e) {
-            throw new ResponseStatusException(Status.REQUEST_TIMEOUT);
+            throw new IllegalStateException(e);
         }
     }
 

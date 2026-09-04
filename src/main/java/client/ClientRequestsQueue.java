@@ -6,6 +6,7 @@ import router.Router;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -38,18 +39,7 @@ public class ClientRequestsQueue {
         isProcessing = true;
 
         CompletableFuture.supplyAsync(() -> {
-                    Response response;
-
-                    try {
-                        response = router.handle(request);
-                    } catch (Exception e) {
-                        response = new Response(
-                                Version.HTTP_1_1,
-                                Status.INTERNAL_SERVER_ERROR,
-                                Map.of(),
-                                new ByteArrayInputStream(e.getMessage().getBytes())
-                        );
-                    }
+                    Response response = router.handle(request);
 
                     clientOutputChannel.write((response + "\r\n").getBytes());
 
@@ -61,7 +51,7 @@ public class ClientRequestsQueue {
                                 clientOutputChannel.write(bodyBytes);
                             }
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            throw new UncheckedIOException(e);
                         }
                     } else {
                         byte[] bodyBytes = new byte[8192];
@@ -78,14 +68,18 @@ public class ClientRequestsQueue {
 
                             clientOutputChannel.write("0\r\n\r\n".getBytes());
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            throw new UncheckedIOException(e);
                         }
                     }
 
                     return response;
                 }, executorService)
-                .whenComplete((res, ex) -> {
+                .whenComplete((res, e) -> {
                     isProcessing = false;
+
+                    if (e != null) {
+                        throw new RuntimeException(e);
+                    }
 
                     if (!requestsQueue.isEmpty()) {
                         submit(requestsQueue.poll());
