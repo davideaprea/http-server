@@ -34,7 +34,18 @@ public class Router {
 
         return Optional
                 .ofNullable(currSegment.methodHandlers.get(request.getMethod()))
-                .map(handler -> handler.handle(request))
+                .map(handler -> {
+                    try {
+                        return handler.handle(request);
+                    } catch (Exception e) {
+                        return new Response(
+                                Version.HTTP_1_1,
+                                Status.INTERNAL_SERVER_ERROR,
+                                Map.of(),
+                                new ByteArrayInputStream(e.getMessage().getBytes())
+                        );
+                    }
+                })
                 .orElse(new Response(
                         Version.HTTP_1_1,
                         Status.METHOD_NOT_ALLOWED,
