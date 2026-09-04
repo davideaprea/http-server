@@ -1,6 +1,6 @@
 package reader;
 
-import client.ClientRequestsQueue;
+import client.channel.ClientRequestsQueue;
 
 public abstract class RequestReader {
     protected final ClientRequestsQueue clientRequestsQueue;

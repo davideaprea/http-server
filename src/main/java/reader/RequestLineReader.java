@@ -1,6 +1,6 @@
 package reader;
 
-import client.ClientRequestsQueue;
+import client.channel.ClientRequestsQueue;
 import model.Request;
 import parser.RequestTargetParser;
 import parser.dto.RequestTarget;

@@ -2,7 +2,7 @@ package reader;
 
 import common.MultiValueMap;
 import model.RequestBody;
-import client.ClientRequestsQueue;
+import client.channel.ClientRequestsQueue;
 import model.Request;
 import parser.HeaderParser;
 import parser.dto.Header;

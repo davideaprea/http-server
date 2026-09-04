@@ -1,7 +1,7 @@
 package reader;
 
 import model.RequestBody;
-import client.ClientRequestsQueue;
+import client.channel.ClientRequestsQueue;
 
 public class ChunkedBodyReader extends RequestReader {
     private boolean isReadingChunkSize = true;

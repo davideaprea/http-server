@@ -1,7 +1,7 @@
 package reader;
 
 import model.RequestBody;
-import client.ClientRequestsQueue;
+import client.channel.ClientRequestsQueue;
 
 public class ContentLengthBodyReader extends RequestReader {
     private final RequestBody requestBody;

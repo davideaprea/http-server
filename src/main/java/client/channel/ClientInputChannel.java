@@ -1,4 +1,4 @@
-package client;
+package client.channel;
 
 import reader.ReadResult;
 import reader.RequestLineReader;

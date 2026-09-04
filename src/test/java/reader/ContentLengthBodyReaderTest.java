@@ -1,6 +1,6 @@
 package reader;
 
-import client.ClientRequestsQueue;
+import client.channel.ClientRequestsQueue;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
