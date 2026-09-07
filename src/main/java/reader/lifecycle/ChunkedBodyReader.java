@@ -26,13 +26,13 @@ public class ChunkedBodyReader extends RequestReader {
 
             if (currChar == '\r') {
                 if (!ReadingState.NORMAL.equals(readingState)) {
-                    throw new MalformedRequestException("Invalid CRLF sequence in body chunk.");
+                    throw new IllegalStateException("Invalid CRLF sequence in body chunk.");
                 }
 
                 readingState = ReadingState.CARRIAGE_RETURN;
             } else if (currChar == '\n') {
                 if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
-                    throw new MalformedRequestException("Invalid CRLF sequence in body chunk.");
+                    throw new IllegalStateException("Invalid CRLF sequence in body chunk.");
                 }
 
                 readingState = ReadingState.NORMAL;
@@ -45,25 +45,25 @@ public class ChunkedBodyReader extends RequestReader {
             }
         } else {
             if (remainingChunkBytes > 0) {
-                requestBody.enqueue(requestByte);
+                requestBody.enqueue(Byte.toUnsignedInt(requestByte));
                 remainingChunkBytes--;
             } else {
                 if ((char) requestByte == '\r') {
                     if (!ReadingState.NORMAL.equals(readingState)) {
-                        throw new MalformedRequestException("Invalid CRLF sequence in body chunk.");
+                        throw new IllegalStateException("Invalid CRLF sequence in body chunk.");
                     }
 
                     readingState = ReadingState.CARRIAGE_RETURN;
                 } else if ((char) requestByte == '\n') {
                     if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
-                        throw new MalformedRequestException("Invalid CRLF sequence in body chunk.");
+                        throw new IllegalStateException("Invalid CRLF sequence in body chunk.");
                     }
 
                     readingState = ReadingState.NORMAL;
                     isReadingChunkSize = true;
 
                     if (currentChunkBytes == 0) {
-                        requestBody.enqueue((byte) -1);
+                        requestBody.enqueue(-1);
                         readingLifecycleEvents.onEnd().run();
 
                         return new ReadResult(

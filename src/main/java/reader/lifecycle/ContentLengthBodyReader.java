@@ -26,12 +26,12 @@ public class ContentLengthBodyReader extends RequestReader {
             return new ReadResult(reader, ReadResult.NextAction.PROCEED);
         }
 
-        requestBody.enqueue(requestByte);
+        requestBody.enqueue(Byte.toUnsignedInt(requestByte));
 
         remainingBytes--;
 
         if (remainingBytes == 0) {
-            requestBody.enqueue((byte) -1);
+            requestBody.enqueue(-1);
             readingLifecycleEvents.onEnd().run();
 
             return new ReadResult(new RequestLineReader(readingLifecycleEvents), ReadResult.NextAction.PROCEED);

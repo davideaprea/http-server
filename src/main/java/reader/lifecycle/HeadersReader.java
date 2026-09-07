@@ -71,7 +71,7 @@ public class HeadersReader extends RequestReader {
 
                     RequestReader nextReader;
 
-                    if (contentLengthValue.isPresent()) {
+                    if (contentLengthValue.filter(v -> v > 0).isPresent()) {
                         nextReader = new ContentLengthBodyReader(
                                 readingLifecycleEvents,
                                 requestBody,
@@ -83,6 +83,8 @@ public class HeadersReader extends RequestReader {
                         requestBody.enqueue(-1);
 
                         nextReader = new RequestLineReader(readingLifecycleEvents);
+
+                        readingLifecycleEvents.onEnd().run();
                     }
 
                     readingLifecycleEvents.onNewRequest().accept(request);

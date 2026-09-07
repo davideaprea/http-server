@@ -16,7 +16,11 @@ public class RequestBody {
     }
 
     public void enqueue(int bodyByte) {
-        bufferedBytes.offer(bodyByte);
+        if (isFull.get()) {
+            throw new IllegalStateException();
+        }
+
+        bufferedBytes.add(bodyByte);
 
         if (bufferedBytes.size() == MAX) {
             isFull.set(true);

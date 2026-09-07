@@ -1,10 +1,10 @@
 package client;
 
+import common.MalformedRequestException;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
 import reader.lifecycle.RequestLineReader;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -44,8 +44,10 @@ public class ClientInputChannel {
                 }
 
                 buffer.clear();
-            } catch (IOException e) {
-                System.out.println("Error while reading from client socket: " + e.getMessage());
+            } catch (Exception e) {
+                if (e instanceof MalformedRequestException) {
+
+                }
 
                 clientChannelKey.close();
 

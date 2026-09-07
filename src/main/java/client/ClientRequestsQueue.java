@@ -8,6 +8,7 @@ import router.Router;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -40,30 +41,44 @@ public class ClientRequestsQueue {
 
         CompletableFuture.supplyAsync(() -> {
                     Response response = router.handle(request);
-
-                    clientOutputChannel.write((response + "\r\n").getBytes());
-
-                    byte[] bodyBytes = new byte[8192];
+                    ByteBuffer buffer = ByteBuffer.allocate(8192);
 
                     try (InputStream bodyStream = response.body()) {
                         if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
-                            while (bodyStream.read(bodyBytes) != -1) {
-                                clientOutputChannel.write(bodyBytes);
+                            int bytesRead;
+
+                            while ((bytesRead = bodyStream.read(buffer.array())) != -1) {
+                                buffer.position(0);
+                                buffer.limit(bytesRead);
+
+                                clientOutputChannel.write(buffer);
+
+                                buffer.clear();
                             }
                         } else {
-                            int totalBytesRead;
+                            response.headers().put(HeaderKey.TRANSFER_ENCODING.getValue(), "chunked");
 
-                            while ((totalBytesRead = bodyStream.read(bodyBytes)) != -1) {
-                                clientOutputChannel.write(String.valueOf(totalBytesRead).getBytes());
-                                clientOutputChannel.write("\r\n".getBytes());
-                                clientOutputChannel.write(bodyBytes);
-                                clientOutputChannel.write("\r\n".getBytes());
+                            int bytesRead;
+
+                            while ((bytesRead = bodyStream.read(buffer.array())) != -1) {
+                                clientOutputChannel.write(ByteBuffer.wrap((Integer.toHexString(bytesRead) + "\r\n").getBytes()));
+                                buffer.position(0);
+                                buffer.limit(bytesRead);
+                                clientOutputChannel.write(buffer);
+                                clientOutputChannel.write(ByteBuffer.wrap("\r\n".getBytes()));
+                                buffer.clear();
                             }
 
-                            clientOutputChannel.write("0\r\n\r\n".getBytes());
+                            clientOutputChannel.write(ByteBuffer.wrap("0\r\n\r\n".getBytes()));
                         }
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
+                    }
+
+                    isProcessing = false;
+
+                    if (!requestsQueue.isEmpty()) {
+                        submit(requestsQueue.poll());
                     }
 
                     return response;

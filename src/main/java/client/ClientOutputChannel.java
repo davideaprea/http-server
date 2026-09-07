@@ -34,9 +34,9 @@ public class ClientOutputChannel {
         }
     }
 
-    public void write(byte[] bodyChunk) {
+    public void write(ByteBuffer bodyChunk) {
         try {
-            bodyChunks.put(ByteBuffer.wrap(bodyChunk));
+            bodyChunks.put(bodyChunk);
         } catch (InterruptedException e) {
             clientChannelKey.close();
 
