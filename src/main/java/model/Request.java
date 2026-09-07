@@ -20,6 +20,8 @@ public class Request {
 
     private final Map<String, List<String>> queryParams;
     private final Map<String, List<String>> headers;
+
+    @Getter
     private final RequestBody body;
 
     public Optional<Long> getContentLength() {
@@ -33,5 +35,13 @@ public class Request {
         return Optional
                 .ofNullable(headers.get(HeaderKey.TRANSFER_ENCODING.getValue()))
                 .map(List::getFirst);
+    }
+
+    public Map<String, List<String>> getHeaders() {
+        return Map.copyOf(headers);
+    }
+
+    public Map<String, List<String>> getQueryParams() {
+        return Map.copyOf(queryParams);
     }
 }
