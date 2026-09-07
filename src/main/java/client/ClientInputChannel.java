@@ -6,17 +6,16 @@ import reader.RequestLineReader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-public class ClientInputChannel extends ClientChannel {
+public class ClientInputChannel {
+    private final ClientChannelKey clientChannelKey;
     private final ByteBuffer buffer;
 
     private ReadResult readResult;
 
-    public ClientInputChannel(SelectionKey clientKey, ReadingLifecycleEvents readingLifecycleEvents) {
-        super(clientKey);
-
+    public ClientInputChannel(ClientChannelKey clientChannelKey, ReadingLifecycleEvents readingLifecycleEvents) {
+        this.clientChannelKey = clientChannelKey;
         buffer = ByteBuffer.allocateDirect(8192);
         readResult = new ReadResult(
                 new RequestLineReader(readingLifecycleEvents),
@@ -29,7 +28,7 @@ public class ClientInputChannel extends ClientChannel {
             return;
         }
 
-        SocketChannel client = (SocketChannel) clientKey.channel();
+        SocketChannel client = (SocketChannel) clientChannelKey.getSocketChannel();
         int bytesRead;
 
         while (true) {
@@ -48,18 +47,18 @@ public class ClientInputChannel extends ClientChannel {
             } catch (IOException e) {
                 System.out.println("Error while reading from client socket: " + e.getMessage());
 
-                close();
+                clientChannelKey.close();
 
                 return;
             }
         }
 
         if (readResult.nextAction().equals(ReadResult.NextAction.WAIT)) {
-            clientKey.interestOps(clientKey.interestOps() & ~SelectionKey.OP_READ);
+            clientChannelKey.removeReadInterest();
         }
 
         if (bytesRead == -1) {
-            close();
+            clientChannelKey.close();
         }
     }
 }

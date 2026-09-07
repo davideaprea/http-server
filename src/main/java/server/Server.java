@@ -1,9 +1,6 @@
 package server;
 
-import client.Client;
-import client.ClientInputChannel;
-import client.ClientOutputChannel;
-import client.ClientRequestsQueue;
+import client.*;
 import common.TimedOperation;
 import reader.ReadingLifecycleEvents;
 
@@ -58,15 +55,16 @@ public class Server {
                     client.configureBlocking(false);
 
                     SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
-                    ClientOutputChannel outputChannel = new ClientOutputChannel(clientKey);
+                    ClientChannelKey clientChannelKey = new ClientChannelKey(clientKey);
+                    ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
                     ClientRequestsQueue clientRequestsQueue = new ClientRequestsQueue(configuration.router(), executor, outputChannel);
-                    TimedOperation timedOperation = new TimedOperation(timersScheduler, 1, TimeUnit.SECONDS, outputChannel::close);
+                    TimedOperation timedOperation = new TimedOperation(timersScheduler, 1, TimeUnit.SECONDS, clientChannelKey::close);
 
                     clientKey.attach(new Client(
-                            new ClientInputChannel(clientKey, ReadingLifecycleEvents.builder()
+                            new ClientInputChannel(clientChannelKey, ReadingLifecycleEvents.builder()
                                     .onNewRequest(clientRequestsQueue::enqueue)
                                     .onReadingAvailable(() -> {
-                                        clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_READ);
+                                        clientChannelKey.addReadInterest();
                                         clientKey.selector().wakeup();
                                     })
                                     .onStart(timedOperation::start)
