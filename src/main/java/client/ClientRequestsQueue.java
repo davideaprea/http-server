@@ -1,13 +1,13 @@
-package client.channel;
+package client;
 
-import client.writer.ContentLengthWriter;
-import client.writer.ResponseBodyWriter;
-import client.writer.TransferEncodingWriter;
 import model.HeaderKey;
 import model.Request;
 import model.Response;
 import router.Router;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -43,15 +43,28 @@ public class ClientRequestsQueue {
 
                     clientOutputChannel.write((response + "\r\n").getBytes());
 
-                    ResponseBodyWriter responseBodyWriter;
+                    byte[] bodyBytes = new byte[8192];
 
-                    if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
-                        responseBodyWriter = new ContentLengthWriter(clientOutputChannel);
-                    } else {
-                        responseBodyWriter = new TransferEncodingWriter(clientOutputChannel);
+                    try (InputStream bodyStream = response.body()) {
+                        if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
+                            while (bodyStream.read(bodyBytes) != -1) {
+                                clientOutputChannel.write(bodyBytes);
+                            }
+                        } else {
+                            int totalBytesRead;
+
+                            while ((totalBytesRead = bodyStream.read(bodyBytes)) != -1) {
+                                clientOutputChannel.write(String.valueOf(totalBytesRead).getBytes());
+                                clientOutputChannel.write("\r\n".getBytes());
+                                clientOutputChannel.write(bodyBytes);
+                                clientOutputChannel.write("\r\n".getBytes());
+                            }
+
+                            clientOutputChannel.write("0\r\n\r\n".getBytes());
+                        }
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
                     }
-
-                    responseBodyWriter.write(response);
 
                     return response;
                 }, executorService)

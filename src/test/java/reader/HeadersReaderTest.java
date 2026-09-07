@@ -1,6 +1,6 @@
 package reader;
 
-import client.channel.ClientRequestsQueue;
+import client.ClientRequestsQueue;
 import model.HeaderKey;
 import model.Request;
 import org.junit.jupiter.api.Assertions;

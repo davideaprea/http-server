@@ -1,9 +1,9 @@
 package server;
 
-import client.channel.Client;
-import client.channel.ClientInputChannel;
-import client.channel.ClientRequestsQueue;
-import client.channel.ClientOutputChannel;
+import client.Client;
+import client.ClientInputChannel;
+import client.ClientRequestsQueue;
+import client.ClientOutputChannel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

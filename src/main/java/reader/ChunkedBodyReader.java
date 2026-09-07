@@ -2,7 +2,7 @@ package reader;
 
 import common.TimedOperation;
 import model.RequestBody;
-import client.channel.ClientRequestsQueue;
+import client.ClientRequestsQueue;
 
 public class ChunkedBodyReader extends RequestReader {
     private boolean isReadingChunkSize = true;

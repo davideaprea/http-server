@@ -1,4 +1,4 @@
-package client.channel;
+package client;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
