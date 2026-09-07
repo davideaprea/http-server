@@ -9,16 +9,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
 public class ClientRequestsQueue {
     private final Router router;
     private final ExecutorService executorService;
     private final ClientOutputChannel clientOutputChannel;
-    private final Queue<Request> requestsQueue = new LinkedList<>();
+    private final Queue<Request> requestsQueue = new ConcurrentLinkedQueue<>();
 
     private boolean isProcessing = false;
 
@@ -73,12 +73,6 @@ public class ClientRequestsQueue {
                         }
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
-                    }
-
-                    isProcessing = false;
-
-                    if (!requestsQueue.isEmpty()) {
-                        submit(requestsQueue.poll());
                     }
 
                     return response;
