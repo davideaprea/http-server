@@ -1,6 +1,5 @@
 package client;
 
-import common.TimedOperation;
 import reader.ReadResult;
 import reader.ReadingLifecycleEvents;
 import reader.RequestLineReader;
@@ -15,22 +14,12 @@ public class ClientInputChannel extends ClientChannel {
 
     private ReadResult readResult;
 
-    public ClientInputChannel(TimedOperation timedOperation, SelectionKey clientKey, ClientRequestsQueue clientRequestsQueue) {
+    public ClientInputChannel(SelectionKey clientKey, ReadingLifecycleEvents readingLifecycleEvents) {
         super(clientKey);
 
         buffer = ByteBuffer.allocateDirect(8192);
         readResult = new ReadResult(
-                new RequestLineReader(
-                        ReadingLifecycleEvents.builder()
-                                .onNewRequest(clientRequestsQueue::enqueue)
-                                .onReadingAvailable(() -> {
-                                    clientKey.interestOps(clientKey.interestOps() | SelectionKey.OP_READ);
-                                    clientKey.selector().wakeup();
-                                })
-                                .onStart(timedOperation::start)
-                                .onEnd(timedOperation::stop)
-                                .build()
-                ),
+                new RequestLineReader(readingLifecycleEvents),
                 ReadResult.NextAction.PROCEED
         );
     }
