@@ -11,7 +11,7 @@ import reader.lifecycle.RequestReader;
 public class RequestLineReaderTest {
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
-        RequestLineReader reader = new RequestLineReader(Mockito.mock(ReadingLifecycleEvents.class));
+        RequestLineReader reader = new RequestLineReader(mockReadingLifecycleEvents());
         RequestReader result = reader.eval((byte) 'G').nextReader();
 
         Assertions.assertSame(reader, result);
@@ -19,7 +19,7 @@ public class RequestLineReaderTest {
 
     @Test
     void shouldRemainInSameStateWhenReceivingCarriageReturn() {
-        RequestLineReader reader = new RequestLineReader(Mockito.mock(ReadingLifecycleEvents.class));
+        RequestLineReader reader = new RequestLineReader(mockReadingLifecycleEvents());
         RequestReader result = reader.eval((byte) '\r').nextReader();
 
         Assertions.assertSame(reader, result);
@@ -28,9 +28,9 @@ public class RequestLineReaderTest {
     @Test
     void shouldPassInReadingHeadersState() {
         String rawRequest = "GET /path HTTP/1.1";
-        RequestReader state = new RequestLineReader(Mockito.mock(ReadingLifecycleEvents.class));
+        RequestReader state = new RequestLineReader(mockReadingLifecycleEvents());
 
-        for(int i = 0; i < rawRequest.length(); i++) {
+        for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);
             state = state.eval((byte) c).nextReader();
         }
@@ -39,5 +39,18 @@ public class RequestLineReaderTest {
         state = state.eval((byte) '\n').nextReader();
 
         Assertions.assertInstanceOf(HeadersReader.class, state);
+    }
+
+    private ReadingLifecycleEvents mockReadingLifecycleEvents() {
+        return new ReadingLifecycleEvents(
+                request -> {
+                },
+                () -> {
+                },
+                () -> {
+                },
+                () -> {
+                }
+        );
     }
 }

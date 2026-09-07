@@ -15,9 +15,10 @@ public class ChunkedBodyReaderTest {
     @Test
     void shouldParseSingleChunk() {
         String content = "0123456789";
-        RequestBody requestBody = new RequestBody(() -> {});
+        RequestBody requestBody = new RequestBody(() -> {
+        });
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(Mockito.mock(ReadingLifecycleEvents.class), requestBody),
+                new ChunkedBodyReader(mockReadingLifecycleEvents(), requestBody),
                 "A\r\n%s\r\n0\r\n\r\n".formatted(content)
         );
         String body = buildBody(requestBody);
@@ -28,9 +29,10 @@ public class ChunkedBodyReaderTest {
 
     @Test
     void shouldParseMultipleChunks() {
-        RequestBody requestBody = new RequestBody(() -> {});
+        RequestBody requestBody = new RequestBody(() -> {
+        });
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(Mockito.mock(ReadingLifecycleEvents.class), requestBody),
+                new ChunkedBodyReader(mockReadingLifecycleEvents(), requestBody),
                 "5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n"
         );
         String body = buildBody(requestBody);
@@ -58,5 +60,18 @@ public class ChunkedBodyReaderTest {
         }
 
         return body.toString();
+    }
+
+    private ReadingLifecycleEvents mockReadingLifecycleEvents() {
+        return new ReadingLifecycleEvents(
+                request -> {
+                },
+                () -> {
+                },
+                () -> {
+                },
+                () -> {
+                }
+        );
     }
 }
