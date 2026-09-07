@@ -5,6 +5,7 @@ import router.Router;
 public record ServerConfiguration(
         int port,
         int threadPoolSize,
-        Router router
+        Router router,
+        long requestTimeoutTime
 ) {
 }
