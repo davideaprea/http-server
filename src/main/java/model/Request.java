@@ -6,7 +6,6 @@ import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @AllArgsConstructor
 @Builder
@@ -23,19 +22,6 @@ public class Request {
 
     @Getter
     private final RequestBody body;
-
-    public Optional<Long> getContentLength() {
-        return Optional
-                .ofNullable(headers.get(HeaderKey.CONTENT_LENGTH.getValue()))
-                .map(List::getFirst)
-                .map(Long::parseLong);
-    }
-
-    public Optional<String> getTransferEncoding() {
-        return Optional
-                .ofNullable(headers.get(HeaderKey.TRANSFER_ENCODING.getValue()))
-                .map(List::getFirst);
-    }
 
     public Map<String, List<String>> getHeaders() {
         return Map.copyOf(headers);

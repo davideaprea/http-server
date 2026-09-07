@@ -1,9 +1,10 @@
 package reader;
 
-import common.TimedOperation;
-import model.RequestBody;
 import client.channel.ClientRequestsQueue;
+import common.TimedOperation;
+import model.HeaderKey;
 import model.Request;
+import model.RequestBody;
 import parser.HeaderParser;
 import parser.dto.Header;
 
@@ -44,8 +45,24 @@ public class HeadersReader extends RequestReader {
                             .headers(headers)
                             .body(requestBody)
                             .build();
-                    Optional<Long> contentLengthValue = request.getContentLength();
-                    Optional<String> transferEncodingValue = request.getTransferEncoding().filter("chunked"::equals);
+                    Optional<Long> contentLengthValue = Optional.ofNullable(headers.get(HeaderKey.CONTENT_LENGTH.getValue()))
+                            .filter(values -> !values.isEmpty())
+                            .map(values -> {
+                                if (values.size() > 1) {
+                                    throw new IllegalStateException();
+                                }
+
+                                long value = Long.parseLong(values.getFirst());
+
+                                if (value < 0) {
+                                    throw new IllegalArgumentException();
+                                }
+
+                                return value;
+                            });
+                    Optional<String> transferEncodingValue = Optional
+                            .ofNullable(headers.get(HeaderKey.TRANSFER_ENCODING.getValue()))
+                            .map(List::getFirst);
 
                     if (contentLengthValue.isPresent() && transferEncodingValue.isPresent()) {
                         throw new IllegalStateException("Both content length and transfer encoding headers are present.");
