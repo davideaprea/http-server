@@ -70,7 +70,7 @@ public class HeadersReader extends RequestReader {
 
                     RequestReader nextReader;
 
-                    if (contentLengthValue.filter(v -> v > 0).isPresent()) {
+                    if (contentLengthValue.isPresent()) {
                         nextReader = new ContentLengthBodyReader(
                                 clientRequestsQueue,
                                 onReadingAvailable,
