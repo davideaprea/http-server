@@ -41,7 +41,7 @@ class ServerTest {
                 ))
                 .build();
 
-        server = new Server(new ServerConfiguration(PORT, 3, router));
+        server = new Server(new ServerConfiguration(PORT, 3, router, 1));
 
         serverThread = new Thread(() -> {
             try {

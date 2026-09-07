@@ -1,20 +1,17 @@
 package reader;
 
-import client.ClientRequestsQueue;
-import model.Request;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import reader.dto.ReadingLifecycleEvents;
 import reader.lifecycle.HeadersReader;
 import reader.lifecycle.RequestLineReader;
 import reader.lifecycle.RequestReader;
 
-import java.util.function.Consumer;
-
 public class RequestLineReaderTest {
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
-        RequestLineReader reader = new RequestLineReader(Mockito.mock(ClientRequestsQueue.class), () -> {}, Mockito.mock());
+        RequestLineReader reader = new RequestLineReader(Mockito.mock(ReadingLifecycleEvents.class));
         RequestReader result = reader.eval((byte) 'G').nextReader();
 
         Assertions.assertSame(reader, result);
@@ -22,8 +19,7 @@ public class RequestLineReaderTest {
 
     @Test
     void shouldRemainInSameStateWhenReceivingCarriageReturn() {
-        Consumer<Request> context = Mockito.mock(ClientRequestsQueue.class);
-        RequestLineReader reader = new RequestLineReader(context, () -> {}, Mockito.mock());
+        RequestLineReader reader = new RequestLineReader(Mockito.mock(ReadingLifecycleEvents.class));
         RequestReader result = reader.eval((byte) '\r').nextReader();
 
         Assertions.assertSame(reader, result);
@@ -31,9 +27,8 @@ public class RequestLineReaderTest {
 
     @Test
     void shouldPassInReadingHeadersState() {
-        Consumer<Request> context = Mockito.mock(ClientRequestsQueue.class);
         String rawRequest = "GET /path HTTP/1.1";
-        RequestReader state = new RequestLineReader(context, () -> {}, Mockito.mock());
+        RequestReader state = new RequestLineReader(Mockito.mock(ReadingLifecycleEvents.class));
 
         for(int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);

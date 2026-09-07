@@ -9,7 +9,7 @@ public class ContentLengthBodyReader extends RequestReader {
 
     private long remainingBytes;
 
-    protected ContentLengthBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody, long remainingBytes) {
+    public ContentLengthBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody, long remainingBytes) {
         super(readingLifecycleEvents);
         this.requestBody = requestBody;
         this.remainingBytes = remainingBytes;

@@ -17,7 +17,7 @@ public class HeadersReader extends RequestReader {
 
     private ReadingState readingState = ReadingState.NORMAL;
 
-    protected HeadersReader(ReadingLifecycleEvents readingLifecycleEvents, Request.RequestBuilder requestBuilder) {
+    public HeadersReader(ReadingLifecycleEvents readingLifecycleEvents, Request.RequestBuilder requestBuilder) {
         super(readingLifecycleEvents);
         this.requestBuilder = requestBuilder;
     }

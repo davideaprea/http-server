@@ -1,11 +1,11 @@
 package reader;
 
-import client.ClientRequestsQueue;
 import model.HeaderKey;
 import model.Request;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import reader.dto.ReadingLifecycleEvents;
 import reader.lifecycle.ChunkedBodyReader;
 import reader.lifecycle.ContentLengthBodyReader;
 import reader.lifecycle.HeadersReader;
@@ -71,10 +71,7 @@ public class HeadersReaderTest {
 
     private HeadersReader withMocks() {
         return new HeadersReader(
-                Mockito.mock(ClientRequestsQueue.class),
-                () -> {
-                },
-                Mockito.mock(),
+                Mockito.mock(ReadingLifecycleEvents.class),
                 Request.builder()
         );
     }

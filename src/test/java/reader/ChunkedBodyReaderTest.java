@@ -4,6 +4,7 @@ import model.RequestBody;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import reader.dto.ReadingLifecycleEvents;
 import reader.lifecycle.ChunkedBodyReader;
 import reader.lifecycle.RequestLineReader;
 import reader.lifecycle.RequestReader;
@@ -16,8 +17,7 @@ public class ChunkedBodyReaderTest {
         String content = "0123456789";
         RequestBody requestBody = new RequestBody(() -> {});
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(null, () -> {
-                }, Mockito.mock(), requestBody),
+                new ChunkedBodyReader(Mockito.mock(ReadingLifecycleEvents.class), requestBody),
                 "A\r\n%s\r\n0\r\n\r\n".formatted(content)
         );
         String body = buildBody(requestBody);
@@ -30,8 +30,7 @@ public class ChunkedBodyReaderTest {
     void shouldParseMultipleChunks() {
         RequestBody requestBody = new RequestBody(() -> {});
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(null, () -> {
-                }, Mockito.mock(), requestBody),
+                new ChunkedBodyReader(Mockito.mock(ReadingLifecycleEvents.class), requestBody),
                 "5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n"
         );
         String body = buildBody(requestBody);

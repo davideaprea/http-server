@@ -13,7 +13,7 @@ public class ChunkedBodyReader extends RequestReader {
 
     private final RequestBody requestBody;
 
-    protected ChunkedBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody) {
+    public ChunkedBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody) {
         super(readingLifecycleEvents);
         this.requestBody = requestBody;
     }
