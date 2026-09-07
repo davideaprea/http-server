@@ -1,5 +1,6 @@
 package reader.lifecycle;
 
+import common.MalformedRequestException;
 import model.RequestBody;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
@@ -18,7 +19,6 @@ public class ChunkedBodyReader extends RequestReader {
         this.requestBody = requestBody;
     }
 
-
     @Override
     public ReadResult eval(byte requestByte) {
         if (isReadingChunkSize) {
@@ -26,13 +26,13 @@ public class ChunkedBodyReader extends RequestReader {
 
             if (currChar == '\r') {
                 if (!ReadingState.NORMAL.equals(readingState)) {
-                    throw new IllegalStateException();
+                    throw new MalformedRequestException("Invalid CRLF sequence in body chunk.");
                 }
 
                 readingState = ReadingState.CARRIAGE_RETURN;
             } else if (currChar == '\n') {
                 if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
-                    throw new IllegalStateException();
+                    throw new MalformedRequestException("Invalid CRLF sequence in body chunk.");
                 }
 
                 readingState = ReadingState.NORMAL;
@@ -50,13 +50,13 @@ public class ChunkedBodyReader extends RequestReader {
             } else {
                 if ((char) requestByte == '\r') {
                     if (!ReadingState.NORMAL.equals(readingState)) {
-                        throw new IllegalStateException();
+                        throw new MalformedRequestException("Invalid CRLF sequence in body chunk.");
                     }
 
                     readingState = ReadingState.CARRIAGE_RETURN;
                 } else if ((char) requestByte == '\n') {
                     if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
-                        throw new IllegalStateException();
+                        throw new MalformedRequestException("Invalid CRLF sequence in body chunk.");
                     }
 
                     readingState = ReadingState.NORMAL;
@@ -72,7 +72,7 @@ public class ChunkedBodyReader extends RequestReader {
                         );
                     }
                 } else {
-                    throw new IllegalStateException("Malformed request.");
+                    throw new MalformedRequestException("Invalid character found in body chunk.");
                 }
             }
         }

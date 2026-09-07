@@ -1,5 +1,6 @@
 package reader.lifecycle;
 
+import common.MalformedRequestException;
 import model.Request;
 import parser.RequestTargetParser;
 import parser.dto.RequestTarget;
@@ -26,7 +27,7 @@ public class RequestLineReader extends RequestReader {
         switch (c) {
             case '\n' -> {
                 if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
-                    throw new IllegalStateException();
+                    throw new MalformedRequestException("Invalid CRLF sequence in request line.");
                 }
 
                 RequestTarget requestTarget = RequestTargetParser.from(requestLineBuilder.toString());
@@ -46,7 +47,7 @@ public class RequestLineReader extends RequestReader {
             }
             case '\r' -> {
                 if (!ReadingState.NORMAL.equals(readingState)) {
-                    throw new IllegalStateException();
+                    throw new MalformedRequestException("Invalid CRLF sequence in request line.");
                 }
 
                 readingState = ReadingState.CARRIAGE_RETURN;

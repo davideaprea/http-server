@@ -1,5 +1,6 @@
 package reader.lifecycle;
 
+import common.MalformedRequestException;
 import model.HeaderKey;
 import model.Request;
 import model.RequestBody;
@@ -29,14 +30,14 @@ public class HeadersReader extends RequestReader {
         switch (c) {
             case '\r' -> {
                 if (!ReadingState.NORMAL.equals(readingState)) {
-                    throw new IllegalStateException();
+                    throw new MalformedRequestException("Invalid CRLF sequence in headers.");
                 }
 
                 readingState = ReadingState.CARRIAGE_RETURN;
             }
             case '\n' -> {
                 if (!ReadingState.CARRIAGE_RETURN.equals(readingState)) {
-                    throw new IllegalStateException();
+                    throw new MalformedRequestException("Invalid CRLF sequence in headers.");
                 }
 
                 if (currentLine.isEmpty()) {
@@ -49,13 +50,13 @@ public class HeadersReader extends RequestReader {
                             .filter(values -> !values.isEmpty())
                             .map(values -> {
                                 if (values.size() > 1) {
-                                    throw new IllegalStateException();
+                                    throw new MalformedRequestException("Content length header allows only one value.");
                                 }
 
                                 long value = Long.parseLong(values.getFirst());
 
                                 if (value < 0) {
-                                    throw new IllegalArgumentException();
+                                    throw new MalformedRequestException("Content length header allows only zero or positive values.");
                                 }
 
                                 return value;
@@ -65,7 +66,7 @@ public class HeadersReader extends RequestReader {
                             .map(List::getFirst);
 
                     if (contentLengthValue.isPresent() && transferEncodingValue.isPresent()) {
-                        throw new IllegalStateException("Both content length and transfer encoding headers are present.");
+                        throw new MalformedRequestException("Content length and transfer encoding headers can't be present in the same request.");
                     }
 
                     RequestReader nextReader;

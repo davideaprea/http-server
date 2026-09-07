@@ -2,7 +2,6 @@ package client;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -18,7 +17,7 @@ public class ClientOutputChannel {
         try {
             while (!bodyChunks.isEmpty()) {
                 ByteBuffer buffer = bodyChunks.peek();
-                int written = ((SocketChannel) clientChannelKey.getSocketChannel()).write(buffer);
+                int written = clientChannelKey.getSocketChannel().write(buffer);
 
                 if (written == 0) {
                     return;

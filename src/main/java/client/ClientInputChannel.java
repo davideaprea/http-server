@@ -28,7 +28,7 @@ public class ClientInputChannel {
             return;
         }
 
-        SocketChannel client = (SocketChannel) clientChannelKey.getSocketChannel();
+        SocketChannel client = clientChannelKey.getSocketChannel();
         int bytesRead;
 
         while (true) {
