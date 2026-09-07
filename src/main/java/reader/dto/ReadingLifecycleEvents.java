@@ -1,4 +1,4 @@
-package reader;
+package reader.dto;
 
 import lombok.Builder;
 import model.Request;

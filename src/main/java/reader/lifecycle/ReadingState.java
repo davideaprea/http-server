@@ -1,4 +1,4 @@
-package reader;
+package reader.lifecycle;
 
 public enum ReadingState {
     NORMAL,

@@ -1,4 +1,7 @@
-package reader;
+package reader.lifecycle;
+
+import reader.dto.ReadResult;
+import reader.dto.ReadingLifecycleEvents;
 
 public abstract class RequestReader {
     protected final ReadingLifecycleEvents readingLifecycleEvents;

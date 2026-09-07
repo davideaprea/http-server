@@ -6,6 +6,10 @@ import model.Request;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import reader.lifecycle.ChunkedBodyReader;
+import reader.lifecycle.ContentLengthBodyReader;
+import reader.lifecycle.HeadersReader;
+import reader.lifecycle.RequestReader;
 
 public class HeadersReaderTest {
     private static final String CRLF = "\r" + '\n';

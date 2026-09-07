@@ -1,8 +1,8 @@
 package client;
 
-import reader.ReadResult;
-import reader.ReadingLifecycleEvents;
-import reader.RequestLineReader;
+import reader.dto.ReadResult;
+import reader.dto.ReadingLifecycleEvents;
+import reader.lifecycle.RequestLineReader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

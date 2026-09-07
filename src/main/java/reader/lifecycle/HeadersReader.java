@@ -1,10 +1,12 @@
-package reader;
+package reader.lifecycle;
 
 import model.HeaderKey;
 import model.Request;
 import model.RequestBody;
 import parser.HeaderParser;
 import parser.dto.Header;
+import reader.dto.ReadResult;
+import reader.dto.ReadingLifecycleEvents;
 
 import java.util.*;
 

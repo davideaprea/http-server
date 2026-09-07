@@ -1,6 +1,8 @@
-package reader;
+package reader.lifecycle;
 
 import model.RequestBody;
+import reader.dto.ReadResult;
+import reader.dto.ReadingLifecycleEvents;
 
 public class ChunkedBodyReader extends RequestReader {
     private boolean isReadingChunkSize = true;

@@ -2,7 +2,7 @@ package server;
 
 import client.*;
 import common.TimedOperation;
-import reader.ReadingLifecycleEvents;
+import reader.dto.ReadingLifecycleEvents;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

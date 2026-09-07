@@ -4,6 +4,9 @@ import client.ClientRequestsQueue;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import reader.lifecycle.ContentLengthBodyReader;
+import reader.lifecycle.RequestLineReader;
+import reader.lifecycle.RequestReader;
 
 public class ContentLengthBodyReaderTest {
     @Test

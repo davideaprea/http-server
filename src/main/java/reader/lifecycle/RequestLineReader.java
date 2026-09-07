@@ -1,8 +1,10 @@
-package reader;
+package reader.lifecycle;
 
 import model.Request;
 import parser.RequestTargetParser;
 import parser.dto.RequestTarget;
+import reader.dto.ReadResult;
+import reader.dto.ReadingLifecycleEvents;
 
 public class RequestLineReader extends RequestReader {
     private final StringBuilder requestLineBuilder = new StringBuilder();

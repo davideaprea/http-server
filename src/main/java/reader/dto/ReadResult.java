@@ -1,4 +1,6 @@
-package reader;
+package reader.dto;
+
+import reader.lifecycle.RequestReader;
 
 public record ReadResult(
         RequestReader nextReader,

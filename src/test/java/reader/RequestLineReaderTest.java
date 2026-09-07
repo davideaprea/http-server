@@ -5,6 +5,9 @@ import model.Request;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import reader.lifecycle.HeadersReader;
+import reader.lifecycle.RequestLineReader;
+import reader.lifecycle.RequestReader;
 
 import java.util.function.Consumer;
 
