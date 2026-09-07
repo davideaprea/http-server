@@ -1,13 +1,15 @@
 package parser.dto;
 
-import common.MultiValueMap;
 import model.Method;
 import model.Version;
+
+import java.util.List;
+import java.util.Map;
 
 public record RequestTarget(
         Method method,
         Version version,
         String url,
-        MultiValueMap<String, String> queryParams
+        Map<String, List<String>> queryParams
 ) {
 }

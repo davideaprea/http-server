@@ -1,6 +1,5 @@
 package reader;
 
-import common.MultiValueMap;
 import common.TimedOperation;
 import model.RequestBody;
 import client.channel.ClientRequestsQueue;
@@ -8,12 +7,12 @@ import model.Request;
 import parser.HeaderParser;
 import parser.dto.Header;
 
-import java.util.Optional;
+import java.util.*;
 
 public class HeadersReader extends RequestReader {
     private final Request.RequestBuilder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
-    private final MultiValueMap<String, String> headers = new MultiValueMap<>();
+    private final Map<String, List<String>> headers = new HashMap<>();
 
     private ReadingState readingState = ReadingState.NORMAL;
 
@@ -79,7 +78,7 @@ public class HeadersReader extends RequestReader {
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
 
-                    headers.add(header.name(), header.value());
+                    headers.computeIfAbsent(header.name(), k -> new ArrayList<>()).add(header.value());
                     currentLine.setLength(0);
                 }
 

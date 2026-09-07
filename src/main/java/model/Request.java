@@ -1,11 +1,11 @@
 package model;
 
-import common.MultiValueMap;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -18,8 +18,8 @@ public class Request {
     @Getter
     private final String url;
 
-    private final MultiValueMap<String, String> queryParams;
-    private final MultiValueMap<String, String> headers;
+    private final Map<String, List<String>> queryParams;
+    private final Map<String, List<String>> headers;
     private final RequestBody body;
 
     public Optional<Long> getContentLength() {

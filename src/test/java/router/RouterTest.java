@@ -1,11 +1,11 @@
 package router;
 
-import common.MultiValueMap;
 import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import router.dto.HandlerCreateCommand;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class RouterTest {
@@ -30,8 +30,8 @@ public class RouterTest {
                 command.method(),
                 Version.HTTP_1_1,
                 command.path(),
-                new MultiValueMap<>(),
-                new MultiValueMap<>(),
+                new HashMap<>(),
+                new HashMap<>(),
                 null
         ));
 
@@ -52,8 +52,8 @@ public class RouterTest {
                 command.method(),
                 Version.HTTP_1_1,
                 "/non/existing/path",
-                new MultiValueMap<>(),
-                new MultiValueMap<>(),
+                new HashMap<>(),
+                new HashMap<>(),
                 null
         ));
 
@@ -74,8 +74,8 @@ public class RouterTest {
                 Method.POST,
                 Version.HTTP_1_1,
                 command.path(),
-                new MultiValueMap<>(),
-                new MultiValueMap<>(),
+                new HashMap<>(),
+                new HashMap<>(),
                 null
         ));
 

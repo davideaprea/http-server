@@ -1,6 +1,5 @@
 package parser;
 
-import common.MultiValueMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import model.Method;
@@ -9,7 +8,7 @@ import parser.dto.RequestTarget;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RequestTargetParser {
@@ -28,7 +27,7 @@ public final class RequestTargetParser {
 
         int paramsStartIndex = requestTarget.indexOf('?');
         String path = paramsStartIndex > -1 ? requestTarget.substring(0, paramsStartIndex) : requestTarget;
-        MultiValueMap<String, String> queryParams = new MultiValueMap<>();
+        Map<String, List<String>> queryParams = new HashMap<>();
 
         if (paramsStartIndex > -1 && paramsStartIndex + 1 < requestTarget.length()) {
             String rawQuery = requestTarget.substring(paramsStartIndex + 1);
@@ -42,7 +41,7 @@ public final class RequestTargetParser {
                         String key = URLDecoder.decode(rawKey, StandardCharsets.UTF_8);
                         String value = URLDecoder.decode(rawValue, StandardCharsets.UTF_8);
 
-                        queryParams.add(key, value);
+                        queryParams.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
                     });
         }
 

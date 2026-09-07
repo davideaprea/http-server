@@ -1,12 +1,14 @@
 package parser;
 
-import common.MultiValueMap;
 import model.Method;
 import model.Version;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import parser.dto.RequestTarget;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 public class RequestTargetParserTest {
@@ -18,7 +20,7 @@ public class RequestTargetParserTest {
                 Method.POST,
                 Version.HTTP_1_1,
                 "/a/b/c",
-                new MultiValueMap<>()
+                new HashMap<>()
         ), requestLine);
     }
 
@@ -54,7 +56,7 @@ public class RequestTargetParserTest {
                 Method.GET,
                 Version.HTTP_1_1,
                 "/target",
-                new MultiValueMap<>()
+                new HashMap<>()
         ), requestTarget);
     }
 
@@ -73,11 +75,11 @@ public class RequestTargetParserTest {
                 Method.GET,
                 Version.HTTP_1_1,
                 "/target",
-                new MultiValueMap<String, String>()
-                        .add("a", "1")
-                        .add("a", "3")
-                        .add("b", "2")
-                        .add("name", "John=Doe")
+                Map.of(
+                        "a", List.of("1", "3"),
+                        "b", List.of("2"),
+                        "name", List.of("John=Doe")
+                )
         ), requestTarget);
     }
 
@@ -88,7 +90,7 @@ public class RequestTargetParserTest {
                         Method.GET,
                         Version.HTTP_1_1,
                         "/",
-                        new MultiValueMap<>()
+                        new HashMap<>()
                 ),
                 RequestTargetParser.from("GET /? HTTP/1.1")
         );
