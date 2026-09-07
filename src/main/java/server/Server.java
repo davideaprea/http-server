@@ -62,8 +62,6 @@ public class Server {
                             outputChannel
                     ));
                 } else if (key.isReadable()) {
-                    SocketChannel socketChannel = (SocketChannel) key.channel();
-
                     ((Client) key.attachment()).inputChannel().read();
                 } else if (key.isWritable()) {
                     ((Client) key.attachment()).outputChannel().flush();
@@ -75,5 +73,6 @@ public class Server {
     public void stop() throws IOException {
         selector.close();
         executor.shutdownNow();
+        timersScheduler.close();
     }
 }
