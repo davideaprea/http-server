@@ -11,7 +11,7 @@ public abstract class ClientChannel {
     }
 
 
-    protected void close() {
+    public void close() {
         clientKey.cancel();
 
         try {

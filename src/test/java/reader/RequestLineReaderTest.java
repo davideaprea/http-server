@@ -1,9 +1,12 @@
 package reader;
 
 import client.ClientRequestsQueue;
+import model.Request;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.util.function.Consumer;
 
 public class RequestLineReaderTest {
     @Test
@@ -16,7 +19,7 @@ public class RequestLineReaderTest {
 
     @Test
     void shouldRemainInSameStateWhenReceivingCarriageReturn() {
-        ClientRequestsQueue context = Mockito.mock(ClientRequestsQueue.class);
+        Consumer<Request> context = Mockito.mock(ClientRequestsQueue.class);
         RequestLineReader reader = new RequestLineReader(context, () -> {}, Mockito.mock());
         RequestReader result = reader.eval((byte) '\r').nextReader();
 
@@ -25,7 +28,7 @@ public class RequestLineReaderTest {
 
     @Test
     void shouldPassInReadingHeadersState() {
-        ClientRequestsQueue context = Mockito.mock(ClientRequestsQueue.class);
+        Consumer<Request> context = Mockito.mock(ClientRequestsQueue.class);
         String rawRequest = "GET /path HTTP/1.1";
         RequestReader state = new RequestLineReader(context, () -> {}, Mockito.mock());
 

@@ -1,7 +1,5 @@
 package reader;
 
-import client.ClientRequestsQueue;
-import common.TimedOperation;
 import model.HeaderKey;
 import model.Request;
 import model.RequestBody;
@@ -17,8 +15,8 @@ public class HeadersReader extends RequestReader {
 
     private ReadingState readingState = ReadingState.NORMAL;
 
-    protected HeadersReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, TimedOperation timedOperation, Request.RequestBuilder requestBuilder) {
-        super(clientRequestsQueue, onReadingAvailable, timedOperation);
+    protected HeadersReader(ReadingLifecycleEvents readingLifecycleEvents, Request.RequestBuilder requestBuilder) {
+        super(readingLifecycleEvents);
         this.requestBuilder = requestBuilder;
     }
 
@@ -40,7 +38,7 @@ public class HeadersReader extends RequestReader {
                 }
 
                 if (currentLine.isEmpty()) {
-                    RequestBody requestBody = new RequestBody(onReadingAvailable);
+                    RequestBody requestBody = new RequestBody(readingLifecycleEvents.onReadingAvailable());
                     Request request = requestBuilder
                             .headers(headers)
                             .body(requestBody)
@@ -72,21 +70,19 @@ public class HeadersReader extends RequestReader {
 
                     if (contentLengthValue.isPresent()) {
                         nextReader = new ContentLengthBodyReader(
-                                clientRequestsQueue,
-                                onReadingAvailable,
-                                timedOperation,
+                                readingLifecycleEvents,
                                 requestBody,
                                 contentLengthValue.get()
                         );
                     } else if (transferEncodingValue.isPresent()) {
-                        nextReader = new ChunkedBodyReader(clientRequestsQueue, onReadingAvailable, timedOperation, requestBody);
+                        nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody);
                     } else {
                         requestBody.enqueue(-1);
 
-                        nextReader = new RequestLineReader(clientRequestsQueue, onReadingAvailable, timedOperation);
+                        nextReader = new RequestLineReader(readingLifecycleEvents);
                     }
 
-                    clientRequestsQueue.enqueue(request);
+                    readingLifecycleEvents.onNewRequest().accept(request);
 
                     return new ReadResult(
                             nextReader,

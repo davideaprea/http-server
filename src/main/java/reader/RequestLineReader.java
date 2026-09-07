@@ -1,7 +1,5 @@
 package reader;
 
-import client.ClientRequestsQueue;
-import common.TimedOperation;
 import model.Request;
 import parser.RequestTargetParser;
 import parser.dto.RequestTarget;
@@ -12,11 +10,12 @@ public class RequestLineReader extends RequestReader {
 
     private ReadingState readingState = ReadingState.NORMAL;
 
-    public RequestLineReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, TimedOperation timedOperation) {
-        super(clientRequestsQueue, onReadingAvailable, timedOperation);
+    public RequestLineReader(ReadingLifecycleEvents readingLifecycleEvents) {
+        super(readingLifecycleEvents);
 
-        timedOperation.start();
+        readingLifecycleEvents.onStart().run();
     }
+
 
     @Override
     public ReadResult eval(byte requestByte) {
@@ -39,7 +38,7 @@ public class RequestLineReader extends RequestReader {
                 readingState = ReadingState.NORMAL;
 
                 return new ReadResult(
-                        new HeadersReader(clientRequestsQueue, onReadingAvailable, timedOperation, requestBuilder),
+                        new HeadersReader(readingLifecycleEvents, requestBuilder),
                         ReadResult.NextAction.PROCEED
                 );
             }

@@ -1,8 +1,6 @@
 package reader;
 
-import common.TimedOperation;
 import model.RequestBody;
-import client.ClientRequestsQueue;
 
 public class ChunkedBodyReader extends RequestReader {
     private boolean isReadingChunkSize = true;
@@ -13,10 +11,11 @@ public class ChunkedBodyReader extends RequestReader {
 
     private final RequestBody requestBody;
 
-    protected ChunkedBodyReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, TimedOperation timedOperation, RequestBody requestBody) {
-        super(clientRequestsQueue, onReadingAvailable, timedOperation);
+    protected ChunkedBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody) {
+        super(readingLifecycleEvents);
         this.requestBody = requestBody;
     }
+
 
     @Override
     public ReadResult eval(byte requestByte) {
@@ -63,10 +62,10 @@ public class ChunkedBodyReader extends RequestReader {
 
                     if (currentChunkBytes == 0) {
                         requestBody.enqueue((byte) -1);
-                        timedOperation.stop();
+                        readingLifecycleEvents.onEnd().run();
 
                         return new ReadResult(
-                                new RequestLineReader(clientRequestsQueue, onReadingAvailable, timedOperation),
+                                new RequestLineReader(readingLifecycleEvents),
                                 ReadResult.NextAction.PROCEED
                         );
                     }

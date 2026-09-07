@@ -2,8 +2,9 @@ package server;
 
 import client.Client;
 import client.ClientInputChannel;
-import client.ClientRequestsQueue;
 import client.ClientOutputChannel;
+import client.ClientRequestsQueue;
+import common.TimedOperation;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,6 +16,7 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
     private final ServerConfiguration configuration;
@@ -58,7 +60,11 @@ public class Server {
                     ClientOutputChannel outputChannel = new ClientOutputChannel(clientKey);
 
                     clientKey.attach(new Client(
-                            new ClientInputChannel(timersScheduler, clientKey, new ClientRequestsQueue(configuration.router(), executor, outputChannel)),
+                            new ClientInputChannel(
+                                    new TimedOperation(timersScheduler, 1, TimeUnit.SECONDS, outputChannel::close),
+                                    clientKey,
+                                    new ClientRequestsQueue(configuration.router(), executor, outputChannel)
+                            ),
                             outputChannel
                     ));
                 } else if (key.isReadable()) {

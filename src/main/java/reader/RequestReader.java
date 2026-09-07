@@ -1,17 +1,10 @@
 package reader;
 
-import client.ClientRequestsQueue;
-import common.TimedOperation;
-
 public abstract class RequestReader {
-    protected final ClientRequestsQueue clientRequestsQueue;
-    protected final Runnable onReadingAvailable;
-    protected final TimedOperation timedOperation;
+    protected final ReadingLifecycleEvents readingLifecycleEvents;
 
-    protected RequestReader(ClientRequestsQueue clientRequestsQueue, Runnable onReadingAvailable, TimedOperation timedOperation) {
-        this.clientRequestsQueue = clientRequestsQueue;
-        this.onReadingAvailable = onReadingAvailable;
-        this.timedOperation = timedOperation;
+    protected RequestReader(ReadingLifecycleEvents readingLifecycleEvents) {
+        this.readingLifecycleEvents = readingLifecycleEvents;
     }
 
     public abstract ReadResult eval(byte requestByte);
