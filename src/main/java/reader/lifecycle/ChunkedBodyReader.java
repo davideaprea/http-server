@@ -72,7 +72,7 @@ public class ChunkedBodyReader extends RequestReader {
                         );
                     }
                 } else {
-                    throw new MalformedRequestException("Invalid character found in body chunk.");
+                    throw new IllegalStateException("Invalid character found in body chunk.");
                 }
             }
         }
