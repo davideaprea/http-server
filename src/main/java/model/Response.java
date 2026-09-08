@@ -29,6 +29,8 @@ public record Response(
             stringBuilder.append("%s: %s\r\n".formatted(h.getKey(), h.getValue()));
         }
 
+        stringBuilder.append("\r\n");
+
         return stringBuilder.toString();
     }
 }
