@@ -23,7 +23,7 @@ public class ContentLengthBodyReader extends RequestReader {
 
             reader.eval(requestByte);
 
-            return new ReadResult(reader, ReadResult.NextAction.PROCEED);
+            return new ReadResult(reader, true);
         }
 
         requestBody.enqueue(Byte.toUnsignedInt(requestByte));
@@ -34,9 +34,9 @@ public class ContentLengthBodyReader extends RequestReader {
             requestBody.enqueue(-1);
             readingLifecycleEvents.onEnd().run();
 
-            return new ReadResult(new RequestLineReader(readingLifecycleEvents), ReadResult.NextAction.PROCEED);
+            return new ReadResult(new RequestLineReader(readingLifecycleEvents), true);
         }
 
-        return new ReadResult(this, requestBody.isFull() ? ReadResult.NextAction.WAIT : ReadResult.NextAction.PROCEED);
+        return new ReadResult(this, !requestBody.isFull());
     }
 }

@@ -68,7 +68,7 @@ public class ChunkedBodyReader extends RequestReader {
 
                         return new ReadResult(
                                 new RequestLineReader(readingLifecycleEvents),
-                                ReadResult.NextAction.PROCEED
+                                true
                         );
                     }
                 } else {
@@ -77,6 +77,6 @@ public class ChunkedBodyReader extends RequestReader {
             }
         }
 
-        return new ReadResult(this, requestBody.isFull() ? ReadResult.NextAction.WAIT : ReadResult.NextAction.PROCEED);
+        return new ReadResult(this, !requestBody.isFull());
     }
 }

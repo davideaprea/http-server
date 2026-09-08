@@ -2,7 +2,6 @@ package server;
 
 import client.*;
 import common.TimedOperation;
-import reader.dto.ReadingLifecycleEvents;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -61,15 +60,11 @@ public class Server {
                     TimedOperation timedOperation = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
 
                     clientKey.attach(new Client(
-                            new ClientInputChannel(clientChannelKey, ReadingLifecycleEvents.builder()
-                                    .onNewRequest(clientRequestsQueue::enqueue)
-                                    .onReadingAvailable(() -> {
-                                        clientChannelKey.addReadInterest();
-                                        clientKey.selector().wakeup();
-                                    })
-                                    .onStart(timedOperation::start)
-                                    .onEnd(timedOperation::stop)
-                                    .build()),
+                            new ClientInputChannel(
+                                    clientChannelKey,
+                                    timedOperation,
+                                    clientRequestsQueue
+                            ),
                             outputChannel
                     ));
                 } else if (key.isReadable()) {

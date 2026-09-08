@@ -42,7 +42,7 @@ public class RequestLineReader extends RequestReader {
 
                 return new ReadResult(
                         new HeadersReader(readingLifecycleEvents, requestBuilder),
-                        ReadResult.NextAction.PROCEED
+                        true
                 );
             }
             case '\r' -> {
@@ -57,7 +57,7 @@ public class RequestLineReader extends RequestReader {
 
         return new ReadResult(
                 this,
-                ReadResult.NextAction.PROCEED
+                true
         );
     }
 }

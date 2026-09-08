@@ -4,10 +4,6 @@ import reader.lifecycle.RequestReader;
 
 public record ReadResult(
         RequestReader nextReader,
-        NextAction nextAction
+        boolean canProceed
 ) {
-    public enum NextAction {
-        PROCEED,
-        WAIT
-    }
 }

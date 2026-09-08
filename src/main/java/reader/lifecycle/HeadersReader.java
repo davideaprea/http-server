@@ -91,7 +91,7 @@ public class HeadersReader extends RequestReader {
 
                     return new ReadResult(
                             nextReader,
-                            ReadResult.NextAction.PROCEED
+                            true
                     );
                 } else {
                     Header header = HeaderParser.from(currentLine.toString());
@@ -107,7 +107,7 @@ public class HeadersReader extends RequestReader {
 
         return new ReadResult(
                 this,
-                ReadResult.NextAction.PROCEED
+                true
         );
     }
 }
