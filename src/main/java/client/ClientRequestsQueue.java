@@ -43,6 +43,8 @@ public class ClientRequestsQueue {
                     Response response = router.handle(request);
                     ByteBuffer buffer = ByteBuffer.allocate(8192);
 
+                    clientOutputChannel.write(ByteBuffer.wrap((response.toHTTPFrame()).getBytes()));
+
                     try (InputStream bodyStream = response.body()) {
                         if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
                             int bytesRead;
