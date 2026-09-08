@@ -2,13 +2,20 @@ package client;
 
 import common.MalformedRequestException;
 import common.TimedOperation;
+import model.HeaderKey;
+import model.Response;
+import model.Status;
+import model.Version;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
 import reader.lifecycle.RequestLineReader;
 import reader.lifecycle.RequestReader;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
 
 public class ClientInputChannel {
     private final ClientChannelKey clientChannelKey;
@@ -58,12 +65,10 @@ public class ClientInputChannel {
                 buffer.compact();
             } catch (Exception e) {
                 if (e instanceof MalformedRequestException) {
-
+                    sendCloseResponse(e.getMessage());
                 }
 
                 clientChannelKey.close();
-
-                return;
             }
         }
 
@@ -73,6 +78,26 @@ public class ClientInputChannel {
 
         if (bytesRead == -1) {
             clientChannelKey.close();
+        }
+    }
+
+    private void sendCloseResponse(String message) {
+        Response response = new Response(
+                Version.HTTP_1_1,
+                Status.BAD_REQUEST,
+                Map.of(
+                        HeaderKey.CONNECTION.getValue(), "close",
+                        HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
+                        HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf(message.length())
+                ),
+                new ByteArrayInputStream(message.getBytes())
+        );
+        String rawResponse = response.toHTTPFrame() + response;
+
+        try {
+            clientChannelKey.getSocketChannel().write(ByteBuffer.wrap(rawResponse.getBytes()));
+        } catch (IOException e) {
+            System.out.println("Connection's closed.");
         }
     }
 }

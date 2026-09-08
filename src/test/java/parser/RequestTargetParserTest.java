@@ -1,5 +1,6 @@
 package parser;
 
+import common.MalformedRequestException;
 import model.Method;
 import model.Version;
 import org.junit.jupiter.api.Assertions;
@@ -27,7 +28,7 @@ public class RequestTargetParserTest {
     @Test
     void testInvalidMethod() {
         Assertions.assertThrows(
-                IllegalArgumentException.class,
+                MalformedRequestException.class,
                 () -> RequestTargetParser.from("INVALID-METHOD /a/b/c HTTP/1.1")
         );
     }
@@ -35,7 +36,7 @@ public class RequestTargetParserTest {
     @Test
     void testInvalidVersion() {
         Assertions.assertThrows(
-                NoSuchElementException.class,
+                MalformedRequestException.class,
                 () -> RequestTargetParser.from("POST /a/b/c INVALID-VERSION")
         );
     }
@@ -43,7 +44,7 @@ public class RequestTargetParserTest {
     @Test
     void testMissingPart() {
         Assertions.assertThrows(
-                IllegalArgumentException.class,
+                MalformedRequestException.class,
                 () -> RequestTargetParser.from("POST HTTP/1.1")
         );
     }
@@ -63,7 +64,7 @@ public class RequestTargetParserTest {
     @Test
     void parseInvalid() {
         Assertions.assertThrows(
-                IllegalArgumentException.class,
+                MalformedRequestException.class,
                 () -> RequestTargetParser.from("target")
         );
     }

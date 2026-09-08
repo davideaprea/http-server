@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import router.dto.HandlerCreateCommand;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public class RouterTest {
                 Version.HTTP_1_1,
                 Status.OK,
                 Map.of(),
-                null
+                InputStream.nullInputStream()
         );
         HandlerCreateCommand command = new HandlerCreateCommand(
                 request -> mockResponse,
@@ -32,7 +33,7 @@ public class RouterTest {
                 command.path(),
                 new HashMap<>(),
                 new HashMap<>(),
-                null
+                new RequestBody(() -> {})
         ));
 
         Assertions.assertEquals(mockResponse, response);
