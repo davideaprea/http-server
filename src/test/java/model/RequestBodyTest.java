@@ -1,4 +1,4 @@
-package common.queue;
+package model;
 
 import model.RequestBody;
 import org.junit.jupiter.api.Assertions;
