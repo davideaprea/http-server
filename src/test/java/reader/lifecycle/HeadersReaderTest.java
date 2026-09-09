@@ -1,5 +1,6 @@
 package reader.lifecycle;
 
+import common.MalformedRequestException;
 import model.HeaderKey;
 import model.Request;
 import org.junit.jupiter.api.Assertions;
@@ -62,6 +63,61 @@ public class HeadersReaderTest {
         }
 
         Assertions.assertInstanceOf(ChunkedBodyReader.class, state);
+    }
+
+    @Test
+    void testNegativeContentLength() {
+        Assertions.assertThrows(MalformedRequestException.class, () -> {
+            String rawRequest = HeaderKey.CONTENT_LENGTH.getValue() + ": -1" + CRLF + CRLF;
+            RequestReader state = withMocks();
+
+            for (int i = 0; i < rawRequest.length(); i++) {
+                char c = rawRequest.charAt(i);
+                state = state.eval((byte) c).nextReader();
+            }
+        });
+    }
+
+    @Test
+    void testDoubleContentLength() {
+        Assertions.assertThrows(MalformedRequestException.class, () -> {
+            String contentLengthHeader = HeaderKey.CONTENT_LENGTH.getValue() + ": 1";
+            String rawRequest = contentLengthHeader + CRLF + contentLengthHeader + CRLF + CRLF;
+            RequestReader state = withMocks();
+
+            for (int i = 0; i < rawRequest.length(); i++) {
+                char c = rawRequest.charAt(i);
+                state = state.eval((byte) c).nextReader();
+            }
+        });
+    }
+
+    @Test
+    void testTransferEncodingAndContentLengthPresentAtTheSameTime() {
+        Assertions.assertThrows(MalformedRequestException.class, () -> {
+            String contentLengthHeader = HeaderKey.CONTENT_LENGTH.getValue() + ": 1";
+            String transferEncodingHeader = HeaderKey.TRANSFER_ENCODING.getValue() + ": chunked";
+            String rawRequest = contentLengthHeader + CRLF + transferEncodingHeader + CRLF + CRLF;
+            RequestReader state = withMocks();
+
+            for (int i = 0; i < rawRequest.length(); i++) {
+                char c = rawRequest.charAt(i);
+                state = state.eval((byte) c).nextReader();
+            }
+        });
+    }
+
+    @Test
+    void testZeroContentLength() {
+        String contentLengthHeader = HeaderKey.CONTENT_LENGTH.getValue() + ": 0" + CRLF + CRLF;
+        RequestReader state = withMocks();
+
+        for (int i = 0; i < contentLengthHeader.length(); i++) {
+            char c = contentLengthHeader.charAt(i);
+            state = state.eval((byte) c).nextReader();
+        }
+
+        Assertions.assertInstanceOf(RequestLineReader.class, state);
     }
 
     private HeadersReader withMocks() {
