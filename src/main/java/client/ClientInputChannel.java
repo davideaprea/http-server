@@ -46,10 +46,10 @@ public class ClientInputChannel {
         }
 
         SocketChannel client = clientChannelKey.getSocketChannel();
-        int bytesRead;
+        int bytesRead = 0;
 
-        while (true) {
-            try {
+        try {
+            while (true) {
                 bytesRead = client.read(buffer);
 
                 if (bytesRead <= 0) break;
@@ -63,13 +63,13 @@ public class ClientInputChannel {
                 }
 
                 buffer.compact();
-            } catch (Exception e) {
-                if (e instanceof MalformedRequestException) {
-                    sendCloseResponse(e.getMessage());
-                }
-
-                clientChannelKey.close();
             }
+        } catch (Exception e) {
+            if (e instanceof MalformedRequestException) {
+                sendCloseResponse(e.getMessage());
+            }
+
+            clientChannelKey.close();
         }
 
         if (!isFree) {
