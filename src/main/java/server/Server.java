@@ -18,22 +18,19 @@ import java.util.concurrent.TimeUnit;
 public class Server {
     private final ServerConfiguration configuration;
     private final ExecutorService executor;
-    private final ScheduledExecutorService timersScheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService timersScheduler;
 
     private Selector selector;
 
     public Server(ServerConfiguration configuration) {
         this.configuration = configuration;
         executor = Executors.newFixedThreadPool(configuration.threadPoolSize());
+        timersScheduler = Executors.newScheduledThreadPool(1);
     }
 
     public void start() throws IOException {
         selector = Selector.open();
-        ServerSocketChannel serverChannel = ServerSocketChannel.open();
-
-        serverChannel.configureBlocking(false);
-        serverChannel.bind(new InetSocketAddress(configuration.port()));
-        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+        ServerSocketChannel serverChannel = createServerChannel();
 
         while (selector.isOpen() && serverChannel.isOpen()) {
             selector.select();
@@ -54,19 +51,8 @@ public class Server {
                     client.configureBlocking(false);
 
                     SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
-                    ClientChannelKey clientChannelKey = new ClientChannelKey(clientKey);
-                    ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
-                    ClientRequestsQueue clientRequestsQueue = new ClientRequestsQueue(configuration.router(), executor, outputChannel, clientChannelKey);
-                    TimedOperation timedOperation = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
 
-                    clientKey.attach(new Client(
-                            new ClientInputChannel(
-                                    clientChannelKey,
-                                    timedOperation,
-                                    clientRequestsQueue
-                            ),
-                            outputChannel
-                    ));
+                    clientKey.attach(createClient(clientKey));
                 } else if (key.isReadable()) {
                     ((Client) key.attachment()).inputChannel().read();
                 } else if (key.isWritable()) {
@@ -74,6 +60,32 @@ public class Server {
                 }
             }
         }
+    }
+
+    private Client createClient(SelectionKey selectionKey) {
+        ClientChannelKey clientChannelKey = new ClientChannelKey(selectionKey);
+        ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
+        ClientRequestsQueue clientRequestsQueue = new ClientRequestsQueue(configuration.router(), executor, outputChannel, clientChannelKey);
+        TimedOperation timedOperation = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
+
+        return new Client(
+                new ClientInputChannel(
+                        clientChannelKey,
+                        timedOperation,
+                        clientRequestsQueue
+                ),
+                outputChannel
+        );
+    }
+
+    private ServerSocketChannel createServerChannel() throws IOException {
+        ServerSocketChannel serverChannel = ServerSocketChannel.open();
+
+        serverChannel.configureBlocking(false);
+        serverChannel.bind(new InetSocketAddress(configuration.port()));
+        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+
+        return serverChannel;
     }
 
     public void stop() throws IOException {
