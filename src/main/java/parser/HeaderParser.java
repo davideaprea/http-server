@@ -10,8 +10,8 @@ public final class HeaderParser {
     public static Header from(String headerLine) {
         final int separatorIndex = headerLine.indexOf(':');
 
-        if (separatorIndex == -1) {
-            throw new MalformedRequestException("Header name and value must be separated by a colon (:) character.");
+        if (headerLine.length() <= 1 || separatorIndex == -1) {
+            throw new MalformedRequestException("Invalid header format.");
         }
 
         final String headerName = headerLine.substring(0, separatorIndex);

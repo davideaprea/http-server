@@ -14,6 +14,18 @@ public class HeaderParserTest {
     }
 
     @Test
+    void testEmptyValue() {
+        Header header = HeaderParser.from("name:");
+
+        Assertions.assertEquals(new Header("name", ""), header);
+    }
+
+    @Test
+    void testMissingNameAndValue() {
+        Assertions.assertThrows(MalformedRequestException.class, () -> HeaderParser.from(":"));
+    }
+
+    @Test
     void testMissingColon() {
         Assertions.assertThrows(MalformedRequestException.class, () -> HeaderParser.from("name value"));
     }
