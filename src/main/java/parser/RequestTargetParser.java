@@ -60,14 +60,26 @@ public final class RequestTargetParser {
     }
 
     private static Map<String, List<String>> parseQueryParams(String rawQuery) {
+        if (rawQuery.chars().anyMatch(Character::isWhitespace)) {
+            throw new MalformedRequestException("Found whitespace character in query params.");
+        }
+
         Map<String, List<String>> queryParams = new HashMap<>();
 
         Arrays.stream(rawQuery.split("&"))
                 .filter(s -> !s.isEmpty())
-                .forEach(rawParam -> {
+                .map(rawParam -> {
                     String[] pair = rawParam.split("=", 2);
+
+                    if (pair.length != 2) {
+                        throw new MalformedRequestException("Missing param value.");
+                    }
+
+                    return pair;
+                })
+                .forEach(pair -> {
                     String rawKey = pair[0];
-                    String rawValue = pair.length == 2 ? pair[1] : "";
+                    String rawValue = pair[1];
                     String key = URLDecoder.decode(rawKey, StandardCharsets.UTF_8);
                     String value = URLDecoder.decode(rawValue, StandardCharsets.UTF_8);
 

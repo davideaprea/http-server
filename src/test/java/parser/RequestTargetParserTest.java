@@ -10,7 +10,6 @@ import parser.dto.RequestTarget;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 public class RequestTargetParserTest {
     @Test
@@ -65,13 +64,21 @@ public class RequestTargetParserTest {
     void parseInvalid() {
         Assertions.assertThrows(
                 MalformedRequestException.class,
-                () -> RequestTargetParser.from("target")
+                () -> RequestTargetParser.from("GET target HTTP/1.1")
+        );
+    }
+
+    @Test
+    void parseWhitespaceCharsInParams() {
+        Assertions.assertThrows(
+                MalformedRequestException.class,
+                () -> RequestTargetParser.from("GET /target?a=\t&b=2 HTTP/1.1")
         );
     }
 
     @Test
     void parseWithParams() {
-        RequestTarget requestTarget = RequestTargetParser.from("GET /target?a=1&&b=2&name=John=Doe&a=3 HTTP/1.1");
+        RequestTarget requestTarget = RequestTargetParser.from("GET /target?a=1&&b=2&name=John=Doe&a=3&c= HTTP/1.1");
         Assertions.assertEquals(new RequestTarget(
                 Method.GET,
                 Version.HTTP_1_1,
@@ -79,7 +86,8 @@ public class RequestTargetParserTest {
                 Map.of(
                         "a", List.of("1", "3"),
                         "b", List.of("2"),
-                        "name", List.of("John=Doe")
+                        "name", List.of("John=Doe"),
+                        "c", List.of("")
                 )
         ), requestTarget);
     }
@@ -94,6 +102,14 @@ public class RequestTargetParserTest {
                         new HashMap<>()
                 ),
                 RequestTargetParser.from("GET /? HTTP/1.1")
+        );
+    }
+
+    @Test
+    void parseMissingKeyValueSeparatorInParams() {
+        Assertions.assertThrows(
+                MalformedRequestException.class,
+                () -> RequestTargetParser.from("GET /target?a=1&b HTTP/1.1")
         );
     }
 }
