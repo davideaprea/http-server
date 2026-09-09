@@ -1,12 +1,9 @@
-package reader;
+package reader.lifecycle;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reader.dto.ReadingLifecycleEvents;
-import reader.lifecycle.ContentLengthBodyReader;
-import reader.lifecycle.RequestLineReader;
-import reader.lifecycle.RequestReader;
 
 public class ContentLengthBodyReaderTest {
     @Test
