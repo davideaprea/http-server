@@ -56,7 +56,7 @@ public class Server {
                     SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
                     ClientChannelKey clientChannelKey = new ClientChannelKey(clientKey);
                     ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
-                    ClientRequestsQueue clientRequestsQueue = new ClientRequestsQueue(configuration.router(), executor, outputChannel);
+                    ClientRequestsQueue clientRequestsQueue = new ClientRequestsQueue(configuration.router(), executor, outputChannel, clientChannelKey);
                     TimedOperation timedOperation = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
 
                     clientKey.attach(new Client(
