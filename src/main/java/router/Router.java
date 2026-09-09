@@ -38,11 +38,17 @@ public class Router {
                     try {
                         return handler.handle(request);
                     } catch (Exception e) {
+                        String message = Status.INTERNAL_SERVER_ERROR.getName();
+
+                        if (e.getMessage() != null) {
+                            message = e.getMessage();
+                        }
+
                         return new Response(
                                 Version.HTTP_1_1,
                                 Status.INTERNAL_SERVER_ERROR,
                                 Map.of(),
-                                new ByteArrayInputStream(e.getMessage().getBytes())
+                                new ByteArrayInputStream(message.getBytes())
                         );
                     }
                 })

@@ -33,7 +33,8 @@ public class RouterTest {
                 command.path(),
                 new HashMap<>(),
                 new HashMap<>(),
-                new RequestBody(() -> {})
+                new RequestBody(() -> {
+                })
         ));
 
         Assertions.assertEquals(mockResponse, response);
@@ -81,5 +82,29 @@ public class RouterTest {
         ));
 
         Assertions.assertEquals(Status.METHOD_NOT_ALLOWED, response.status());
+    }
+
+    @Test
+    void testRequestHandlerExceptionHandling() {
+        HandlerCreateCommand command = new HandlerCreateCommand(
+                request -> {
+                    throw new RuntimeException();
+                },
+                Method.GET,
+                "/resource/path"
+        );
+        Router router = new Router.Builder()
+                .add(command)
+                .build();
+        Response response = router.handle(new Request(
+                command.method(),
+                Version.HTTP_1_1,
+                command.path(),
+                new HashMap<>(),
+                new HashMap<>(),
+                null
+        ));
+
+        Assertions.assertEquals(Status.INTERNAL_SERVER_ERROR, response.status());
     }
 }
