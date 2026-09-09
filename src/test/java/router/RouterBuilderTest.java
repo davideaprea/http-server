@@ -1,10 +1,15 @@
 package router;
 
+import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import router.dto.HandlerCreateCommand;
 import router.exception.ConflictingRoutesException;
-import model.Method;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
 public class RouterBuilderTest {
     @Test
@@ -17,5 +22,33 @@ public class RouterBuilderTest {
         Router.Builder routerBuilder = new Router.Builder().add(command);
 
         Assertions.assertThrows(ConflictingRoutesException.class, () -> routerBuilder.add(command));
+    }
+
+    @Test
+    void testHeadEndpointRegistrationForGetRequests() throws IOException {
+        Response handlerResponse = new Response(
+                Version.HTTP_1_1,
+                Status.OK,
+                Map.of("name", "value"),
+                new ByteArrayInputStream("Response body".getBytes())
+        );
+        HandlerCreateCommand command = new HandlerCreateCommand(
+                request -> handlerResponse,
+                Method.GET,
+                "/resource/path"
+        );
+        Router router = new Router.Builder().add(command).build();
+        Response actualResponse = router.handle(new Request(
+                Method.HEAD,
+                Version.HTTP_1_1,
+                command.path(),
+                Map.of(),
+                Map.of(),
+                null
+        ));
+
+        Assertions.assertEquals(handlerResponse.status(), actualResponse.status());
+        Assertions.assertEquals(handlerResponse.headers(), actualResponse.headers());
+        Assertions.assertEquals(0, actualResponse.body().readAllBytes().length);
     }
 }
