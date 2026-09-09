@@ -1,6 +1,5 @@
 package reader.lifecycle;
 
-import common.MalformedRequestException;
 import model.RequestBody;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
