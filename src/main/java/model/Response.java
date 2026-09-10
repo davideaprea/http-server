@@ -1,6 +1,7 @@
 package model;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -14,6 +15,8 @@ public record Response(
         Objects.requireNonNull(version);
         Objects.requireNonNull(status);
         Objects.requireNonNull(body);
+
+        headers = new HashMap<>(headers);
     }
 
     public String toHTTPFrame() {
