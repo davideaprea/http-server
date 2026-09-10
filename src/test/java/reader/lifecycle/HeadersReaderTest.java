@@ -1,6 +1,6 @@
 package reader.lifecycle;
 
-import common.MalformedRequestException;
+import reader.exception.MalformedRequestException;
 import model.HeaderKey;
 import model.Request;
 import org.junit.jupiter.api.Assertions;

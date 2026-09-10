@@ -1,4 +1,4 @@
-package common;
+package reader.exception;
 
 public class MalformedRequestException extends RuntimeException {
     public MalformedRequestException(String message) {

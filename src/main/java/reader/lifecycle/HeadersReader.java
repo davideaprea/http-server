@@ -1,14 +1,15 @@
 package reader.lifecycle;
 
-import common.MalformedRequestException;
 import model.HeaderKey;
 import model.Request;
 import model.RequestBody;
 import parser.HeaderParser;
 import parser.dto.Header;
+import parser.exception.BadFormatException;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
 import reader.dto.SizeLimits;
+import reader.exception.MalformedRequestException;
 
 import java.util.*;
 
@@ -98,7 +99,13 @@ public class HeadersReader extends RequestReader {
                             true
                     );
                 } else {
-                    Header header = HeaderParser.from(currentLine.toString());
+                    Header header;
+
+                    try {
+                        header = HeaderParser.from(currentLine.toString());
+                    } catch (BadFormatException e) {
+                        throw new MalformedRequestException(e.getMessage());
+                    }
 
                     headers.computeIfAbsent(header.name(), k -> new ArrayList<>()).add(header.value());
                     currentLine.setLength(0);

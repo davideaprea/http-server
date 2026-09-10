@@ -1,6 +1,6 @@
 package parser;
 
-import common.MalformedRequestException;
+import reader.exception.MalformedRequestException;
 import model.Method;
 import model.Version;
 import org.junit.jupiter.api.Assertions;

@@ -1,6 +1,6 @@
 package parser;
 
-import common.MalformedRequestException;
+import reader.exception.MalformedRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import parser.dto.Header;

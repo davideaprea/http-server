@@ -1,12 +1,13 @@
 package reader.lifecycle;
 
-import common.MalformedRequestException;
 import model.Request;
 import parser.RequestTargetParser;
 import parser.dto.RequestTarget;
+import parser.exception.BadFormatException;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
 import reader.dto.SizeLimits;
+import reader.exception.MalformedRequestException;
 
 public class RequestLineReader extends RequestReader {
     private final StringBuilder requestLineBuilder = new StringBuilder();
@@ -33,7 +34,13 @@ public class RequestLineReader extends RequestReader {
                     throw new MalformedRequestException("Invalid CRLF sequence in request line.");
                 }
 
-                RequestTarget requestTarget = RequestTargetParser.from(requestLineBuilder.toString());
+                RequestTarget requestTarget;
+
+                try {
+                    requestTarget = RequestTargetParser.from(requestLineBuilder.toString());
+                } catch (BadFormatException e) {
+                    throw new MalformedRequestException(e.getMessage());
+                }
 
                 requestBuilder
                         .method(requestTarget.method())

@@ -1,7 +1,7 @@
 package server;
 
 import client.*;
-import common.MalformedRequestException;
+import reader.exception.MalformedRequestException;
 import common.TimedOperation;
 import model.HeaderKey;
 import model.Response;
