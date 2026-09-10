@@ -1,11 +1,11 @@
 package parser;
 
-import common.MalformedRequestException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import model.Method;
 import model.Version;
 import parser.dto.RequestTarget;
+import parser.exception.BadFormatException;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -17,13 +17,13 @@ public final class RequestTargetParser {
         String[] splitRequestLine = rawRequestLine.split(" ");
 
         if (splitRequestLine.length != 3) {
-            throw new MalformedRequestException("Request line is malformed.");
+            throw new BadFormatException("Request line is malformed.");
         }
 
         String requestTarget = splitRequestLine[1];
 
         if (!requestTarget.startsWith("/")) {
-            throw new MalformedRequestException("Request URI must start with a backslash.");
+            throw new BadFormatException("Request URI must start with a backslash.");
         }
 
         int paramsStartIndex = requestTarget.indexOf('?');
@@ -47,7 +47,7 @@ public final class RequestTargetParser {
         try {
             return Version.fromValue(value);
         } catch (NoSuchElementException e) {
-            throw new MalformedRequestException(e.getMessage());
+            throw new BadFormatException("The requested version %s is not supported.".formatted(value));
         }
     }
 
@@ -55,13 +55,13 @@ public final class RequestTargetParser {
         try {
             return Method.valueOf(value);
         } catch (IllegalArgumentException e) {
-            throw new MalformedRequestException("Request method is not valid.");
+            throw new BadFormatException("Request method %s is not valid.".formatted(value));
         }
     }
 
     private static Map<String, List<String>> parseQueryParams(String rawQuery) {
         if (rawQuery.chars().anyMatch(Character::isWhitespace)) {
-            throw new MalformedRequestException("Found whitespace character in query params.");
+            throw new BadFormatException("Found whitespace character in raw query params.");
         }
 
         Map<String, List<String>> queryParams = new HashMap<>();
@@ -72,7 +72,7 @@ public final class RequestTargetParser {
                     String[] pair = rawParam.split("=", 2);
 
                     if (pair.length != 2) {
-                        throw new MalformedRequestException("Missing param value.");
+                        throw new BadFormatException("Missing param %s value.".formatted(pair[0]));
                     }
 
                     return pair;
