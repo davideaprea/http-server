@@ -1,6 +1,6 @@
 package parser;
 
-import reader.exception.MalformedRequestException;
+import parser.exception.BadFormatException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import parser.dto.Header;
@@ -22,21 +22,21 @@ public class HeaderParserTest {
 
     @Test
     void testMissingNameAndValue() {
-        Assertions.assertThrows(MalformedRequestException.class, () -> HeaderParser.from(":"));
+        Assertions.assertThrows(BadFormatException.class, () -> HeaderParser.from(":"));
     }
 
     @Test
     void testMissingColon() {
-        Assertions.assertThrows(MalformedRequestException.class, () -> HeaderParser.from("name value"));
+        Assertions.assertThrows(BadFormatException.class, () -> HeaderParser.from("name value"));
     }
 
     @Test
     void testMissingName() {
-        Assertions.assertThrows(MalformedRequestException.class, () -> HeaderParser.from(": value"));
+        Assertions.assertThrows(BadFormatException.class, () -> HeaderParser.from(": value"));
     }
 
     @Test
     void testInvalidHeaderName() {
-        Assertions.assertThrows(MalformedRequestException.class, () -> HeaderParser.from("invalid name: value"));
+        Assertions.assertThrows(BadFormatException.class, () -> HeaderParser.from("invalid name: value"));
     }
 }

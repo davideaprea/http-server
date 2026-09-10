@@ -1,6 +1,6 @@
 package parser;
 
-import reader.exception.MalformedRequestException;
+import parser.exception.BadFormatException;
 import model.Method;
 import model.Version;
 import org.junit.jupiter.api.Assertions;
@@ -27,7 +27,7 @@ public class RequestTargetParserTest {
     @Test
     void testInvalidMethod() {
         Assertions.assertThrows(
-                MalformedRequestException.class,
+                BadFormatException.class,
                 () -> RequestTargetParser.from("INVALID-METHOD /a/b/c HTTP/1.1")
         );
     }
@@ -35,7 +35,7 @@ public class RequestTargetParserTest {
     @Test
     void testInvalidVersion() {
         Assertions.assertThrows(
-                MalformedRequestException.class,
+                BadFormatException.class,
                 () -> RequestTargetParser.from("POST /a/b/c INVALID-VERSION")
         );
     }
@@ -43,7 +43,7 @@ public class RequestTargetParserTest {
     @Test
     void testMissingPart() {
         Assertions.assertThrows(
-                MalformedRequestException.class,
+                BadFormatException.class,
                 () -> RequestTargetParser.from("POST HTTP/1.1")
         );
     }
@@ -63,7 +63,7 @@ public class RequestTargetParserTest {
     @Test
     void parseInvalid() {
         Assertions.assertThrows(
-                MalformedRequestException.class,
+                BadFormatException.class,
                 () -> RequestTargetParser.from("GET target HTTP/1.1")
         );
     }
@@ -71,7 +71,7 @@ public class RequestTargetParserTest {
     @Test
     void parseWhitespaceCharsInParams() {
         Assertions.assertThrows(
-                MalformedRequestException.class,
+                BadFormatException.class,
                 () -> RequestTargetParser.from("GET /target?a=\t&b=2 HTTP/1.1")
         );
     }
@@ -108,7 +108,7 @@ public class RequestTargetParserTest {
     @Test
     void parseMissingKeyValueSeparatorInParams() {
         Assertions.assertThrows(
-                MalformedRequestException.class,
+                BadFormatException.class,
                 () -> RequestTargetParser.from("GET /target?a=1&b HTTP/1.1")
         );
     }
