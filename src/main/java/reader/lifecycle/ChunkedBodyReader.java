@@ -62,7 +62,7 @@ public class ChunkedBodyReader extends RequestReader {
                     isReadingChunkSize = true;
 
                     if (currentChunkBytes == 0) {
-                        requestBody.enqueue(-1);
+                        requestBody.close();
                         readingLifecycleEvents.onEnd().run();
 
                         return new ReadResult(

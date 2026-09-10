@@ -31,7 +31,7 @@ public class ContentLengthBodyReader extends RequestReader {
         remainingBytes--;
 
         if (remainingBytes == 0) {
-            requestBody.enqueue(-1);
+            requestBody.close();
             readingLifecycleEvents.onEnd().run();
 
             return new ReadResult(new RequestLineReader(readingLifecycleEvents), true);

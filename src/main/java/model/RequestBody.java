@@ -10,13 +10,14 @@ public class RequestBody {
     private final BlockingQueue<Integer> bufferedBytes = new LinkedBlockingQueue<>(MAX);
     private final Runnable onSpaceFreed;
     private final AtomicBoolean isFull = new AtomicBoolean(false);
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     public RequestBody(Runnable onSpaceFreed) {
         this.onSpaceFreed = onSpaceFreed;
     }
 
     public void enqueue(int bodyByte) {
-        if (isFull.get()) {
+        if (isFull.get() || isClosed.get()) {
             throw new IllegalStateException();
         }
 
@@ -28,6 +29,10 @@ public class RequestBody {
     }
 
     public int dequeue() {
+        if (isClosed.get() && bufferedBytes.isEmpty()) {
+            return -1;
+        }
+
         try {
             int bodyByte = bufferedBytes.take();
 
@@ -45,5 +50,9 @@ public class RequestBody {
 
     public boolean isFull() {
         return isFull.get();
+    }
+
+    public void close() {
+        isClosed.set(true);
     }
 }

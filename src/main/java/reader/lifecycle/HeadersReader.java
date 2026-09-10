@@ -80,7 +80,7 @@ public class HeadersReader extends RequestReader {
                     } else if (transferEncodingValue.isPresent()) {
                         nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody);
                     } else {
-                        requestBody.enqueue(-1);
+                        requestBody.close();
 
                         nextReader = new RequestLineReader(readingLifecycleEvents);
 
