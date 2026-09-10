@@ -1,8 +1,14 @@
 package server;
 
 import client.*;
+import common.MalformedRequestException;
 import common.TimedOperation;
+import model.HeaderKey;
+import model.Response;
+import model.Status;
+import model.Version;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
@@ -10,6 +16,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -54,7 +61,30 @@ public class Server {
 
                     clientKey.attach(createClient(clientKey));
                 } else if (key.isReadable()) {
-                    ((Client) key.attachment()).inputChannel().read();
+                    Client client = (Client) key.attachment();
+
+                    try {
+                        client.inputChannel().read();
+                    } catch (Exception e) {
+                        if (e instanceof MalformedRequestException) {
+                            String message = e.getMessage() != null ? e.getMessage() : Status.BAD_REQUEST.getName();
+                            Response badRequestResponse = new Response(
+                                    Version.HTTP_1_1,
+                                    Status.BAD_REQUEST,
+                                    Map.of(
+                                            HeaderKey.CONNECTION.getValue(), "close",
+                                            HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
+                                            HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf(message.length())
+                                    ),
+                                    new ByteArrayInputStream(message.getBytes())
+                            );
+                            String rawResponse = badRequestResponse.toHTTPFrame() + badRequestResponse;
+
+                            client.outputChannel().write(rawResponse.getBytes(), true);
+                        }
+
+                        client.channelKey().close();
+                    }
                 } else if (key.isWritable()) {
                     ((Client) key.attachment()).outputChannel().flush();
                 }
@@ -69,6 +99,7 @@ public class Server {
         TimedOperation timedOperation = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
 
         return new Client(
+                clientChannelKey,
                 new ClientInputChannel(
                         clientChannelKey,
                         timedOperation,
