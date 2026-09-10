@@ -1,14 +1,10 @@
 package server;
 
 import client.channel.*;
-import reader.exception.MalformedRequestException;
 import common.TimedOperation;
-import model.HeaderKey;
 import model.Response;
-import model.Status;
-import model.Version;
+import reader.exception.MalformedRequestException;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
@@ -16,7 +12,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -65,24 +60,12 @@ public class Server {
 
                     try {
                         client.inputChannel().read();
+                    } catch (MalformedRequestException e) {
+                        Response badRequestResponse = Response.internalServerError(e);
+                        String rawResponse = badRequestResponse.toHTTPFrame() + badRequestResponse;
+
+                        client.outputChannel().write(rawResponse.getBytes(), true);
                     } catch (Exception e) {
-                        if (e instanceof MalformedRequestException) {
-                            String message = e.getMessage() != null ? e.getMessage() : Status.BAD_REQUEST.getName();
-                            Response badRequestResponse = new Response(
-                                    Version.HTTP_1_1,
-                                    Status.BAD_REQUEST,
-                                    Map.of(
-                                            HeaderKey.CONNECTION.getValue(), "close",
-                                            HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
-                                            HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf(message.length())
-                                    ),
-                                    new ByteArrayInputStream(message.getBytes())
-                            );
-                            String rawResponse = badRequestResponse.toHTTPFrame() + badRequestResponse;
-
-                            client.outputChannel().write(rawResponse.getBytes(), true);
-                        }
-
                         client.channelKey().close();
                     }
                 } else if (key.isWritable()) {

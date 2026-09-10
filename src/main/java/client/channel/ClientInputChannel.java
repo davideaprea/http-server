@@ -7,6 +7,7 @@ import reader.dto.SizeLimits;
 import reader.lifecycle.RequestLineReader;
 import reader.lifecycle.RequestReader;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -34,16 +35,20 @@ public class ClientInputChannel {
         isFree = true;
     }
 
-    public void read() throws Exception {
+    public void read() {
         if (!isFree) {
             return;
         }
 
         SocketChannel client = clientChannelKey.getSocketChannel();
-        int bytesRead = 0;
+        int bytesRead;
 
         while (true) {
-            bytesRead = client.read(buffer);
+            try {
+                bytesRead = client.read(buffer);
+            } catch (IOException e) {
+                bytesRead = -1;
+            }
 
             if (bytesRead <= 0) break;
 

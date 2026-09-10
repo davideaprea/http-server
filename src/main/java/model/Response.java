@@ -1,5 +1,6 @@
 package model;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,5 +36,20 @@ public record Response(
         stringBuilder.append("\r\n");
 
         return stringBuilder.toString();
+    }
+
+    public static Response internalServerError(Exception e) {
+        String message = e.getMessage() != null ? e.getMessage() : Status.BAD_REQUEST.getName();
+
+        return new Response(
+                Version.HTTP_1_1,
+                Status.BAD_REQUEST,
+                Map.of(
+                        HeaderKey.CONNECTION.getValue(), "close",
+                        HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
+                        HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf(message.length())
+                ),
+                new ByteArrayInputStream(message.getBytes())
+        );
     }
 }
