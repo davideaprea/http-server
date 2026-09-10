@@ -11,16 +11,15 @@ import writer.TransferEncodingWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
 public class ClientRequestsQueue {
     private final Router router;
     private final ExecutorService executorService;
     private final ClientOutputChannel clientOutputChannel;
-    private final Queue<Request> requestsQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Request> requestsQueue = new LinkedList<>();
     private final ClientChannelKey clientChannelKey;
 
     private boolean isProcessing = false;
@@ -33,47 +32,61 @@ public class ClientRequestsQueue {
     }
 
     public void enqueue(Request request) {
-        if (isProcessing) {
+        synchronized (this) {
             requestsQueue.add(request);
-        } else {
-            submit(request);
+
+            if (isProcessing) {
+                return;
+            }
+
+            isProcessing = true;
         }
+
+        submitNext();
     }
 
-    private void submit(Request request) {
-        isProcessing = true;
+    private void submitNext() {
+        Request request;
 
-        CompletableFuture.supplyAsync(() -> {
-            Response response = router.handle(request);
-            ByteBuffer buffer = ByteBuffer.allocate(8192);
-            ResponseBodyWriter responseBodyWriter;
+        synchronized (this) {
+            request = requestsQueue.poll();
 
-            if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
-                responseBodyWriter = new ContentLengthWriter(clientOutputChannel);
-            } else {
-                response.headers().put(HeaderKey.TRANSFER_ENCODING.getValue(), "chunked");
+            if (request == null) {
+                isProcessing = false;
 
-                responseBodyWriter = new TransferEncodingWriter(clientOutputChannel);
+                return;
             }
+        }
 
-            clientOutputChannel.write(ByteBuffer.wrap((response.toHTTPFrame()).getBytes()));
+        executorService.submit(() -> {
+            process(request);
+            submitNext();
+        });
+    }
 
-            try (InputStream bodyStream = response.body()) {
-                responseBodyWriter.fromSource(bodyStream);
-            } catch (IOException e) {
-                clientChannelKey.close();
-                requestsQueue.clear();
+    private void process(Request request) {
+        Response response = router.handle(request);
 
-                return response;
-            }
+        ResponseBodyWriter responseBodyWriter;
 
-            isProcessing = false;
+        if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
+            responseBodyWriter = new ContentLengthWriter(clientOutputChannel);
+        } else {
+            response.headers().put(
+                    HeaderKey.TRANSFER_ENCODING.getValue(),
+                    "chunked"
+            );
 
-            if (!requestsQueue.isEmpty()) {
-                submit(requestsQueue.poll());
-            }
+            responseBodyWriter = new TransferEncodingWriter(clientOutputChannel);
+        }
 
-            return response;
-        }, executorService);
+        clientOutputChannel.write(ByteBuffer.wrap(response.toHTTPFrame().getBytes()));
+
+        try (InputStream bodyStream = response.body()) {
+            responseBodyWriter.fromSource(bodyStream);
+        } catch (IOException e) {
+            clientChannelKey.close();
+            requestsQueue.clear();
+        }
     }
 }
