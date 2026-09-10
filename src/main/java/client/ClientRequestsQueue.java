@@ -10,7 +10,6 @@ import writer.TransferEncodingWriter;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
