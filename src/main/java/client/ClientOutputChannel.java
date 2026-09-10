@@ -6,7 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ClientOutputChannel {
-    private final BlockingQueue<ByteBuffer> bodyChunks = new LinkedBlockingQueue<>();
+    private final BlockingQueue<OutputChunk> bodyChunks = new LinkedBlockingQueue<>();
     private final ClientChannelKey clientChannelKey;
 
     public ClientOutputChannel(ClientChannelKey clientChannelKey) {
@@ -16,7 +16,8 @@ public class ClientOutputChannel {
     public void flush() {
         try {
             while (!bodyChunks.isEmpty()) {
-                ByteBuffer buffer = bodyChunks.peek();
+                OutputChunk chunk = bodyChunks.peek();
+                ByteBuffer buffer = chunk.value();
                 int written = clientChannelKey.getSocketChannel().write(buffer);
 
                 if (written == 0) {
@@ -26,6 +27,12 @@ public class ClientOutputChannel {
                 if (!buffer.hasRemaining()) {
                     bodyChunks.poll();
                 }
+
+                if (chunk.isLast()) {
+                    clientChannelKey.close();
+
+                    return;
+                }
             }
 
             clientChannelKey.removeWriteInterest();
@@ -34,9 +41,9 @@ public class ClientOutputChannel {
         }
     }
 
-    public void write(ByteBuffer bodyChunk) {
+    public void write(byte[] chunk, boolean isLast) {
         try {
-            bodyChunks.put(bodyChunk);
+            bodyChunks.put(new OutputChunk(ByteBuffer.wrap(chunk), isLast));
         } catch (InterruptedException e) {
             clientChannelKey.close();
 

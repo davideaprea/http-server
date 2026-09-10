@@ -17,14 +17,14 @@ public class TransferEncodingWriter extends ResponseBodyWriter {
         int bytesRead;
 
         while ((bytesRead = bodyStream.read(buffer.array())) != -1) {
-            clientOutputChannel.write(ByteBuffer.wrap((Integer.toHexString(bytesRead) + "\r\n").getBytes()));
+            clientOutputChannel.write((Integer.toHexString(bytesRead) + "\r\n").getBytes(), false);
             buffer.position(0);
             buffer.limit(bytesRead);
-            clientOutputChannel.write(buffer);
-            clientOutputChannel.write(ByteBuffer.wrap("\r\n".getBytes()));
+            clientOutputChannel.write(buffer.array(), false);
+            clientOutputChannel.write("\r\n".getBytes(), false);
             buffer.clear();
         }
 
-        clientOutputChannel.write(ByteBuffer.wrap("0\r\n\r\n".getBytes()));
+        clientOutputChannel.write("0\r\n\r\n".getBytes(), false);
     }
 }

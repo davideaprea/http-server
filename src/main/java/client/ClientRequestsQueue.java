@@ -80,7 +80,7 @@ public class ClientRequestsQueue {
             responseBodyWriter = new TransferEncodingWriter(clientOutputChannel);
         }
 
-        clientOutputChannel.write(ByteBuffer.wrap(response.toHTTPFrame().getBytes()));
+        clientOutputChannel.write(response.toHTTPFrame().getBytes(), false);
 
         try (InputStream bodyStream = response.body()) {
             responseBodyWriter.fromSource(bodyStream);

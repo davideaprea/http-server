@@ -20,7 +20,7 @@ public class ContentLengthWriter extends ResponseBodyWriter {
             buffer.position(0);
             buffer.limit(bytesRead);
 
-            clientOutputChannel.write(buffer);
+            clientOutputChannel.write(buffer.array(), false);
 
             buffer.clear();
         }
