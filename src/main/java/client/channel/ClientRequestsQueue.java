@@ -1,12 +1,12 @@
-package client;
+package client.channel;
 
 import model.HeaderKey;
 import model.Request;
 import model.Response;
 import router.Router;
-import writer.ContentLengthWriter;
-import writer.ResponseBodyWriter;
-import writer.TransferEncodingWriter;
+import client.writer.ContentLengthWriter;
+import client.writer.ResponseBodyWriter;
+import client.writer.TransferEncodingWriter;
 
 import java.io.IOException;
 import java.io.InputStream;

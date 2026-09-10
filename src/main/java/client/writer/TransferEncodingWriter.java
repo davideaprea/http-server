@@ -1,6 +1,6 @@
-package writer;
+package client.writer;
 
-import client.ClientOutputChannel;
+import client.channel.ClientOutputChannel;
 
 import java.io.IOException;
 import java.io.InputStream;
