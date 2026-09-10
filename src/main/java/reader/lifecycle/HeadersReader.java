@@ -8,6 +8,7 @@ import parser.HeaderParser;
 import parser.dto.Header;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
+import reader.dto.SizeLimits;
 
 import java.util.*;
 
@@ -17,10 +18,12 @@ public class HeadersReader extends RequestReader {
     private final Map<String, List<String>> headers = new HashMap<>();
 
     private ReadingState readingState = ReadingState.NORMAL;
+    private long availableSpace;
 
-    public HeadersReader(ReadingLifecycleEvents readingLifecycleEvents, Request.RequestBuilder requestBuilder) {
-        super(readingLifecycleEvents);
+    public HeadersReader(ReadingLifecycleEvents readingLifecycleEvents, Request.RequestBuilder requestBuilder, SizeLimits sizeLimits, long availableSpace) {
+        super(readingLifecycleEvents, sizeLimits);
         this.requestBuilder = requestBuilder;
+        this.availableSpace = availableSpace;
     }
 
     @Override
@@ -75,14 +78,15 @@ public class HeadersReader extends RequestReader {
                         nextReader = new ContentLengthBodyReader(
                                 readingLifecycleEvents,
                                 requestBody,
-                                contentLengthValue.get()
+                                contentLengthValue.get(),
+                                sizeLimits
                         );
                     } else if (transferEncodingValue.isPresent()) {
-                        nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody);
+                        nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody, sizeLimits);
                     } else {
                         requestBody.close();
 
-                        nextReader = new RequestLineReader(readingLifecycleEvents);
+                        nextReader = new RequestLineReader(readingLifecycleEvents, sizeLimits);
 
                         readingLifecycleEvents.onEnd().run();
                     }
@@ -102,7 +106,14 @@ public class HeadersReader extends RequestReader {
 
                 readingState = ReadingState.NORMAL;
             }
-            default -> currentLine.append(c);
+            default -> {
+                if (availableSpace == 0) {
+                    throw new MalformedRequestException("Request line and headers exceeded max size.");
+                }
+
+                availableSpace--;
+                currentLine.append(c);
+            }
         }
 
         return new ReadResult(

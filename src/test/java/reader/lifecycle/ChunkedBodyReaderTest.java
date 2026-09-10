@@ -4,6 +4,7 @@ import model.RequestBody;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reader.dto.ReadingLifecycleEvents;
+import reader.dto.SizeLimits;
 
 import java.nio.charset.StandardCharsets;
 
@@ -14,7 +15,7 @@ public class ChunkedBodyReaderTest {
         RequestBody requestBody = new RequestBody(() -> {
         });
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(mockReadingLifecycleEvents(), requestBody),
+                new ChunkedBodyReader(mockReadingLifecycleEvents(), requestBody, new SizeLimits(1000, 1000)),
                 "A\r\n%s\r\n0\r\n\r\n".formatted(content)
         );
         String body = buildBody(requestBody);
@@ -28,7 +29,7 @@ public class ChunkedBodyReaderTest {
         RequestBody requestBody = new RequestBody(() -> {
         });
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(mockReadingLifecycleEvents(), requestBody),
+                new ChunkedBodyReader(mockReadingLifecycleEvents(), requestBody, new SizeLimits(1000, 1000)),
                 "5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n"
         );
         String body = buildBody(requestBody);

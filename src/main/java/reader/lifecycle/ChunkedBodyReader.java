@@ -3,6 +3,7 @@ package reader.lifecycle;
 import model.RequestBody;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
+import reader.dto.SizeLimits;
 
 public class ChunkedBodyReader extends RequestReader {
     private boolean isReadingChunkSize = true;
@@ -10,12 +11,14 @@ public class ChunkedBodyReader extends RequestReader {
     private long remainingChunkBytes = 0;
     private long currentChunkBytes = 0;
     private ReadingState readingState = ReadingState.NORMAL;
+    private long availableSpace;
 
     private final RequestBody requestBody;
 
-    public ChunkedBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody) {
-        super(readingLifecycleEvents);
+    public ChunkedBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody, SizeLimits sizeLimits) {
+        super(readingLifecycleEvents, sizeLimits);
         this.requestBody = requestBody;
+        availableSpace = sizeLimits.maxBodySize();
     }
 
     @Override
@@ -44,6 +47,11 @@ public class ChunkedBodyReader extends RequestReader {
             }
         } else {
             if (remainingChunkBytes > 0) {
+                if (availableSpace == 0) {
+                    throw new IllegalStateException("Max body size exceeded");
+                }
+
+                availableSpace--;
                 requestBody.enqueue(Byte.toUnsignedInt(requestByte));
                 remainingChunkBytes--;
             } else {
@@ -66,7 +74,7 @@ public class ChunkedBodyReader extends RequestReader {
                         readingLifecycleEvents.onEnd().run();
 
                         return new ReadResult(
-                                new RequestLineReader(readingLifecycleEvents),
+                                new RequestLineReader(readingLifecycleEvents, sizeLimits),
                                 true
                         );
                     }

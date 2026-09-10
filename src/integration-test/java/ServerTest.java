@@ -3,8 +3,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import router.dto.HandlerCreateCommand;
+import reader.dto.SizeLimits;
 import router.Router;
+import router.dto.HandlerCreateCommand;
 import server.Server;
 import server.ServerConfiguration;
 
@@ -40,8 +41,14 @@ class ServerTest {
                         "/resource/path"
                 ))
                 .build();
-
-        server = new Server(new ServerConfiguration(PORT, 3, router, 1));
+        ServerConfiguration serverConfiguration = ServerConfiguration.builder()
+                .port(PORT)
+                .threadPoolSize(3)
+                .requestTimeoutTime(1)
+                .sizeLimits(new SizeLimits(1000, 1000))
+                .router(router)
+                .build();
+        server = new Server(serverConfiguration);
 
         serverThread = new Thread(() -> {
             try {

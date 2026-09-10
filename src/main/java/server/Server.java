@@ -103,7 +103,8 @@ public class Server {
                 new ClientInputChannel(
                         clientChannelKey,
                         timedOperation,
-                        clientRequestsQueue
+                        clientRequestsQueue,
+                        configuration.sizeLimits()
                 ),
                 outputChannel
         );

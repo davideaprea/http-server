@@ -6,19 +6,22 @@ import parser.RequestTargetParser;
 import parser.dto.RequestTarget;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
+import reader.dto.SizeLimits;
 
 public class RequestLineReader extends RequestReader {
     private final StringBuilder requestLineBuilder = new StringBuilder();
     private final Request.RequestBuilder requestBuilder = Request.builder();
 
     private ReadingState readingState = ReadingState.NORMAL;
+    private long availableSpace;
 
-    public RequestLineReader(ReadingLifecycleEvents readingLifecycleEvents) {
-        super(readingLifecycleEvents);
+    public RequestLineReader(ReadingLifecycleEvents readingLifecycleEvents, SizeLimits sizeLimits) {
+        super(readingLifecycleEvents, sizeLimits);
+
+        availableSpace = sizeLimits.maxHeadersSize();
 
         readingLifecycleEvents.onStart().run();
     }
-
 
     @Override
     public ReadResult eval(byte requestByte) {
@@ -41,7 +44,7 @@ public class RequestLineReader extends RequestReader {
                 readingState = ReadingState.NORMAL;
 
                 return new ReadResult(
-                        new HeadersReader(readingLifecycleEvents, requestBuilder),
+                        new HeadersReader(readingLifecycleEvents, requestBuilder, sizeLimits, availableSpace),
                         true
                 );
             }
@@ -52,7 +55,14 @@ public class RequestLineReader extends RequestReader {
 
                 readingState = ReadingState.CARRIAGE_RETURN;
             }
-            default -> requestLineBuilder.append(c);
+            default -> {
+                if (availableSpace == 0) {
+                    throw new MalformedRequestException("Request line and headers exceeded max size.");
+                }
+
+                availableSpace--;
+                requestLineBuilder.append(c);
+            }
         }
 
         return new ReadResult(

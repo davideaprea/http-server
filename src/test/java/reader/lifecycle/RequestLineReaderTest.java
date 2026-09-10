@@ -3,11 +3,12 @@ package reader.lifecycle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reader.dto.ReadingLifecycleEvents;
+import reader.dto.SizeLimits;
 
 public class RequestLineReaderTest {
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
-        RequestLineReader reader = new RequestLineReader(mockReadingLifecycleEvents());
+        RequestLineReader reader = mockRequestLineReader();
         RequestReader result = reader.eval((byte) 'G').nextReader();
 
         Assertions.assertSame(reader, result);
@@ -15,7 +16,7 @@ public class RequestLineReaderTest {
 
     @Test
     void shouldRemainInSameStateWhenReceivingCarriageReturn() {
-        RequestLineReader reader = new RequestLineReader(mockReadingLifecycleEvents());
+        RequestLineReader reader = mockRequestLineReader();
         RequestReader result = reader.eval((byte) '\r').nextReader();
 
         Assertions.assertSame(reader, result);
@@ -24,7 +25,7 @@ public class RequestLineReaderTest {
     @Test
     void shouldPassInReadingHeadersState() {
         String rawRequest = "GET /path HTTP/1.1";
-        RequestReader state = new RequestLineReader(mockReadingLifecycleEvents());
+        RequestReader state = mockRequestLineReader();
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);
@@ -37,8 +38,8 @@ public class RequestLineReaderTest {
         Assertions.assertInstanceOf(HeadersReader.class, state);
     }
 
-    private ReadingLifecycleEvents mockReadingLifecycleEvents() {
-        return new ReadingLifecycleEvents(
+    private RequestLineReader mockRequestLineReader() {
+        return new RequestLineReader(new ReadingLifecycleEvents(
                 request -> {
                 },
                 () -> {
@@ -47,6 +48,6 @@ public class RequestLineReaderTest {
                 },
                 () -> {
                 }
-        );
+        ), new SizeLimits(1000, 1000));
     }
 }

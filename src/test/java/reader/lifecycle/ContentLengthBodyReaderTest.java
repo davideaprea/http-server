@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reader.dto.ReadingLifecycleEvents;
+import reader.dto.SizeLimits;
 
 public class ContentLengthBodyReaderTest {
     @Test
@@ -33,7 +34,8 @@ public class ContentLengthBodyReaderTest {
                         }
                 ),
                 Mockito.mock(),
-                bytesNumber
+                bytesNumber,
+                new SizeLimits(1000, 1000)
         );
     }
 }

@@ -6,6 +6,7 @@ import model.Request;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reader.dto.ReadingLifecycleEvents;
+import reader.dto.SizeLimits;
 
 public class HeadersReaderTest {
     private static final String CRLF = "\r" + '\n';
@@ -132,7 +133,9 @@ public class HeadersReaderTest {
                         () -> {
                         }
                 ),
-                Request.builder()
+                Request.builder(),
+                new SizeLimits(1000, 1000),
+                1000
         );
     }
 }

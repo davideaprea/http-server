@@ -3,6 +3,7 @@ package client;
 import common.TimedOperation;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
+import reader.dto.SizeLimits;
 import reader.lifecycle.RequestLineReader;
 import reader.lifecycle.RequestReader;
 
@@ -16,7 +17,7 @@ public class ClientInputChannel {
     private RequestReader requestReader;
     private boolean isFree;
 
-    public ClientInputChannel(ClientChannelKey clientChannelKey, TimedOperation requestTimer, ClientRequestsQueue clientRequestsQueue) {
+    public ClientInputChannel(ClientChannelKey clientChannelKey, TimedOperation requestTimer, ClientRequestsQueue clientRequestsQueue, SizeLimits sizeLimits) {
         this.clientChannelKey = clientChannelKey;
         buffer = ByteBuffer.allocateDirect(8192);
         requestReader = new RequestLineReader(ReadingLifecycleEvents.builder()
@@ -28,7 +29,8 @@ public class ClientInputChannel {
                 })
                 .onStart(requestTimer::start)
                 .onEnd(requestTimer::stop)
-                .build());
+                .build(),
+                sizeLimits);
         isFree = true;
     }
 
