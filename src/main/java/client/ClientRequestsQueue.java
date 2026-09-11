@@ -76,6 +76,10 @@ public class ClientRequestsQueue {
                     clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead), false);
                     bytesToWrite -= bytesRead;
                 }
+
+                if (bytesRead != 0) {
+                    clientChannelKey.close();
+                }
             } else {
                 byte[] buffer = new byte[8192];
                 int bytesRead;
