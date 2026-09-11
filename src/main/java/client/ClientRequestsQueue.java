@@ -7,6 +7,7 @@ import router.Router;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -72,7 +73,7 @@ public class ClientRequestsQueue {
                 int bytesRead;
 
                 while ((bytesRead = bodyStream.read(buffer)) != -1 && byteToRead > 0) {
-                    clientOutputChannel.write(buffer, false);
+                    clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead), false);
                     byteToRead--;
                 }
             } else {
@@ -81,7 +82,7 @@ public class ClientRequestsQueue {
 
                 while ((bytesRead = bodyStream.read(buffer)) != -1) {
                     clientOutputChannel.write((Integer.toHexString(bytesRead) + "\r\n").getBytes(), false);
-                    clientOutputChannel.write(buffer, false);
+                    clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead), false);
                     clientOutputChannel.write("\r\n".getBytes(), false);
                 }
 

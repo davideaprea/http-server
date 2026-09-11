@@ -48,6 +48,11 @@ public class ChunkedBodyReader extends RequestReader {
                 isReadingChunkSize = false;
                 chunkSizeBuilder = new StringBuilder();
             } else {
+                if (availableSpace == 0) {
+                    throw new IllegalStateException("Max body size exceeded");
+                }
+
+                availableSpace--;
                 chunkSizeBuilder.append(currChar);
             }
         } else {
