@@ -77,7 +77,7 @@ public class ClientRequestsQueue {
                     bytesToWrite -= bytesRead;
                 }
 
-                if (bytesRead != 0) {
+                if (bytesRead > 0) {
                     clientChannelKey.close();
                 }
             } else {
