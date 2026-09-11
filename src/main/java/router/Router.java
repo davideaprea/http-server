@@ -32,7 +32,7 @@ public class Router {
             }
         }
 
-        return Optional
+        Response response = Optional
                 .ofNullable(currSegment.methodHandlers.get(request.getMethod()))
                 .map(handler -> {
                     try {
@@ -58,6 +58,15 @@ public class Router {
                         Map.of(),
                         new ByteArrayInputStream("The requested path is not configured for this method.".getBytes())
                 ));
+
+        if (
+                !response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue()) &&
+                !response.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue())
+        ) {
+            response.headers().put(HeaderKey.TRANSFER_ENCODING.getValue(), "chunked");
+        }
+
+        return response;
     }
 
     public static final class Builder {

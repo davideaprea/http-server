@@ -1,12 +1,9 @@
-package client.channel;
+package client;
 
 import model.HeaderKey;
 import model.Request;
 import model.Response;
 import router.Router;
-import client.writer.ContentLengthWriter;
-import client.writer.ResponseBodyWriter;
-import client.writer.TransferEncodingWriter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,23 +63,30 @@ public class ClientRequestsQueue {
     private void process(Request request) {
         Response response = router.handle(request);
 
-        ResponseBodyWriter responseBodyWriter;
-
-        if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
-            responseBodyWriter = new ContentLengthWriter(clientOutputChannel);
-        } else {
-            response.headers().put(
-                    HeaderKey.TRANSFER_ENCODING.getValue(),
-                    "chunked"
-            );
-
-            responseBodyWriter = new TransferEncodingWriter(clientOutputChannel);
-        }
-
         clientOutputChannel.write(response.toHTTPFrame().getBytes(), false);
 
         try (InputStream bodyStream = response.body()) {
-            responseBodyWriter.fromSource(bodyStream);
+            if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
+                long byteToRead = Long.parseLong(response.headers().get(HeaderKey.CONTENT_LENGTH.getValue()));
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+
+                while ((bytesRead = bodyStream.read(buffer)) != -1 && byteToRead > 0) {
+                    clientOutputChannel.write(buffer, false);
+                    byteToRead--;
+                }
+            } else {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+
+                while ((bytesRead = bodyStream.read(buffer)) != -1) {
+                    clientOutputChannel.write((Integer.toHexString(bytesRead) + "\r\n").getBytes(), false);
+                    clientOutputChannel.write(buffer, false);
+                    clientOutputChannel.write("\r\n".getBytes(), false);
+                }
+
+                clientOutputChannel.write("0\r\n\r\n".getBytes(), false);
+            }
         } catch (IOException e) {
             clientChannelKey.close();
             requestsQueue.clear();

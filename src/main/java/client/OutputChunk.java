@@ -1,4 +1,4 @@
-package client.channel;
+package client;
 
 import java.nio.ByteBuffer;
 

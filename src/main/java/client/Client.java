@@ -1,4 +1,4 @@
-package client.channel;
+package client;
 
 public record Client(
         ClientChannelKey channelKey,

@@ -1,6 +1,6 @@
 package server;
 
-import client.channel.*;
+import client.*;
 import common.TimedOperation;
 import model.Response;
 import reader.exception.MalformedRequestException;

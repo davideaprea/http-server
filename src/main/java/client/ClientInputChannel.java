@@ -1,4 +1,4 @@
-package client.channel;
+package client;
 
 import common.TimedOperation;
 import reader.dto.ReadResult;
