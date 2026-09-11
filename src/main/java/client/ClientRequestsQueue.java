@@ -68,13 +68,13 @@ public class ClientRequestsQueue {
 
         try (InputStream bodyStream = response.body()) {
             if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
-                long byteToRead = Long.parseLong(response.headers().get(HeaderKey.CONTENT_LENGTH.getValue()));
+                long bytesToWrite = Long.parseLong(response.headers().get(HeaderKey.CONTENT_LENGTH.getValue()));
                 byte[] buffer = new byte[8192];
                 int bytesRead;
 
-                while ((bytesRead = bodyStream.read(buffer)) != -1 && byteToRead > 0) {
+                while ((bytesRead = bodyStream.read(buffer)) != -1 && bytesToWrite > 0) {
                     clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead), false);
-                    byteToRead--;
+                    bytesToWrite -= bytesRead;
                 }
             } else {
                 byte[] buffer = new byte[8192];
