@@ -61,7 +61,7 @@ public class Server {
                     try {
                         client.inputChannel().read();
                     } catch (MalformedRequestException e) {
-                        Response badRequestResponse = Response.internalServerError(e);
+                        Response badRequestResponse = Response.badRequestError(e);
                         byte[] headers = badRequestResponse.toHTTPFrame().getBytes();
                         byte[] body = badRequestResponse.body().readAllBytes();
                         byte[] rawResponse =  new byte[headers.length + body.length];

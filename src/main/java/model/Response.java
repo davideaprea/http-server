@@ -38,7 +38,7 @@ public record Response(
         return stringBuilder.toString();
     }
 
-    public static Response internalServerError(Exception e) {
+    public static Response badRequestError(Exception e) {
         String message = e.getMessage() != null ? e.getMessage() : Status.BAD_REQUEST.getName();
 
         return new Response(
