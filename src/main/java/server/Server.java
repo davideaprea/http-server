@@ -62,9 +62,14 @@ public class Server {
                         client.inputChannel().read();
                     } catch (MalformedRequestException e) {
                         Response badRequestResponse = Response.internalServerError(e);
-                        String rawResponse = badRequestResponse.toHTTPFrame() + badRequestResponse;
+                        byte[] headers = badRequestResponse.toHTTPFrame().getBytes();
+                        byte[] body = badRequestResponse.body().readAllBytes();
+                        byte[] rawResponse =  new byte[headers.length + body.length];
 
-                        client.outputChannel().write(rawResponse.getBytes(), true);
+                        System.arraycopy(headers, 0, rawResponse, 0, headers.length);
+                        System.arraycopy(body, 0, rawResponse, 0, body.length);
+
+                        client.outputChannel().write(rawResponse, true);
                     } catch (Exception e) {
                         client.channelKey().close();
                     }
