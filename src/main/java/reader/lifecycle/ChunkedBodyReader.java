@@ -6,6 +6,8 @@ import reader.dto.ReadingLifecycleEvents;
 import reader.dto.SizeLimits;
 
 public class ChunkedBodyReader extends RequestReader {
+    private static final int CHUNK_SIZE_MAX_LENGTH = 16;
+
     private boolean isReadingChunkSize = true;
     private StringBuilder chunkSizeBuilder = new StringBuilder();
     private long remainingChunkBytes = 0;
@@ -48,11 +50,10 @@ public class ChunkedBodyReader extends RequestReader {
                 isReadingChunkSize = false;
                 chunkSizeBuilder = new StringBuilder();
             } else {
-                if (availableSpace == 0) {
+                if (chunkSizeBuilder.length() == CHUNK_SIZE_MAX_LENGTH) {
                     throw new IllegalStateException("Max body size exceeded");
                 }
 
-                availableSpace--;
                 chunkSizeBuilder.append(currChar);
             }
         } else {
