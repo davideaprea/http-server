@@ -73,7 +73,8 @@ public class HeadersReader extends RequestReader {
                             });
                     Optional<String> transferEncodingValue = Optional
                             .ofNullable(headers.get(HeaderKey.TRANSFER_ENCODING.getValue()))
-                            .map(List::getFirst);
+                            .map(List::getFirst)
+                            .filter("chunked"::equals);
 
                     if (contentLengthValue.isPresent() && transferEncodingValue.isPresent()) {
                         throw new MalformedRequestException("Content length and transfer encoding headers can't be present in the same request.");
