@@ -37,10 +37,15 @@ public class ChunkedBodyReader extends RequestReader {
                     throw new IllegalStateException("Invalid CRLF sequence in body chunk.");
                 }
 
+                try {
+                    currentChunkBytes = Long.parseLong(chunkSizeBuilder.toString(), 16);
+                } catch (NumberFormatException e) {
+                    throw new IllegalStateException("Chunk size is not a valid number.");
+                }
+
+                remainingChunkBytes = currentChunkBytes;
                 readingState = ReadingState.NORMAL;
                 isReadingChunkSize = false;
-                currentChunkBytes = Long.parseLong(chunkSizeBuilder.toString(), 16);
-                remainingChunkBytes = currentChunkBytes;
                 chunkSizeBuilder = new StringBuilder();
             } else {
                 chunkSizeBuilder.append(currChar);

@@ -57,7 +57,13 @@ public class HeadersReader extends RequestReader {
                                     throw new MalformedRequestException("Content length header allows only one value.");
                                 }
 
-                                long value = Long.parseLong(values.getFirst());
+                                long value;
+
+                                try {
+                                    value = Long.parseLong(values.getFirst());
+                                } catch (NumberFormatException e) {
+                                    throw new MalformedRequestException("Content length is not a valid number.");
+                                }
 
                                 if (value < 0) {
                                     throw new MalformedRequestException("Content length header allows only zero or positive values.");
