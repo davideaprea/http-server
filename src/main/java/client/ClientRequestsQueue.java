@@ -1,9 +1,7 @@
 package client;
 
 import model.HeaderKey;
-import model.Request;
 import model.Response;
-import router.Router;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,26 +10,25 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ClientRequestsQueue {
-    private final Router router;
     private final ExecutorService executorService;
     private final ClientOutputChannel clientOutputChannel;
-    private final Queue<Request> requestsQueue = new LinkedList<>();
+    private final Queue<Supplier<Response>> requestsQueue = new LinkedList<>();
     private final Consumer<Exception> onError;
 
     private boolean isProcessing = false;
 
-    public ClientRequestsQueue(Router router, ExecutorService executorService, ClientOutputChannel clientOutputChannel, Consumer<Exception> onError) {
-        this.router = router;
+    public ClientRequestsQueue(ExecutorService executorService, ClientOutputChannel clientOutputChannel, Consumer<Exception> onError) {
         this.executorService = executorService;
         this.clientOutputChannel = clientOutputChannel;
         this.onError = onError;
     }
 
-    public void enqueue(Request request) {
+    public void enqueue(Supplier<Response> responseSupplier) {
         synchronized (this) {
-            requestsQueue.add(request);
+            requestsQueue.add(responseSupplier);
 
             if (isProcessing) {
                 return;
@@ -44,7 +41,7 @@ public class ClientRequestsQueue {
     }
 
     private void submitNext() {
-        Request request;
+        Supplier<Response> request;
 
         synchronized (this) {
             request = requestsQueue.poll();
@@ -57,14 +54,12 @@ public class ClientRequestsQueue {
         }
 
         executorService.submit(() -> {
-            process(request);
+            process(request.get());
             submitNext();
         });
     }
 
-    private void process(Request request) {
-        Response response = router.handle(request);
-
+    private void process(Response response) {
         clientOutputChannel.write(response.toHTTPFrame().getBytes(), false);
 
         try (InputStream bodyStream = response.body()) {

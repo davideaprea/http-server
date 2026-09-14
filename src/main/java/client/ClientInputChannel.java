@@ -1,11 +1,14 @@
 package client;
 
 import common.TimedOperation;
+import model.Response;
 import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
 import reader.dto.SizeLimits;
+import reader.exception.MalformedRequestException;
 import reader.lifecycle.RequestLineReader;
 import reader.lifecycle.RequestReader;
+import router.Router;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -14,15 +17,19 @@ import java.nio.channels.SocketChannel;
 public class ClientInputChannel {
     private final ClientChannelKey clientChannelKey;
     private final ByteBuffer buffer;
+    private final ClientRequestsQueue clientRequestsQueue;
+    private final ReadingLifecycleEvents readingLifecycleEvents;
+    private final SizeLimits sizeLimits;
 
     private RequestReader requestReader;
     private boolean isFree;
 
-    public ClientInputChannel(ClientChannelKey clientChannelKey, TimedOperation requestTimer, ClientRequestsQueue clientRequestsQueue, SizeLimits sizeLimits) {
+    public ClientInputChannel(ClientChannelKey clientChannelKey, TimedOperation requestTimer, ClientRequestsQueue clientRequestsQueue, SizeLimits sizeLimits, Router router) {
         this.clientChannelKey = clientChannelKey;
-        buffer = ByteBuffer.allocateDirect(8192);
-        requestReader = new RequestLineReader(ReadingLifecycleEvents.builder()
-                .onNewRequest(clientRequestsQueue::enqueue)
+        this.clientRequestsQueue = clientRequestsQueue;
+        this.sizeLimits = sizeLimits;
+        this.readingLifecycleEvents = ReadingLifecycleEvents.builder()
+                .onNewRequest(request -> clientRequestsQueue.enqueue(() -> router.handle(request)))
                 .onReadingAvailable(() -> {
                     clientChannelKey.addReadInterest();
 
@@ -30,8 +37,9 @@ public class ClientInputChannel {
                 })
                 .onStart(requestTimer::start)
                 .onEnd(requestTimer::stop)
-                .build(),
-                sizeLimits);
+                .build();
+        buffer = ByteBuffer.allocateDirect(8192);
+        requestReader = new RequestLineReader(readingLifecycleEvents, sizeLimits);
         isFree = true;
     }
 
@@ -55,7 +63,19 @@ public class ClientInputChannel {
             buffer.flip();
 
             while (buffer.hasRemaining() && isFree) {
-                ReadResult readingResult = requestReader.eval(buffer.get());
+                ReadResult readingResult;
+
+                try {
+                    readingResult = requestReader.eval(buffer.get());
+                } catch (MalformedRequestException e) {
+                    clientRequestsQueue.enqueue(() -> Response.badRequestError(e));
+                    readingResult = new ReadResult(new RequestLineReader(readingLifecycleEvents, sizeLimits), true);
+                } catch (Exception e) {
+                    clientChannelKey.close();
+
+                    return;
+                }
+
                 requestReader = readingResult.nextReader();
                 isFree = readingResult.canProceed();
             }

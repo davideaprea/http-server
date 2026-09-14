@@ -2,8 +2,6 @@ package server;
 
 import client.*;
 import common.TimedOperation;
-import model.Response;
-import reader.exception.MalformedRequestException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -56,23 +54,7 @@ public class Server {
 
                     clientKey.attach(createClient(clientKey));
                 } else if (key.isReadable()) {
-                    Client client = (Client) key.attachment();
-
-                    try {
-                        client.inputChannel().read();
-                    } catch (MalformedRequestException e) {
-                        Response badRequestResponse = Response.badRequestError(e);
-                        byte[] headers = badRequestResponse.toHTTPFrame().getBytes();
-                        byte[] body = badRequestResponse.body().readAllBytes();
-                        byte[] rawResponse =  new byte[headers.length + body.length];
-
-                        System.arraycopy(headers, 0, rawResponse, 0, headers.length);
-                        System.arraycopy(body, 0, rawResponse, 0, body.length);
-
-                        client.outputChannel().write(rawResponse, true);
-                    } catch (Exception e) {
-                        client.channelKey().close();
-                    }
+                    ((Client) key.attachment()).inputChannel().read();
                 } else if (key.isWritable()) {
                     ((Client) key.attachment()).outputChannel().flush();
                 }
@@ -83,7 +65,7 @@ public class Server {
     private Client createClient(SelectionKey selectionKey) {
         ClientChannelKey clientChannelKey = new ClientChannelKey(selectionKey);
         ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
-        ClientRequestsQueue clientRequestsQueue = new ClientRequestsQueue(configuration.router(), executor, outputChannel, e -> clientChannelKey.close());
+        ClientRequestsQueue clientRequestsQueue = new ClientRequestsQueue(executor, outputChannel, e -> clientChannelKey.close());
         TimedOperation timedOperation = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
 
         return new Client(
@@ -92,7 +74,8 @@ public class Server {
                         clientChannelKey,
                         timedOperation,
                         clientRequestsQueue,
-                        configuration.sizeLimits()
+                        configuration.sizeLimits(),
+                        configuration.router()
                 ),
                 outputChannel
         );
