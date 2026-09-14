@@ -11,21 +11,22 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 public class ClientRequestsQueue {
     private final Router router;
     private final ExecutorService executorService;
     private final ClientOutputChannel clientOutputChannel;
     private final Queue<Request> requestsQueue = new LinkedList<>();
-    private final ClientChannelKey clientChannelKey;
+    private final Consumer<Exception> onError;
 
     private boolean isProcessing = false;
 
-    public ClientRequestsQueue(Router router, ExecutorService executorService, ClientOutputChannel clientOutputChannel, ClientChannelKey clientChannelKey) {
+    public ClientRequestsQueue(Router router, ExecutorService executorService, ClientOutputChannel clientOutputChannel, Consumer<Exception> onError) {
         this.router = router;
         this.executorService = executorService;
         this.clientOutputChannel = clientOutputChannel;
-        this.clientChannelKey = clientChannelKey;
+        this.onError = onError;
     }
 
     public void enqueue(Request request) {
@@ -78,7 +79,7 @@ public class ClientRequestsQueue {
                 }
 
                 if (bytesRead > 0) {
-                    clientChannelKey.close();
+                    onError.accept(new IllegalStateException("Content length hasn't been reached."));
                 }
             } else {
                 byte[] buffer = new byte[8192];
@@ -93,8 +94,7 @@ public class ClientRequestsQueue {
                 clientOutputChannel.write("0\r\n\r\n".getBytes(), false);
             }
         } catch (IOException e) {
-            clientChannelKey.close();
-            requestsQueue.clear();
+            onError.accept(e);
         }
     }
 }
