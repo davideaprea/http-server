@@ -12,15 +12,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class ClientRequestsQueue {
+public class ClientResponsesQueue {
     private final ExecutorService executorService;
     private final ClientOutputChannel clientOutputChannel;
-    private final Queue<Supplier<Response>> requestsQueue = new LinkedList<>();
+    private final Queue<Supplier<Response>> responsesQueue = new LinkedList<>();
     private final Consumer<Exception> onError;
 
     private boolean isProcessing = false;
 
-    public ClientRequestsQueue(ExecutorService executorService, ClientOutputChannel clientOutputChannel, Consumer<Exception> onError) {
+    public ClientResponsesQueue(ExecutorService executorService, ClientOutputChannel clientOutputChannel, Consumer<Exception> onError) {
         this.executorService = executorService;
         this.clientOutputChannel = clientOutputChannel;
         this.onError = onError;
@@ -28,7 +28,7 @@ public class ClientRequestsQueue {
 
     public void enqueue(Supplier<Response> responseSupplier) {
         synchronized (this) {
-            requestsQueue.add(responseSupplier);
+            responsesQueue.add(responseSupplier);
 
             if (isProcessing) {
                 return;
@@ -41,12 +41,12 @@ public class ClientRequestsQueue {
     }
 
     private void submitNext() {
-        Supplier<Response> request;
+        Supplier<Response> responseSupplier;
 
         synchronized (this) {
-            request = requestsQueue.poll();
+            responseSupplier = responsesQueue.poll();
 
-            if (request == null) {
+            if (responseSupplier == null) {
                 isProcessing = false;
 
                 return;
@@ -54,12 +54,12 @@ public class ClientRequestsQueue {
         }
 
         executorService.submit(() -> {
-            process(request.get());
+            write(responseSupplier.get());
             submitNext();
         });
     }
 
-    private void process(Response response) {
+    private void write(Response response) {
         clientOutputChannel.write(response.toHTTPFrame().getBytes(), false);
 
         try (InputStream bodyStream = response.body()) {

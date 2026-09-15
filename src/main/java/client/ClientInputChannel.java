@@ -17,19 +17,19 @@ import java.nio.channels.SocketChannel;
 public class ClientInputChannel {
     private final ClientChannelKey clientChannelKey;
     private final ByteBuffer buffer;
-    private final ClientRequestsQueue clientRequestsQueue;
+    private final ClientResponsesQueue clientResponsesQueue;
     private final ReadingLifecycleEvents readingLifecycleEvents;
     private final SizeLimits sizeLimits;
 
     private RequestReader requestReader;
     private boolean isFree;
 
-    public ClientInputChannel(ClientChannelKey clientChannelKey, TimedOperation requestTimer, ClientRequestsQueue clientRequestsQueue, SizeLimits sizeLimits, Router router) {
+    public ClientInputChannel(ClientChannelKey clientChannelKey, TimedOperation requestTimer, ClientResponsesQueue clientResponsesQueue, SizeLimits sizeLimits, Router router) {
         this.clientChannelKey = clientChannelKey;
-        this.clientRequestsQueue = clientRequestsQueue;
+        this.clientResponsesQueue = clientResponsesQueue;
         this.sizeLimits = sizeLimits;
         this.readingLifecycleEvents = ReadingLifecycleEvents.builder()
-                .onNewRequest(request -> clientRequestsQueue.enqueue(() -> router.handle(request)))
+                .onNewRequest(request -> clientResponsesQueue.enqueue(() -> router.handle(request)))
                 .onReadingAvailable(() -> {
                     clientChannelKey.addReadInterest();
 
@@ -68,7 +68,7 @@ public class ClientInputChannel {
                 try {
                     readingResult = requestReader.eval(buffer.get());
                 } catch (MalformedRequestException e) {
-                    clientRequestsQueue.enqueue(() -> Response.badRequestError(e));
+                    clientResponsesQueue.enqueue(() -> Response.badRequestError(e));
                     readingResult = new ReadResult(new RequestLineReader(readingLifecycleEvents, sizeLimits), true);
                 } catch (Exception e) {
                     clientChannelKey.close();

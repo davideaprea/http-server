@@ -65,7 +65,7 @@ public class Server {
     private Client createClient(SelectionKey selectionKey) {
         ClientChannelKey clientChannelKey = new ClientChannelKey(selectionKey);
         ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
-        ClientRequestsQueue clientRequestsQueue = new ClientRequestsQueue(executor, outputChannel, e -> clientChannelKey.close());
+        ClientResponsesQueue clientResponsesQueue = new ClientResponsesQueue(executor, outputChannel, e -> clientChannelKey.close());
         TimedOperation timedOperation = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
 
         return new Client(
@@ -73,7 +73,7 @@ public class Server {
                 new ClientInputChannel(
                         clientChannelKey,
                         timedOperation,
-                        clientRequestsQueue,
+                        clientResponsesQueue,
                         configuration.sizeLimits(),
                         configuration.router()
                 ),
