@@ -31,6 +31,8 @@ public class ContentLengthBodyReaderTest {
                         () -> {
                         },
                         () -> {
+                        },
+                        (error) -> {
                         }
                 ),
                 Mockito.mock(),

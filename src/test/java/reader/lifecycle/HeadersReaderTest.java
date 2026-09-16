@@ -131,6 +131,8 @@ public class HeadersReaderTest {
                         () -> {
                         },
                         () -> {
+                        },
+                        (error) -> {
                         }
                 ),
                 Request.builder(),

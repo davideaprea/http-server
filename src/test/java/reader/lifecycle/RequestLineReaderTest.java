@@ -47,6 +47,8 @@ public class RequestLineReaderTest {
                 () -> {
                 },
                 () -> {
+                },
+                (error) -> {
                 }
         ), new SizeLimits(1000, 1000));
     }

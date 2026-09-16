@@ -2,6 +2,9 @@ package server;
 
 import client.*;
 import common.TimedOperation;
+import model.Response;
+import reader.dto.ReadingLifecycleEvents;
+import reader.lifecycle.RequestReaderEvaluator;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -66,16 +69,25 @@ public class Server {
         ClientChannelKey clientChannelKey = new ClientChannelKey(selectionKey);
         ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
         ClientResponsesQueue clientResponsesQueue = new ClientResponsesQueue(executor, outputChannel, e -> clientChannelKey.close());
-        TimedOperation timedOperation = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
+        TimedOperation requestTimer = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
+        ReadingLifecycleEvents readingLifecycleEvents = ReadingLifecycleEvents.builder()
+                .onNewRequest(request -> clientResponsesQueue.enqueue(() -> configuration.router().handle(request)))
+                .onReadingAvailable(clientChannelKey::addReadInterest)
+                .onStart(requestTimer::start)
+                .onEnd(requestTimer::stop)
+                .onError(error -> {
+                    if (error.isRecoverable()) {
+                        clientResponsesQueue.enqueue(() -> Response.badRequestError(error.value()));
+                    } else {
+                        clientChannelKey.close();
+                    }
+                })
+                .build();
 
         return new Client(
-                clientChannelKey,
                 new ClientInputChannel(
                         clientChannelKey,
-                        timedOperation,
-                        clientResponsesQueue,
-                        configuration.sizeLimits(),
-                        configuration.router()
+                        new RequestReaderEvaluator(readingLifecycleEvents, configuration.sizeLimits())
                 ),
                 outputChannel
         );
