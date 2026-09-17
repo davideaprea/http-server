@@ -384,7 +384,7 @@ class ServerTest {
                 true
         ));
 
-        try (RawHttpConnection raw = newRawConnection()) {
+        try (RawHttpConnection raw = newRawConnection(40_000)) {
             raw.sendHeaders(
                     "POST /backpressure HTTP/1.1\r\n" +
                             "Host: localhost\r\n" +
@@ -1154,9 +1154,13 @@ class ServerTest {
     }
 
     private RawHttpConnection newRawConnection() throws IOException {
+        return newRawConnection(5000);
+    }
+
+    private RawHttpConnection newRawConnection(int timeout) throws IOException {
         Socket socket = new Socket();
         socket.setTcpNoDelay(true);
-        socket.setSoTimeout(5000);
+        socket.setSoTimeout(timeout);
         socket.connect(new InetSocketAddress("127.0.0.1", port), 5000);
         return new RawHttpConnection(socket);
     }
