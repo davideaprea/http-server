@@ -23,10 +23,16 @@ public class Request {
     @Getter
     private final RequestBody body;
 
+    /**
+     * @return a <b>copy</b> of the headers map.
+     */
     public Map<String, List<String>> getHeaders() {
         return Map.copyOf(headers);
     }
 
+    /**
+     * @return a <b>copy</b> of the query parameters map.
+     */
     public Map<String, List<String>> getQueryParams() {
         return Map.copyOf(queryParams);
     }
