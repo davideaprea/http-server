@@ -5,7 +5,6 @@ import model.*;
 import router.dto.HandlerCreateCommand;
 import router.exception.ConflictingRoutesException;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,20 +22,24 @@ public class Router {
             currSegment = currSegment.children.get(segmentName);
 
             if (currSegment == null) {
-                return new Response(
-                        Version.HTTP_1_1,
-                        Status.NOT_FOUND,
-                        Map.of(),
-                        new ByteArrayInputStream("Couldn't find the requested path.".getBytes())
-                );
+                return Response.textResponse("Couldn't find the requested path.", Status.NOT_FOUND);
             }
         }
 
-        Response response = Optional
+        return Optional
                 .ofNullable(currSegment.methodHandlers.get(request.getMethod()))
                 .map(handler -> {
                     try {
-                        return handler.handle(request);
+                        Response response = handler.handle(request);
+
+                        if (
+                                !response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue()) &&
+                                !response.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue())
+                        ) {
+                            response.headers().put(HeaderKey.TRANSFER_ENCODING.getValue(), "chunked");
+                        }
+
+                        return response;
                     } catch (Exception e) {
                         String message = Status.INTERNAL_SERVER_ERROR.getName();
 
@@ -44,29 +47,13 @@ public class Router {
                             message = e.getMessage();
                         }
 
-                        return new Response(
-                                Version.HTTP_1_1,
-                                Status.INTERNAL_SERVER_ERROR,
-                                Map.of(),
-                                new ByteArrayInputStream(message.getBytes())
-                        );
+                        return Response.textResponse(message, Status.INTERNAL_SERVER_ERROR);
                     }
                 })
-                .orElse(new Response(
-                        Version.HTTP_1_1,
-                        Status.METHOD_NOT_ALLOWED,
-                        Map.of(),
-                        new ByteArrayInputStream("The requested path is not configured for this method.".getBytes())
+                .orElse(Response.textResponse(
+                        "The requested path is not configured for this method.",
+                        Status.METHOD_NOT_ALLOWED
                 ));
-
-        if (
-                !response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue()) &&
-                !response.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue())
-        ) {
-            response.headers().put(HeaderKey.TRANSFER_ENCODING.getValue(), "chunked");
-        }
-
-        return response;
     }
 
     public static final class Builder {

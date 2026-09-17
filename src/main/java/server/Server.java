@@ -106,6 +106,6 @@ public class Server {
     public void stop() throws IOException {
         selector.close();
         executor.shutdownNow();
-        timersScheduler.close();
+        timersScheduler.shutdownNow();
     }
 }

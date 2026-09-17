@@ -54,4 +54,18 @@ public record Response(
                 new ByteArrayInputStream(body)
         );
     }
+
+    public static Response textResponse(String body, Status status) {
+        byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
+
+        return new Response(
+                Version.HTTP_1_1,
+                status,
+                Map.of(
+                        HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
+                        HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf(bodyBytes.length)
+                ),
+                new ByteArrayInputStream(bodyBytes)
+        );
+    }
 }
