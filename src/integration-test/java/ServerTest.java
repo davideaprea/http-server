@@ -1,9 +1,4 @@
-import model.HeaderKey;
-import model.Method;
-import model.Request;
-import model.Response;
-import model.Status;
-import model.Version;
+import model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -13,12 +8,7 @@ import router.dto.HandlerCreateCommand;
 import server.Server;
 import server.ServerConfiguration;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -359,13 +349,18 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST /chunked-request HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Transfer-Encoding: chunked\r\n" +
-                    "\r\n" +
-                    "5\r\nhello\r\n" +
-                    "6\r\n world\r\n" +
-                    "0\r\n\r\n"
+                    """
+                            POST /chunked-request HTTP/1.1\r
+                            Host: localhost\r
+                            Transfer-Encoding: chunked\r
+                            \r
+                            5\r
+                            hello\r
+                            6\r
+                             world\r
+                            0\r
+                            \r
+                            """
             );
 
             RawResponse response = raw.readResponse(false);
@@ -413,9 +408,9 @@ class ServerTest {
         try (RawHttpConnection raw = newRawConnection()) {
             raw.sendHeaders(
                     "POST /backpressure HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Content-Length: " + payload.length + "\r\n" +
-                    "\r\n"
+                            "Host: localhost\r\n" +
+                            "Content-Length: " + payload.length + "\r\n" +
+                            "\r\n"
             );
 
             Thread sender = new Thread(() -> {
@@ -461,11 +456,12 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST /header-case HTTP/1.1\r\n" +
-                    "hOsT: localhost\r\n" +
-                    "CoNtEnT-LeNgTh: 3\r\n" +
-                    "\r\n" +
-                    "abc"
+                    """
+                            POST /header-case HTTP/1.1\r
+                            hOsT: localhost\r
+                            CoNtEnT-LeNgTh: 3\r
+                            \r
+                            abc"""
             );
 
             RawResponse response = raw.readResponse(false);
@@ -508,10 +504,12 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST / HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Content-Length: nope\r\n" +
-                    "\r\n"
+                    """
+                            POST / HTTP/1.1\r
+                            Host: localhost\r
+                            Content-Length: nope\r
+                            \r
+                            """
             );
 
             RawResponse response = raw.readResponse(false);
@@ -525,10 +523,12 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST / HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Content-Length: -1\r\n" +
-                    "\r\n"
+                    """
+                            POST / HTTP/1.1\r
+                            Host: localhost\r
+                            Content-Length: -1\r
+                            \r
+                            """
             );
 
             RawResponse response = raw.readResponse(false);
@@ -542,12 +542,13 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST / HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Content-Length: 1\r\n" +
-                    "Content-Length: 1\r\n" +
-                    "\r\n" +
-                    "x"
+                    """
+                            POST / HTTP/1.1\r
+                            Host: localhost\r
+                            Content-Length: 1\r
+                            Content-Length: 1\r
+                            \r
+                            x"""
             );
 
             RawResponse response = raw.readResponse(false);
@@ -561,11 +562,13 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST / HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Content-Length: 1\r\n" +
-                    "Transfer-Encoding: chunked\r\n" +
-                    "\r\n"
+                    """
+                            POST / HTTP/1.1\r
+                            Host: localhost\r
+                            Content-Length: 1\r
+                            Transfer-Encoding: chunked\r
+                            \r
+                            """
             );
 
             RawResponse response = raw.readResponse(false);
@@ -639,10 +642,12 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST /too-large HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Content-Length: 5\r\n" +
-                    "\r\n"
+                    """
+                            POST /too-large HTTP/1.1\r
+                            Host: localhost\r
+                            Content-Length: 5\r
+                            \r
+                            """
             );
 
             assertConnectionCloses(raw);
@@ -673,12 +678,16 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST /chunk-too-large HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Transfer-Encoding: chunked\r\n" +
-                    "\r\n" +
-                    "5\r\nhello\r\n" +
-                    "0\r\n\r\n"
+                    """
+                            POST /chunk-too-large HTTP/1.1\r
+                            Host: localhost\r
+                            Transfer-Encoding: chunked\r
+                            \r
+                            5\r
+                            hello\r
+                            0\r
+                            \r
+                            """
             );
 
             assertTrue(handlerStarted.await(2, TimeUnit.SECONDS));
@@ -692,11 +701,13 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST /chunk HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Transfer-Encoding: chunked\r\n" +
-                    "\r\n" +
-                    "not-hex\r\n"
+                    """
+                            POST /chunk HTTP/1.1\r
+                            Host: localhost\r
+                            Transfer-Encoding: chunked\r
+                            \r
+                            not-hex\r
+                            """
             );
 
             assertConnectionCloses(raw);
@@ -738,11 +749,12 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "POST /timeout-body HTTP/1.1\r\n" +
-                    "Host: localhost\r\n" +
-                    "Content-Length: 5\r\n" +
-                    "\r\n" +
-                    "a"
+                    """
+                            POST /timeout-body HTTP/1.1\r
+                            Host: localhost\r
+                            Content-Length: 5\r
+                            \r
+                            a"""
             );
 
             assertTrue(handlerStarted.await(2, TimeUnit.SECONDS));
@@ -938,8 +950,14 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "GET /one HTTP/1.1\r\nHost: localhost\r\n\r\n" +
-                    "GET /two HTTP/1.1\r\nHost: localhost\r\n\r\n"
+                    """
+                            GET /one HTTP/1.1\r
+                            Host: localhost\r
+                            \r
+                            GET /two HTTP/1.1\r
+                            Host: localhost\r
+                            \r
+                            """
             );
 
             RawResponse first = raw.readResponse(false);
@@ -981,8 +999,14 @@ class ServerTest {
 
         try (RawHttpConnection raw = newRawConnection()) {
             raw.send(
-                    "GET /one HTTP/1.1\r\nHost: localhost\r\n\r\n" +
-                    "GET /two HTTP/1.1\r\nHost: localhost\r\n\r\n"
+                    """
+                            GET /one HTTP/1.1\r
+                            Host: localhost\r
+                            \r
+                            GET /two HTTP/1.1\r
+                            Host: localhost\r
+                            \r
+                            """
             );
 
             assertTrue(firstStarted.await(2, TimeUnit.SECONDS));
