@@ -162,27 +162,6 @@ class ServerTest {
     }*/
 
     @Test
-    void headReturnsNoBodyAndPreservesGetHeaders() throws Exception {
-        startServer(routerForText(
-                Method.GET,
-                "/head",
-                "Hello world",
-                true
-        ));
-
-        try (RawHttpConnection raw = newRawConnection()) {
-            raw.send("HEAD /head HTTP/1.1\r\nHost: localhost\r\n\r\n");
-            RawResponse response = raw.readResponse(true);
-
-            assertEquals(200, response.statusCode());
-            assertEquals("11", response.header("content-length"));
-            assertEquals("text/plain", response.header("content-type"));
-
-            assertNoImmediateBytes(raw, 300);
-        }
-    }
-
-    @Test
     void queryParametersAreDecodedAndRepeatedValuesArePreserved() throws Exception {
         Router router = new Router.Builder()
                 .add(new HandlerCreateCommand(

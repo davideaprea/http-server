@@ -69,7 +69,7 @@ public class ClientResponsesQueue {
                 int bytesRead;
 
                 while ((bytesRead = bodyStream.read(buffer)) != -1 && bytesToWrite > 0) {
-                    clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead), false);
+                    clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead > bytesToWrite ? (int) bytesToWrite : bytesRead), false);
                     bytesToWrite -= bytesRead;
                 }
 
