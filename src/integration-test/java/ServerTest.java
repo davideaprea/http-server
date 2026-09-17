@@ -1153,7 +1153,7 @@ class ServerTest {
     private RawHttpConnection newRawConnection() throws IOException {
         Socket socket = new Socket();
         socket.setTcpNoDelay(true);
-        socket.setSoTimeout(50000);
+        socket.setSoTimeout(5000);
         socket.connect(new InetSocketAddress("127.0.0.1", port), 5000);
         return new RawHttpConnection(socket);
     }

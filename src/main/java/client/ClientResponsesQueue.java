@@ -73,7 +73,7 @@ public class ClientResponsesQueue {
                     bytesToWrite -= bytesRead;
                 }
 
-                if (bytesRead > 0) {
+                if (bytesToWrite > 0) {
                     onError.accept(new IllegalStateException("Content length hasn't been reached."));
                 }
             } else {
