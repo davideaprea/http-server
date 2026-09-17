@@ -26,11 +26,15 @@ public class RouterBuilderTest {
 
     @Test
     void testHeadEndpointRegistrationForGetRequests() throws IOException {
+        String responseBody = "Response body";
         Response handlerResponse = new Response(
                 Version.HTTP_1_1,
                 Status.OK,
-                Map.of("name", "value"),
-                new ByteArrayInputStream("Response body".getBytes())
+                Map.of(
+                        "name", "value",
+                        HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.length())
+                ),
+                new ByteArrayInputStream(responseBody.getBytes())
         );
         HandlerCreateCommand command = new HandlerCreateCommand(
                 request -> handlerResponse,
