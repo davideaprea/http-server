@@ -1228,7 +1228,10 @@ class ServerTest {
         raw.socket().setSoTimeout(timeoutMillis);
         try {
             int value = raw.input().read();
-            fail("Unexpected bytes after the response: " + value);
+
+            if (value != -1) {
+                fail("Unexpected bytes after the response: " + value);
+            }
         } catch (SocketTimeoutException | EOFException expected) {
             // Expected: no body bytes, or the server closed the connection.
         }
