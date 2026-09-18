@@ -62,6 +62,10 @@ public class ChunkedBodyReader extends RequestReader {
                     throw new IllegalStateException("Max body size exceeded");
                 }
 
+                if (!isHexDigit(currChar)) {
+                    throw new IllegalStateException("Character %s is not a valid hexadecimal digit.".formatted(currChar));
+                }
+
                 chunkSizeBuilder.append(currChar);
             }
         } else {
@@ -104,5 +108,11 @@ public class ChunkedBodyReader extends RequestReader {
         }
 
         return new ReadResult(this, !requestBody.isFull());
+    }
+
+    private boolean isHexDigit(char c) {
+        return (c >= '0' && c <= '9')
+                || (c >= 'a' && c <= 'f')
+                || (c >= 'A' && c <= 'F');
     }
 }
