@@ -18,6 +18,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Runs an HTTP server that accepts client connections and processes HTTP
+ * requests using a non-blocking I/O model.
+ */
 public class Server {
     private final ServerConfiguration configuration;
     private final ExecutorService executor;
@@ -31,6 +35,14 @@ public class Server {
         timersScheduler = Executors.newScheduledThreadPool(1);
     }
 
+    /**
+     * Starts the server and processes client connections and I/O events.
+     *
+     * <p>This method blocks while the server is running.</p>
+     *
+     * @throws IOException if an I/O error occurs while initializing or processing
+     *                     the server
+     */
     public void start() throws IOException {
         selector = Selector.open();
         ServerSocketChannel serverChannel = createServerChannel();
@@ -103,6 +115,11 @@ public class Server {
         return serverChannel;
     }
 
+    /**
+     * Stops the server and shuts down its worker and timer executors.
+     *
+     * @throws IOException if an I/O error occurs while closing the selector
+     */
     public void stop() throws IOException {
         selector.close();
         executor.shutdownNow();

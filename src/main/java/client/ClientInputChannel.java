@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+/**
+ * Reads request data from a client socket and passes it to the request reader
+ * lifecycle.
+ */
 public class ClientInputChannel {
     private final ClientChannelKey clientChannelKey;
     private final ByteBuffer buffer;
@@ -20,6 +24,13 @@ public class ClientInputChannel {
         isFree = true;
     }
 
+    /**
+     * Reads available data from the client socket and processes it as part of an
+     * HTTP request.
+     *
+     * <p>Reading stops when no more data is currently available, the request
+     * reader signals that it cannot proceed, or the client connection is closed.</p>
+     */
     public void read() {
         if (!isFree) {
             return;

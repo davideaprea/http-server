@@ -12,6 +12,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Queues HTTP responses for sequential processing and writing to a client.
+ *
+ * <p>Responses are processed asynchronously and written to the client in the
+ * same order in which they are enqueued.</p>
+ */
 public class ClientResponsesQueue {
     private final ExecutorService executorService;
     private final ClientOutputChannel clientOutputChannel;
@@ -26,6 +32,12 @@ public class ClientResponsesQueue {
         this.onError = onError;
     }
 
+    /**
+     * Adds a response supplier to the processing queue.
+     *
+     * <p>If no response is currently being processed, processing starts
+     * immediately.</p>
+     */
     public void enqueue(Supplier<Response> responseSupplier) {
         synchronized (this) {
             responsesQueue.add(responseSupplier);

@@ -5,6 +5,12 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Manages outgoing HTTP response data for a client connection.
+ *
+ * <p>Response data is queued by the handler thread through {@link #write(byte[], boolean)}
+ * and written to the client socket by the selector thread through {@link #flush()}.</p>
+ */
 public class ClientOutputChannel {
     private final BlockingQueue<OutputChunk> bodyChunks = new LinkedBlockingQueue<>();
     private final ClientChannelKey clientChannelKey;
@@ -13,6 +19,12 @@ public class ClientOutputChannel {
         this.clientChannelKey = clientChannelKey;
     }
 
+    /**
+     * Writes queued response data to the client socket.
+     *
+     * <p>Writing stops when the socket cannot accept more data. Once all queued
+     * data has been written, write interest is removed from the selector.</p>
+     */
     public void flush() {
         try {
             while (!bodyChunks.isEmpty()) {
@@ -41,6 +53,15 @@ public class ClientOutputChannel {
         }
     }
 
+    /**
+     * Queues a response chunk to be written to the client socket.
+     *
+     * <p>The chunk is queued for writing by the selector thread.</p>
+     *
+     * @param chunk the response data to queue
+     * @param isLast whether the chunk is the last one to be written before
+     *               closing the channel
+     */
     public void write(byte[] chunk, boolean isLast) {
         try {
             bodyChunks.put(new OutputChunk(ByteBuffer.wrap(chunk), isLast));
