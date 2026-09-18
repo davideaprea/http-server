@@ -107,10 +107,9 @@ public class HeadersReader extends RequestReader {
                         nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody, sizeLimits);
                     } else {
                         requestBody.close();
+                        readingLifecycleEvents.onEnd().run();
 
                         nextReader = new RequestLineReader(readingLifecycleEvents, sizeLimits);
-
-                        readingLifecycleEvents.onEnd().run();
                     }
 
                     readingLifecycleEvents.onNewRequest().accept(request);
