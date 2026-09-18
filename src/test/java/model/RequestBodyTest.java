@@ -1,13 +1,12 @@
 package model;
 
-import model.RequestBody;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class RequestBodyTest {
     @Test
-    void a() {
+    void shouldBeFull() {
         RequestBody queue = new RequestBody(() -> {
         });
 
@@ -19,7 +18,7 @@ public class RequestBodyTest {
     }
 
     @Test
-    void b() {
+    void shouldNotCallOnSpaceFreedCallback() {
         Runnable onSpaceFreed = Mockito.mock(Runnable.class);
         RequestBody queue = new RequestBody(onSpaceFreed);
 
@@ -34,7 +33,7 @@ public class RequestBodyTest {
     }
 
     @Test
-    void c() {
+    void shouldCallOnSpaceFreedCallback() {
         Runnable onSpaceFreed = Mockito.mock(Runnable.class);
         RequestBody queue = new RequestBody(onSpaceFreed);
 
