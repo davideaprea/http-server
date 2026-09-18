@@ -13,6 +13,9 @@ import reader.exception.MalformedRequestException;
 
 import java.util.*;
 
+/**
+ * Reads and parses the headers of an HTTP request.
+ */
 public class HeadersReader extends RequestReader {
     private final Request.RequestBuilder requestBuilder;
     private final StringBuilder currentLine = new StringBuilder();
@@ -27,6 +30,17 @@ public class HeadersReader extends RequestReader {
         this.availableSpace = availableSpace;
     }
 
+    /**
+     * Processes a byte of the request headers.
+     *
+     * <p>Once all headers have been read, the request body configuration is
+     * determined and the request is passed to the appropriate stage of the
+     * request reading lifecycle.</p>
+     *
+     * @throws MalformedRequestException if the headers have an invalid format,
+     *                                   contain conflicting body information,
+     *                                   or exceed the configured {@link SizeLimits#maxHeadersSize()}
+     */
     @Override
     public ReadResult eval(byte requestByte) {
         char c = (char) requestByte;

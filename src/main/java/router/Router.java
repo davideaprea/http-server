@@ -14,6 +14,16 @@ import java.util.Optional;
 public class Router {
     private final Segment root;
 
+    /**
+     * Handles an HTTP request by finding the handler associated to
+     * the given {@link Request#getUrl()} and {@link Request#getMethod()}
+     *
+     * @param request the HTTP request to handle
+     * @return the response produced by the matching handler, or a response with
+     *         status {@link Status#NOT_FOUND} if the requested path does not exist,
+     *         {@link Status#METHOD_NOT_ALLOWED} if the path does not support the requested method
+     *         or {@link Status#INTERNAL_SERVER_ERROR} if the handler raised an unknown exception
+     */
     public Response handle(Request request) {
         String[] pathSegments = request.getUrl().split("/");
         Segment currSegment = root;
@@ -59,6 +69,18 @@ public class Router {
     public static final class Builder {
         private final Segment root = Segment.withDefaults();
 
+        /**
+         * Adds a handler with a specific path to the router.
+         *
+         * <p>If a {@link Method#GET} handler is added, a corresponding
+         * {@link Method#HEAD} handler is automatically registered.</p>
+         *
+         * @param command the command containing the route path, HTTP method and
+         *                request handler
+         * @return this builder
+         * @throws ConflictingRoutesException if a handler for the same path and
+         *                                    method has already been registered
+         */
         public Builder add(HandlerCreateCommand command) {
             String[] pathSegments = command.path().split("/");
             Segment currSegment = root;

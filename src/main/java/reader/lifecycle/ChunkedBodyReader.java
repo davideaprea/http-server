@@ -5,6 +5,9 @@ import reader.dto.ReadResult;
 import reader.dto.ReadingLifecycleEvents;
 import reader.dto.SizeLimits;
 
+/**
+ * Reads the body of an HTTP request encoded using chunked transfer encoding.
+ */
 public class ChunkedBodyReader extends RequestReader {
     private static final int CHUNK_SIZE_MAX_LENGTH = 16;
 
@@ -23,6 +26,11 @@ public class ChunkedBodyReader extends RequestReader {
         availableSpace = sizeLimits.maxBodySize();
     }
 
+    /**
+     * <p>The byte is processed as part of the current chunk size, chunk data,
+     * or chunk delimiter. Once the terminating chunk is received, the request
+     * body is closed and the reading lifecycle proceeds to the next request.</p>
+     */
     @Override
     public ReadResult eval(byte requestByte) {
         if (isReadingChunkSize) {

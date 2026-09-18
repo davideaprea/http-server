@@ -6,6 +6,10 @@ import reader.dto.ReadingLifecycleEvents;
 import reader.dto.SizeLimits;
 import reader.exception.MalformedRequestException;
 
+/**
+ * Coordinates the lifecycle of an HTTP request reader by delegating byte
+ * processing to the current {@link RequestReader}.
+ */
 public class RequestReaderEvaluator {
     private final ReadingLifecycleEvents readingLifecycleEvents;
     private final SizeLimits sizeLimits;
@@ -19,6 +23,16 @@ public class RequestReaderEvaluator {
         reset();
     }
 
+    /**
+     * Processes a byte using the current request reader and advances the reading
+     * lifecycle when appropriate.
+     *
+     * <p>If an error occurs while processing the byte, the error is reported and
+     * the reader lifecycle is reset.</p>
+     *
+     * @param requestByte the byte read from the request
+     * @return {@code true} if reading can proceed, {@code false} otherwise
+     */
     public boolean eval(byte requestByte) {
         try {
             ReadResult result = requestReader.eval(requestByte);
@@ -34,6 +48,9 @@ public class RequestReaderEvaluator {
         }
     }
 
+    /**
+     * Resets the request reading lifecycle to the beginning of a new request.
+     */
     public void reset() {
         requestReader = new RequestLineReader(readingLifecycleEvents, sizeLimits);
     }
