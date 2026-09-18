@@ -4,14 +4,12 @@ import client.dto.EnqueuedResponse;
 import model.HeaderKey;
 import model.Response;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Queues HTTP responses for sequential processing and writing to a client.
@@ -101,6 +99,10 @@ public class ClientResponsesQueue {
                 }
 
                 clientOutputChannel.write("0\r\n\r\n".getBytes(), false);
+            }
+
+            if (response.headers().getOrDefault(HeaderKey.CONNECTION.getValue(), "").equals("close")) {
+                clientOutputChannel.write(new byte[0], true);
             }
         } catch (Exception e) {
             onError.accept(e);
