@@ -7,6 +7,11 @@ import parser.exception.BadFormatException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HeaderParser {
+    /**
+     * Parses an HTTP header line into a {@link Header}.
+     *
+     * @throws BadFormatException if the header line has an invalid format
+     */
     public static Header from(String headerLine) {
         final int separatorIndex = headerLine.indexOf(':');
 

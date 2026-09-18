@@ -13,6 +13,12 @@ import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RequestTargetParser {
+    /**
+     * Parses an HTTP request line into a {@link RequestTarget}.
+     *
+     * @throws BadFormatException if the request line, method, version, target
+     *                            or query parameters have an invalid format
+     */
     public static RequestTarget from(String rawRequestLine) {
         String[] splitRequestLine = rawRequestLine.split(" ");
 
@@ -23,7 +29,7 @@ public final class RequestTargetParser {
         String requestTarget = splitRequestLine[1];
 
         if (!requestTarget.startsWith("/")) {
-            throw new BadFormatException("Request URI must start with a backslash.");
+            throw new BadFormatException("Request URI must start with a slash.");
         }
 
         int paramsStartIndex = requestTarget.indexOf('?');
