@@ -7,6 +7,7 @@ import client.ClientResponsesQueue;
 import client.dto.Client;
 import client.dto.EnqueuedResponse;
 import common.TimedOperation;
+import model.HeaderKey;
 import model.Method;
 import model.Response;
 import reader.dto.ReadingLifecycleEvents;
@@ -19,6 +20,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -90,7 +93,19 @@ public class Server {
         TimedOperation requestTimer = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
         ReadingLifecycleEvents readingLifecycleEvents = ReadingLifecycleEvents.builder()
                 .onNewRequest(request -> clientResponsesQueue.enqueue(new EnqueuedResponse(
-                        () -> configuration.router().handle(request),
+                        () -> {
+                            Response response = configuration.router().handle(request);
+                            boolean shouldCloseConn = Optional.of(request.getHeaders().get(HeaderKey.CONNECTION.getValue()))
+                                    .filter(values -> !values.isEmpty())
+                                    .map(values -> "close".equals(values.getFirst()))
+                                    .orElse(false);
+
+                            if (shouldCloseConn) {
+                                response.headers().put(HeaderKey.CONNECTION.getValue(), "close");
+                            }
+
+                            return response;
+                        },
                         Method.HEAD.equals(request.getMethod())
                 )))
                 .onReadingAvailable(clientChannelKey::addReadInterest)
