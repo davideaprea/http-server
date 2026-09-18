@@ -102,7 +102,7 @@ public class ClientResponsesQueue {
 
                 clientOutputChannel.write("0\r\n\r\n".getBytes(), false);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             onError.accept(e);
         }
     }
