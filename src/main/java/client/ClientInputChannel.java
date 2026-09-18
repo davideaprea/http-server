@@ -15,13 +15,10 @@ public class ClientInputChannel {
     private final ByteBuffer buffer;
     private final RequestReaderEvaluator requestReaderEvaluator;
 
-    private boolean isFree;
-
     public ClientInputChannel(ClientChannelKey clientChannelKey, RequestReaderEvaluator requestReaderEvaluator) {
         this.clientChannelKey = clientChannelKey;
         this.requestReaderEvaluator = requestReaderEvaluator;
         buffer = ByteBuffer.allocateDirect(8192);
-        isFree = true;
     }
 
     /**
@@ -32,10 +29,7 @@ public class ClientInputChannel {
      * reader signals that it cannot proceed, or the client connection is closed.</p>
      */
     public void read() {
-        if (!isFree) {
-            return;
-        }
-
+        boolean isFree = true;
         SocketChannel client = clientChannelKey.getSocketChannel();
         int bytesRead;
 
