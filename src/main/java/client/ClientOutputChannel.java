@@ -1,5 +1,7 @@
 package client;
 
+import client.dto.OutputChunk;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;

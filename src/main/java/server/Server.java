@@ -1,7 +1,13 @@
 package server;
 
-import client.*;
+import client.ClientChannelKey;
+import client.ClientInputChannel;
+import client.ClientOutputChannel;
+import client.ClientResponsesQueue;
+import client.dto.Client;
+import client.dto.EnqueuedResponse;
 import common.TimedOperation;
+import model.Method;
 import model.Response;
 import reader.dto.ReadingLifecycleEvents;
 import reader.lifecycle.RequestReaderEvaluator;
@@ -83,13 +89,19 @@ public class Server {
         ClientResponsesQueue clientResponsesQueue = new ClientResponsesQueue(executor, outputChannel, e -> clientChannelKey.close());
         TimedOperation requestTimer = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
         ReadingLifecycleEvents readingLifecycleEvents = ReadingLifecycleEvents.builder()
-                .onNewRequest(request -> clientResponsesQueue.enqueue(() -> configuration.router().handle(request)))
+                .onNewRequest(request -> clientResponsesQueue.enqueue(new EnqueuedResponse(
+                        () -> configuration.router().handle(request),
+                        Method.HEAD.equals(request.getMethod())
+                )))
                 .onReadingAvailable(clientChannelKey::addReadInterest)
                 .onStart(requestTimer::start)
                 .onEnd(requestTimer::stop)
                 .onError(error -> {
                     if (error.isRecoverable()) {
-                        clientResponsesQueue.enqueue(() -> Response.badRequestError(error.value()));
+                        clientResponsesQueue.enqueue(new EnqueuedResponse(
+                                () -> Response.badRequestError(error.value()),
+                                false
+                        ));
                     } else {
                         clientChannelKey.close();
                     }

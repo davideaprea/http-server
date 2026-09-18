@@ -1,5 +1,6 @@
 package client;
 
+import client.dto.EnqueuedResponse;
 import model.HeaderKey;
 import model.Response;
 
@@ -21,7 +22,7 @@ import java.util.function.Supplier;
 public class ClientResponsesQueue {
     private final ExecutorService executorService;
     private final ClientOutputChannel clientOutputChannel;
-    private final Queue<Supplier<Response>> responsesQueue = new LinkedList<>();
+    private final Queue<EnqueuedResponse> responsesQueue = new LinkedList<>();
     private final Consumer<Exception> onError;
 
     private boolean isProcessing = false;
@@ -38,7 +39,7 @@ public class ClientResponsesQueue {
      * <p>If no response is currently being processed, processing starts
      * immediately.</p>
      */
-    public void enqueue(Supplier<Response> responseSupplier) {
+    public void enqueue(EnqueuedResponse responseSupplier) {
         synchronized (this) {
             responsesQueue.add(responseSupplier);
 
@@ -53,12 +54,12 @@ public class ClientResponsesQueue {
     }
 
     private void submitNext() {
-        Supplier<Response> responseSupplier;
+        EnqueuedResponse enqueuedResponse;
 
         synchronized (this) {
-            responseSupplier = responsesQueue.poll();
+            enqueuedResponse = responsesQueue.poll();
 
-            if (responseSupplier == null) {
+            if (enqueuedResponse == null) {
                 isProcessing = false;
 
                 return;
@@ -66,12 +67,13 @@ public class ClientResponsesQueue {
         }
 
         executorService.submit(() -> {
-            write(responseSupplier.get());
+            write(enqueuedResponse);
             submitNext();
         });
     }
 
-    private void write(Response response) {
+    private void write(EnqueuedResponse enqueuedResponse) {
+        Response response = enqueuedResponse.responseSupplier().get();
         clientOutputChannel.write(response.toHTTPFrame().getBytes(), false);
 
         try (InputStream bodyStream = response.body()) {
@@ -85,7 +87,7 @@ public class ClientResponsesQueue {
                     bytesToWrite -= bytesRead;
                 }
 
-                if (bytesToWrite > 0) {
+                if (!enqueuedResponse.shouldSkipBodyProcessing() && bytesToWrite > 0) {
                     onError.accept(new IllegalStateException("Content length hasn't been reached."));
                 }
             } else {
