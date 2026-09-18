@@ -2,7 +2,6 @@ package reader.dto;
 
 import lombok.Builder;
 import model.Request;
-import reader.exception.MalformedRequestException;
 
 import java.util.function.Consumer;
 

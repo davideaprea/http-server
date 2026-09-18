@@ -51,13 +51,10 @@ public class Router {
 
                         return response;
                     } catch (Exception e) {
-                        String message = Status.INTERNAL_SERVER_ERROR.getName();
-
-                        if (e.getMessage() != null) {
-                            message = e.getMessage();
-                        }
-
-                        return Response.textResponse(message, Status.INTERNAL_SERVER_ERROR);
+                        return Response.textResponse(
+                                Status.INTERNAL_SERVER_ERROR.getName(),
+                                Status.INTERNAL_SERVER_ERROR
+                        );
                     }
                 })
                 .orElse(Response.textResponse(
