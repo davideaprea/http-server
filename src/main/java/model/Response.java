@@ -21,6 +21,12 @@ public record Response(
         headers = new HashMap<>(headers);
     }
 
+    /**
+     * Builds the response header section in the HTTP format, including the status line and
+     * response headers.
+     *
+     * @return the HTTP response header section as a string
+     */
     public String toHTTPFrame() {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -41,18 +47,11 @@ public record Response(
 
     public static Response badRequestError(Exception e) {
         String message = e.getMessage() != null ? e.getMessage() : Status.BAD_REQUEST.getName();
-        byte[] body = message.getBytes(StandardCharsets.UTF_8);
+        Response response = textResponse(message, Status.BAD_REQUEST);
 
-        return new Response(
-                Version.HTTP_1_1,
-                Status.BAD_REQUEST,
-                Map.of(
-                        HeaderKey.CONNECTION.getValue(), "close",
-                        HeaderKey.CONTENT_TYPE.getValue(), "text/plain",
-                        HeaderKey.CONTENT_LENGTH.getValue(), String.valueOf(body.length)
-                ),
-                new ByteArrayInputStream(body)
-        );
+        response.headers.put(HeaderKey.CONNECTION.getValue(), "close");
+
+        return response;
     }
 
     public static Response textResponse(String body, Status status) {
