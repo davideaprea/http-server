@@ -4,6 +4,7 @@ import io.github.davideaprea.httpserver.model.RequestBody;
 import io.github.davideaprea.httpserver.reader.dto.ReadResult;
 import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
 import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
+import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
 
 /**
  * Reads the body of an HTTP request with a known content length.
@@ -14,7 +15,7 @@ public class ContentLengthBodyReader extends RequestReader {
     private long remainingBytes;
 
     /**
-     * @throws IllegalStateException if the remaining bytes to read ar bigger than the configured body size limit
+     * @throws MalformedRequestException if the remaining bytes to read ar bigger than the configured body size limit
      */
     public ContentLengthBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody, long remainingBytes, SizeLimits sizeLimits) {
         super(readingLifecycleEvents, sizeLimits);
@@ -22,7 +23,7 @@ public class ContentLengthBodyReader extends RequestReader {
         this.remainingBytes = remainingBytes;
 
         if (remainingBytes > sizeLimits.maxBodySize()) {
-            throw new IllegalStateException("Max body size exceeded");
+            throw new MalformedRequestException("Max body size exceeded");
         }
     }
 
