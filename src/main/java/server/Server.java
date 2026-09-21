@@ -15,13 +15,8 @@ import reader.lifecycle.RequestReaderEvaluator;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -65,22 +60,26 @@ public class Server {
                 SelectionKey key = keys.next();
                 keys.remove();
 
-                if (!key.isValid()) {
-                    continue;
-                }
+                try {
+                    if (key.isAcceptable()) {
+                        SocketChannel client = ((ServerSocketChannel) key.channel()).accept();
 
-                if (key.isAcceptable()) {
-                    SocketChannel client = ((ServerSocketChannel) key.channel()).accept();
+                        if (client == null) {
+                            continue;
+                        }
 
-                    client.configureBlocking(false);
+                        client.configureBlocking(false);
 
-                    SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
+                        SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
 
-                    clientKey.attach(createClient(clientKey));
-                } else if (key.isReadable()) {
-                    ((Client) key.attachment()).inputChannel().read();
-                } else if (key.isWritable()) {
-                    ((Client) key.attachment()).outputChannel().flush();
+                        clientKey.attach(createClient(clientKey));
+                    } else if (key.isReadable()) {
+                        ((Client) key.attachment()).inputChannel().read();
+                    } else if (key.isWritable()) {
+                        ((Client) key.attachment()).outputChannel().flush();
+                    }
+                } catch (CancelledKeyException | ClosedChannelException e) {
+                    System.out.println("The key has been cancelled: " + e);
                 }
             }
         }
