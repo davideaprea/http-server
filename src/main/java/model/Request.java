@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Builder
@@ -35,5 +36,12 @@ public class Request {
      */
     public Map<String, List<String>> getQueryParams() {
         return Map.copyOf(queryParams);
+    }
+
+    public boolean isClosingRequest() {
+        return Optional.of(headers.get(HeaderKey.CONNECTION.getValue()))
+                .filter(values -> !values.isEmpty())
+                .map(values -> "close".equals(values.getFirst()))
+                .orElse(false);
     }
 }

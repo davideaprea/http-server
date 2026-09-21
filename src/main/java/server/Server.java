@@ -95,12 +95,8 @@ public class Server {
                 .onNewRequest(request -> clientResponsesQueue.enqueue(new EnqueuedResponse(
                         () -> {
                             Response response = configuration.router().handle(request);
-                            boolean shouldCloseConn = Optional.of(request.getHeaders().get(HeaderKey.CONNECTION.getValue()))
-                                    .filter(values -> !values.isEmpty())
-                                    .map(values -> "close".equals(values.getFirst()))
-                                    .orElse(false);
 
-                            if (shouldCloseConn) {
+                            if (request.isClosingRequest()) {
                                 response.headers().put(HeaderKey.CONNECTION.getValue(), "close");
                             }
 
