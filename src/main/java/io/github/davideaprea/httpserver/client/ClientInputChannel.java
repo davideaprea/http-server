@@ -31,9 +31,17 @@ public class ClientInputChannel {
     public void read() {
         boolean isFree = true;
         SocketChannel client = clientChannelKey.getSocketChannel();
-        int bytesRead;
+        int bytesRead = 0;
 
         while (true) {
+            buffer.flip();
+            while (buffer.hasRemaining() && isFree) {
+                isFree = requestReaderEvaluator.eval(buffer.get());
+            }
+            buffer.compact();
+
+            if (!isFree) break;
+
             try {
                 bytesRead = client.read(buffer);
             } catch (IOException e) {
@@ -41,14 +49,6 @@ public class ClientInputChannel {
             }
 
             if (bytesRead <= 0) break;
-
-            buffer.flip();
-
-            while (buffer.hasRemaining() && isFree) {
-                isFree = requestReaderEvaluator.eval(buffer.get());
-            }
-
-            buffer.compact();
         }
 
         if (!isFree) {
