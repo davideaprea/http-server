@@ -1,12 +1,13 @@
-import model.*;
+import io.github.davideaprea.httpserver.model.*;
+import io.github.davideaprea.httpserver.router.RequestHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import reader.dto.SizeLimits;
-import router.Router;
-import router.dto.HandlerCreateCommand;
-import server.Server;
-import server.ServerConfiguration;
+import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
+import io.github.davideaprea.httpserver.router.Router;
+import io.github.davideaprea.httpserver.router.dto.HandlerCreateCommand;
+import io.github.davideaprea.httpserver.server.Server;
+import io.github.davideaprea.httpserver.server.ServerConfiguration;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -1046,7 +1047,7 @@ class ServerTest {
     private Router routerForBodyConsumer(
             Method method,
             String path,
-            router.RequestHandler handler,
+            RequestHandler handler,
             boolean ignored
     ) {
         return new Router.Builder()
