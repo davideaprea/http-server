@@ -129,7 +129,7 @@ class ServerTest {
         HttpResponse<String> response = send("GET", "/failure", HttpRequest.BodyPublishers.noBody());
 
         assertEquals(500, response.statusCode());
-        assertEquals("boom", response.body());
+        assertEquals(Status.INTERNAL_SERVER_ERROR.getName(), response.body());
     }
 
     /*@ParameterizedTest
