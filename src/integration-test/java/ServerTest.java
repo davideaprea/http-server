@@ -1,13 +1,13 @@
 import io.github.davideaprea.httpserver.model.*;
-import io.github.davideaprea.httpserver.router.RequestHandler;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
+import io.github.davideaprea.httpserver.router.RequestHandler;
 import io.github.davideaprea.httpserver.router.Router;
 import io.github.davideaprea.httpserver.router.dto.HandlerCreateCommand;
 import io.github.davideaprea.httpserver.server.Server;
 import io.github.davideaprea.httpserver.server.ServerConfiguration;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -556,17 +556,20 @@ class ServerTest {
 
         startServer(router, 4, 8, new SizeLimits(16_384, 4));
 
-        try (RawHttpConnection raw = newRawConnection()) {
-            raw.send(
-                    """
-                            POST /too-large HTTP/1.1\r
-                            Host: localhost\r
-                            Content-Length: 5\r
-                            \r
-                            """
-            );
+        HttpRequest request = HttpRequest.newBuilder(uri("/too-large"))
+                .POST(HttpRequest.BodyPublishers.ofByteArray("Hello".getBytes(StandardCharsets.UTF_8)))
+                .version(HttpClient.Version.HTTP_1_1)
+                .timeout(Duration.ofSeconds(5))
+                .build();
 
-            assertConnectionCloses(raw);
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            assertEquals(400, response.statusCode());
+            assertTrue(response.headers()
+                    .allValues(HeaderKey.CONNECTION.getValue())
+                    .getFirst()
+                    .equalsIgnoreCase("close"));
         }
 
         assertEquals(0, invocations.get());
