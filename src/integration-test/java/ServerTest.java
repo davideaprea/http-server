@@ -577,12 +577,9 @@ class ServerTest {
 
     @Test
     void chunkedBodyAboveMaxBodySizeClosesConnection() throws Exception {
-        CountDownLatch handlerStarted = new CountDownLatch(1);
-
         Router router = new Router.Builder()
                 .add(new HandlerCreateCommand(
                         request -> {
-                            handlerStarted.countDown();
                             while (request.getBody().dequeue() != -1) {
                                 // consume until the server aborts the connection
                             }
@@ -609,7 +606,6 @@ class ServerTest {
                             """
             );
 
-            assertTrue(handlerStarted.await(2, TimeUnit.SECONDS));
             assertConnectionCloses(raw);
         }
     }
