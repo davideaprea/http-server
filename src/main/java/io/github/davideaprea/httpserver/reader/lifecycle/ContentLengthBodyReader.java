@@ -34,14 +34,6 @@ public class ContentLengthBodyReader extends RequestReader {
      */
     @Override
     public ReadResult eval(byte requestByte) {
-        if (remainingBytes == 0) {
-            RequestReader reader = new RequestLineReader(readingLifecycleEvents, sizeLimits);
-
-            reader.eval(requestByte);
-
-            return new ReadResult(reader, true);
-        }
-
         requestBody.enqueue(Byte.toUnsignedInt(requestByte));
 
         remainingBytes--;
