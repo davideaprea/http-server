@@ -76,9 +76,10 @@ public class ClientResponsesQueue {
 
     private void write(EnqueuedResponse enqueuedResponse) {
         Response response = enqueuedResponse.responseSupplier().get();
-        clientOutputChannel.write(response.toHTTPFrame().getBytes(), false);
 
         try (InputStream bodyStream = response.body()) {
+            clientOutputChannel.write(response.toHTTPFrame().getBytes(), false);
+
             if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
                 long bytesToWrite = Long.parseLong(response.headers().get(HeaderKey.CONTENT_LENGTH.getValue()));
                 byte[] buffer = new byte[8192];
