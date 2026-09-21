@@ -3,6 +3,9 @@ package model;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +22,10 @@ public record Response(
         Objects.requireNonNull(body);
 
         headers = new HashMap<>(headers);
+
+        headers.put(HeaderKey.DATE.getValue(), ZonedDateTime
+                .now(ZoneOffset.UTC)
+                .format(DateTimeFormatter.RFC_1123_DATE_TIME));
     }
 
     /**
