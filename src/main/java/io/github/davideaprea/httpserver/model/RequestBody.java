@@ -1,22 +1,22 @@
 package io.github.davideaprea.httpserver.model;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * Represents the body of an HTTP request as a bounded, thread-safe buffer
  * of bytes.
  * <p>The buffer allows bytes to be produced and consumed concurrently while
  * enforcing a maximum capacity. A callback can be used to notify the producer
- * when space becomes available in a full buffer.</p> */
+ * when space becomes available in a full buffer.</p>
+ */
 public class RequestBody {
     private static final int MAX = 8192;
 
-    private final BlockingQueue<Integer> bufferedBytes = new LinkedBlockingQueue<>(MAX);
+    private final Queue<Integer> bufferedBytes = new ArrayDeque<>();
     private final Runnable onSpaceFreed;
-    private final AtomicBoolean isFull = new AtomicBoolean(false);
-    private final AtomicBoolean isClosed = new AtomicBoolean(false);
+
+    private boolean isClosed = false;
 
     /**
      * @param onSpaceFreed the function that will be called when the buffer is free
@@ -28,17 +28,21 @@ public class RequestBody {
 
     /**
      * Adds a byte to the request body.
+     *
      * @param bodyByte the byte to add
-     * @throws IllegalStateException if the buffer is full or the request body is closed */
-    public void enqueue(int bodyByte) {
-        if (isFull.get() || isClosed.get()) {
+     * @throws IllegalStateException if the buffer is full or the request body is closed
+     */
+    public synchronized void enqueue(int bodyByte) {
+        if (isClosed || bufferedBytes.size() == MAX) {
             throw new IllegalStateException();
         }
 
+        boolean wasFull = bufferedBytes.size() == MAX - 1;
+
         bufferedBytes.add(bodyByte);
 
-        if (bufferedBytes.size() == MAX) {
-            isFull.set(true);
+        if (wasFull) {
+            notifyAll();
         }
     }
 
@@ -50,32 +54,38 @@ public class RequestBody {
      * remain, {@code -1} is returned.</p>
      *
      * @return the next byte, or {@code -1} if the request body is closed and
-     *         no bytes remain
+     * no bytes remain
      * @throws IllegalStateException if the thread is interrupted while waiting
      *                               for a byte
      */
-    public int dequeue() {
-        if (isClosed.get() && bufferedBytes.isEmpty()) {
+    public synchronized int dequeue() {
+        while (bufferedBytes.isEmpty() && !isClosed) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+
+                throw new IllegalStateException(e);
+            }
+        }
+
+        if (bufferedBytes.isEmpty()) {
             return -1;
         }
 
-        try {
-            int bodyByte = bufferedBytes.take();
+        int bodyByte = bufferedBytes.remove();
 
-            if (isFull.get()) {
-                isFull.set(false);
-
-                onSpaceFreed.run();
-            }
-
-            return bodyByte;
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
+        if (bufferedBytes.size() == MAX - 1) {
+            onSpaceFreed.run();
         }
+
+        notifyAll();
+
+        return bodyByte;
     }
 
-    public boolean isFull() {
-        return isFull.get();
+    public synchronized boolean isFull() {
+        return bufferedBytes.size() == MAX;
     }
 
     /**
@@ -84,7 +94,8 @@ public class RequestBody {
      * <p>Once closed, no more bytes can be added to the request body. Bytes
      * already buffered can still be consumed.</p>
      */
-    public void close() {
-        isClosed.set(true);
+    public synchronized void close() {
+        isClosed = true;
+        notifyAll();
     }
 }

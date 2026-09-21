@@ -38,6 +38,10 @@ public class ClientChannelKey {
     }
 
     public void close() {
+        if (clientKey.channel().isOpen()) {
+            onCloseSubscribers.forEach(Runnable::run);
+        }
+
         clientKey.cancel();
 
         try {
@@ -45,8 +49,6 @@ public class ClientChannelKey {
         } catch (IOException e) {
             System.out.println("Error while closing socket channel: " + e.getMessage());
         }
-
-        onCloseSubscribers.forEach(Runnable::run);
     }
 
     public SocketChannel getSocketChannel() {
