@@ -36,17 +36,17 @@ public class ClientOutputChannel {
                 ByteBuffer buffer = chunk.value();
                 int written = clientChannelKey.getSocketChannel().write(buffer);
 
-                if (written == 0) {
-                    return;
-                }
-
                 if (!buffer.hasRemaining()) {
                     bodyChunks.poll();
+
+                    if (chunk.isLast()) {
+                        clientChannelKey.close();
+
+                        return;
+                    }
                 }
 
-                if (chunk.isLast()) {
-                    clientChannelKey.close();
-
+                if (written == 0) {
                     return;
                 }
             }
