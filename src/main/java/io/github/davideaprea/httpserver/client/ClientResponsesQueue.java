@@ -39,39 +39,37 @@ public class ClientResponsesQueue {
      * <p>If no response is currently being processed, processing starts
      * immediately.</p>
      */
-    public void enqueue(EnqueuedResponse responseSupplier) {
-        synchronized (this) {
-            if (isClosed) {
-                return;
-            }
-
-            responsesQueue.add(responseSupplier);
-
-            if (ongoingResponseWriting != null) {
-                return;
-            }
+    public synchronized void enqueue(EnqueuedResponse responseSupplier) {
+        if (isClosed) {
+            return;
         }
 
-        submitNext();
+        responsesQueue.add(responseSupplier);
+
+        if (ongoingResponseWriting == null) {
+            submitNext();
+        }
     }
 
-    private void submitNext() {
-        synchronized (this) {
-            ongoingResponseWriting = null;
-            EnqueuedResponse enqueuedResponse = responsesQueue.poll();
-
-            if (enqueuedResponse == null) {
-                return;
-            }
-
-            ongoingResponseWriting = executorService.submit(() -> {
-                write(enqueuedResponse);
-
-                if (!Thread.currentThread().isInterrupted()) {
-                    submitNext();
-                }
-            });
+    private synchronized void submitNext() {
+        if (isClosed) {
+            return;
         }
+
+        ongoingResponseWriting = null;
+        EnqueuedResponse enqueuedResponse = responsesQueue.poll();
+
+        if (enqueuedResponse == null) {
+            return;
+        }
+
+        ongoingResponseWriting = executorService.submit(() -> {
+            write(enqueuedResponse);
+
+            if (!Thread.currentThread().isInterrupted()) {
+                submitNext();
+            }
+        });
     }
 
     private void write(EnqueuedResponse enqueuedResponse) {
@@ -124,17 +122,15 @@ public class ClientResponsesQueue {
         }
     }
 
-    public void close() {
-        synchronized (this) {
-            isClosed = true;
+    public synchronized void close() {
+        isClosed = true;
 
-            if (ongoingResponseWriting != null) {
-                ongoingResponseWriting.cancel(true);
+        if (ongoingResponseWriting != null) {
+            ongoingResponseWriting.cancel(true);
 
-                ongoingResponseWriting = null;
-            }
-
-            responsesQueue.clear();
+            ongoingResponseWriting = null;
         }
+
+        responsesQueue.clear();
     }
 }
