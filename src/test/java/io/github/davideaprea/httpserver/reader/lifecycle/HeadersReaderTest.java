@@ -1,16 +1,16 @@
 package io.github.davideaprea.httpserver.reader.lifecycle;
 
-import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
 import io.github.davideaprea.httpserver.model.HeaderKey;
 import io.github.davideaprea.httpserver.model.Request;
-import io.github.davideaprea.httpserver.reader.lifecycle.*;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
 import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
+import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class HeadersReaderTest {
     private static final String CRLF = "\r" + '\n';
+    private static final String rawMandatoryHeaders = HeaderKey.HOST.getValue() + ": name" + CRLF;
 
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
@@ -43,7 +43,7 @@ public class HeadersReaderTest {
 
     @Test
     void shouldPassInReadingContentLengthBodyState() {
-        String rawRequest = HeaderKey.CONTENT_LENGTH.getValue() + ": 10" + CRLF + CRLF;
+        String rawRequest = rawMandatoryHeaders + HeaderKey.CONTENT_LENGTH.getValue() + ": 10" + CRLF + CRLF;
         RequestReader state = withMocks();
 
         for (int i = 0; i < rawRequest.length(); i++) {
@@ -56,7 +56,7 @@ public class HeadersReaderTest {
 
     @Test
     void shouldPassInReadingChunkedBodyState() {
-        String rawRequest = HeaderKey.TRANSFER_ENCODING.getValue() + ": chunked" + CRLF + CRLF;
+        String rawRequest = rawMandatoryHeaders + HeaderKey.TRANSFER_ENCODING.getValue() + ": chunked" + CRLF + CRLF;
         RequestReader state = withMocks();
 
         for (int i = 0; i < rawRequest.length(); i++) {
@@ -111,7 +111,7 @@ public class HeadersReaderTest {
 
     @Test
     void testZeroContentLength() {
-        String contentLengthHeader = HeaderKey.CONTENT_LENGTH.getValue() + ": 0" + CRLF + CRLF;
+        String contentLengthHeader = rawMandatoryHeaders + HeaderKey.CONTENT_LENGTH.getValue() + ": 0" + CRLF + CRLF;
         RequestReader state = withMocks();
 
         for (int i = 0; i < contentLengthHeader.length(); i++) {
