@@ -143,7 +143,20 @@ public class Server {
      * @throws IOException if an I/O error occurs while closing the selector
      */
     public void stop() throws IOException {
-        selector.close();
+        if (selector != null && selector.isOpen()) {
+            selector.wakeup();
+
+            for (SelectionKey key : selector.keys()) {
+                try {
+                    key.channel().close();
+                } catch (IOException e) {
+                    System.out.println("Error while closing channel: " + e);
+                }
+            }
+
+            selector.close();
+        }
+
         executor.shutdownNow();
         timersScheduler.shutdownNow();
     }
