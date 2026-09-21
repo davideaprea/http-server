@@ -88,8 +88,7 @@ public class HeadersReader extends RequestReader {
                     Optional<String> transferEncodingValue = Optional
                             .ofNullable(headers.get(HeaderKey.TRANSFER_ENCODING.getValue()))
                             .map(List::getFirst)
-                            .map(String::toLowerCase)
-                            .filter("chunked"::equals);
+                            .map(String::toLowerCase);
 
                     if (!headers.containsKey(HeaderKey.HOST.getValue())) {
                         throw new MalformedRequestException("Mandatory header \"Host\" is missing.");
@@ -108,7 +107,7 @@ public class HeadersReader extends RequestReader {
                                 contentLengthValue.get(),
                                 sizeLimits
                         );
-                    } else if (transferEncodingValue.isPresent()) {
+                    } else if (transferEncodingValue.filter("chunked"::equals).isPresent()) {
                         nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody, sizeLimits);
                     } else {
                         requestBody.close();
