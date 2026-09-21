@@ -42,7 +42,7 @@ public class ClientResponsesQueue {
     public void enqueue(EnqueuedResponse responseSupplier) {
         synchronized (this) {
             if (isClosed) {
-                throw new IllegalArgumentException("The queue is closed.");
+                return;
             }
 
             responsesQueue.add(responseSupplier);
