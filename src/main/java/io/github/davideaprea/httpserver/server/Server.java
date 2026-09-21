@@ -89,6 +89,9 @@ public class Server {
         ClientChannelKey clientChannelKey = new ClientChannelKey(selectionKey);
         ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
         ClientResponsesQueue clientResponsesQueue = new ClientResponsesQueue(executor, outputChannel, e -> clientChannelKey.close());
+
+        clientChannelKey.subscribeToCloseEvent(clientResponsesQueue::close);
+
         TimedOperation requestTimer = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
         ReadingLifecycleEvents readingLifecycleEvents = ReadingLifecycleEvents.builder()
                 .onNewRequest(request -> clientResponsesQueue.enqueue(new EnqueuedResponse(

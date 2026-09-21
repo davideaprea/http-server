@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
@@ -23,7 +24,8 @@ public class ClientResponsesQueue {
     private final Queue<EnqueuedResponse> responsesQueue = new LinkedList<>();
     private final Consumer<Exception> onError;
 
-    private boolean isProcessing = false;
+    private Future<?> ongoingResponseWriting;
+    private boolean isClosed = false;
 
     public ClientResponsesQueue(ExecutorService executorService, ClientOutputChannel clientOutputChannel, Consumer<Exception> onError) {
         this.executorService = executorService;
@@ -39,35 +41,37 @@ public class ClientResponsesQueue {
      */
     public void enqueue(EnqueuedResponse responseSupplier) {
         synchronized (this) {
-            responsesQueue.add(responseSupplier);
-
-            if (isProcessing) {
-                return;
+            if (isClosed) {
+                throw new IllegalArgumentException("The queue is closed.");
             }
 
-            isProcessing = true;
+            responsesQueue.add(responseSupplier);
+
+            if (ongoingResponseWriting != null) {
+                return;
+            }
         }
 
         submitNext();
     }
 
     private void submitNext() {
-        EnqueuedResponse enqueuedResponse;
-
         synchronized (this) {
-            enqueuedResponse = responsesQueue.poll();
+            ongoingResponseWriting = null;
+            EnqueuedResponse enqueuedResponse = responsesQueue.poll();
 
             if (enqueuedResponse == null) {
-                isProcessing = false;
-
                 return;
             }
-        }
 
-        executorService.submit(() -> {
-            write(enqueuedResponse);
-            submitNext();
-        });
+            ongoingResponseWriting = executorService.submit(() -> {
+                write(enqueuedResponse);
+
+                if (!Thread.currentThread().isInterrupted()) {
+                    submitNext();
+                }
+            });
+        }
     }
 
     private void write(EnqueuedResponse enqueuedResponse) {
@@ -81,6 +85,10 @@ public class ClientResponsesQueue {
                 int bytesRead;
 
                 while ((bytesRead = bodyStream.read(buffer)) != -1 && bytesToWrite > 0) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+
                     clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead > bytesToWrite ? (int) bytesToWrite : bytesRead), false);
                     bytesToWrite -= bytesRead;
                 }
@@ -93,6 +101,10 @@ public class ClientResponsesQueue {
                 int bytesRead;
 
                 while ((bytesRead = bodyStream.read(buffer)) != -1) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+
                     clientOutputChannel.write((Integer.toHexString(bytesRead) + "\r\n").getBytes(), false);
                     clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead), false);
                     clientOutputChannel.write("\r\n".getBytes(), false);
@@ -106,6 +118,20 @@ public class ClientResponsesQueue {
             }
         } catch (Exception e) {
             onError.accept(e);
+        }
+    }
+
+    public void close() {
+        synchronized (this) {
+            isClosed = true;
+
+            if (ongoingResponseWriting != null) {
+                ongoingResponseWriting.cancel(true);
+
+                ongoingResponseWriting = null;
+            }
+
+            responsesQueue.clear();
         }
     }
 }
