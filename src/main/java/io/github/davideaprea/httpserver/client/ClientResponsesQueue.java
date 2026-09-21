@@ -111,7 +111,9 @@ public class ClientResponsesQueue {
                     clientOutputChannel.write("\r\n".getBytes(), false);
                 }
 
-                clientOutputChannel.write("0\r\n\r\n".getBytes(), false);
+                if (!enqueuedResponse.shouldSkipBodyProcessing()) {
+                    clientOutputChannel.write("0\r\n\r\n".getBytes(), false);
+                }
             }
 
             if (response.headers().getOrDefault(HeaderKey.CONNECTION.getValue(), "").equals("close")) {
