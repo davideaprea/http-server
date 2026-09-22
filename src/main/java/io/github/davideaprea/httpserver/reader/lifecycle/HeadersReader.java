@@ -85,16 +85,24 @@ public class HeadersReader extends RequestReader {
 
                                 return value;
                             });
-                    Optional<String> transferEncodingValue = Optional
+                    boolean isChunked = Optional
                             .ofNullable(headers.get(HeaderKey.TRANSFER_ENCODING.getValue()))
-                            .map(List::getFirst)
-                            .map(String::toLowerCase);
+                            .map(values -> {
+                                boolean isNotOnlyChunked = values.stream().anyMatch(value -> !"chunked".equalsIgnoreCase(value));
+
+                                if (isNotOnlyChunked) {
+                                    throw new MalformedRequestException("Unsupported transfer encoding");
+                                }
+
+                                return values.stream().anyMatch("chunked"::equalsIgnoreCase);
+                            })
+                            .orElse(false);
 
                     if (!headers.containsKey(HeaderKey.HOST.getValue())) {
                         throw new MalformedRequestException("Mandatory header \"Host\" is missing.");
                     }
 
-                    if (contentLengthValue.isPresent() && transferEncodingValue.isPresent()) {
+                    if (contentLengthValue.isPresent() && isChunked) {
                         throw new MalformedRequestException("Content length and transfer encoding headers can't be present in the same request.");
                     }
 
@@ -107,10 +115,8 @@ public class HeadersReader extends RequestReader {
                                 contentLengthValue.get(),
                                 sizeLimits
                         );
-                    } else if (transferEncodingValue.filter("chunked"::equals).isPresent()) {
+                    } else if (isChunked) {
                         nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody, sizeLimits);
-                    } else if (transferEncodingValue.isPresent()) {
-                        throw new MalformedRequestException("Unsupported transfer encoding.");
                     } else {
                         requestBody.close();
                         readingLifecycleEvents.onEnd().run();
