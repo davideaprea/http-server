@@ -64,58 +64,16 @@ public class HeadersReader extends RequestReader {
                             .headers(headers)
                             .body(requestBody)
                             .build();
-                    Optional<Long> contentLengthValue = Optional.ofNullable(headers.get(HeaderKey.CONTENT_LENGTH.getValue()))
-                            .filter(values -> !values.isEmpty())
-                            .map(values -> {
-                                if (values.size() > 1) {
-                                    throw new MalformedRequestException("Content length header allows only one value.");
-                                }
-
-                                long value;
-
-                                try {
-                                    value = Long.parseLong(values.getFirst());
-                                } catch (NumberFormatException e) {
-                                    throw new MalformedRequestException("Content length is not a valid number.");
-                                }
-
-                                if (value < 0) {
-                                    throw new MalformedRequestException("Content length header allows only zero or positive values.");
-                                }
-
-                                return value;
-                            });
-                    boolean isChunked = Optional
-                            .ofNullable(headers.get(HeaderKey.TRANSFER_ENCODING.getValue()))
-                            .map(values -> {
-                                boolean isNotOnlyChunked = values.stream().anyMatch(value -> !"chunked".equalsIgnoreCase(value));
-
-                                if (isNotOnlyChunked) {
-                                    throw new MalformedRequestException("Unsupported transfer encoding");
-                                }
-
-                                return values.stream().anyMatch("chunked"::equalsIgnoreCase);
-                            })
-                            .orElse(false);
-
-                    if (!headers.containsKey(HeaderKey.HOST.getValue())) {
-                        throw new MalformedRequestException("Mandatory header \"Host\" is missing.");
-                    }
-
-                    if (contentLengthValue.isPresent() && isChunked) {
-                        throw new MalformedRequestException("Content length and transfer encoding headers can't be present in the same request.");
-                    }
-
                     RequestReader nextReader;
 
-                    if (contentLengthValue.filter(v -> v > 0).isPresent()) {
+                    if (request.getContentLength().filter(v -> v > 0).isPresent()) {
                         nextReader = new ContentLengthBodyReader(
                                 readingLifecycleEvents,
                                 requestBody,
-                                contentLengthValue.get(),
+                                request.getContentLength().get(),
                                 sizeLimits
                         );
-                    } else if (isChunked) {
+                    } else if (request.getHeaderValue(HeaderKey.TRANSFER_ENCODING.getValue()).isPresent()) {
                         nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody, sizeLimits);
                     } else {
                         requestBody.close();

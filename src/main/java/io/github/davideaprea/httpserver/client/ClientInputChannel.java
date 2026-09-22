@@ -35,9 +35,11 @@ public class ClientInputChannel {
 
         while (true) {
             buffer.flip();
+
             while (buffer.hasRemaining() && isFree) {
                 isFree = requestReaderEvaluator.eval(buffer.get());
             }
+
             buffer.compact();
 
             if (!isFree) break;
