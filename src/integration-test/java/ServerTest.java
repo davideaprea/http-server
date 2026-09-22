@@ -977,6 +977,140 @@ class ServerTest {
         }
     }
 
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    void requestBodyIsDeliveredIncrementallyNotOnlyAfterFullBodyArrives() throws Exception {
+        CountDownLatch firstByteAvailable = new CountDownLatch(1);
+
+        startServer(routerForBodyConsumer(
+                Method.POST,
+                "/trickle",
+                request -> {
+                    request.getBody().dequeue();
+                    firstByteAvailable.countDown();
+
+                    while (request.getBody().dequeue() != -1) {
+                        // drain the rest of the body
+                    }
+
+                    return textResponse("ok");
+                },
+                true
+        ));
+
+        try (RawHttpConnection raw = newRawConnection()) {
+            raw.sendHeaders("""
+                POST /trickle HTTP/1.1\r
+                Host: localhost\r
+                Content-Length: 2\r
+                \r
+                """);
+
+            Thread.sleep(300); // give the handler time to reach dequeue() and block
+            raw.sendBytes(new byte[]{'A'});
+
+            assertTrue(
+                    firstByteAvailable.await(2, TimeUnit.SECONDS),
+                    "The handler should get the first byte as soon as it arrives, not wait for the rest of the body."
+            );
+
+            raw.sendBytes(new byte[]{'B'});
+
+            RawResponse response = raw.readResponse(false);
+            assertEquals(200, response.statusCode());
+        }
+    }
+
+    @Test
+    void headRequestOnNonEmptyRouteKeepsConnectionUsable() throws Exception {
+        startServer(routerForText(Method.GET, "/resource", "Hello, World!", true));
+
+        try (RawHttpConnection raw = newRawConnection()) {
+            raw.send("HEAD /resource HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+            RawResponse headResponse = raw.readResponse(true);
+            assertEquals(200, headResponse.statusCode());
+            assertEquals("13", headResponse.header("content-length"));
+
+            // the connection must stay usable: if HEAD closed it, this fails
+            raw.send("GET /resource HTTP/1.1\r\nHost: localhost\r\n\r\n");
+            RawResponse getResponse = raw.readResponse(false);
+            assertEquals(200, getResponse.statusCode());
+            assertEquals("Hello, World!", new String(getResponse.body(), StandardCharsets.UTF_8));
+        }
+    }
+
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    void clientDisconnectingMidBodyFreesTheWorkerThread() throws Exception {
+        Router router = new Router.Builder()
+                .add(new HandlerCreateCommand(
+                        request -> {
+                            while (request.getBody().dequeue() != -1) {
+                                // stays here until the connection is aborted
+                            }
+                            return textResponse("unexpected");
+                        },
+                        Method.POST,
+                        "/abandoned"
+                ))
+                .add(new HandlerCreateCommand(
+                        request -> textResponse("ok"),
+                        Method.GET,
+                        "/ok"
+                ))
+                .build();
+
+        // a single worker: if the handler above leaks its thread, this never recovers
+        startServer(router, 1, 8, DEFAULT_LIMITS);
+
+        try (RawHttpConnection raw = newRawConnection()) {
+            raw.send("""
+                POST /abandoned HTTP/1.1\r
+                Host: localhost\r
+                Content-Length: 1000\r
+                \r
+                """);
+            raw.sendBytes(new byte[]{1, 2, 3}); // far short of 1000: the client vanishes mid-body
+        }
+
+        HttpResponse<String> response = send("GET", "/ok", HttpRequest.BodyPublishers.noBody());
+        assertEquals(200, response.statusCode());
+        assertEquals("ok", response.body());
+    }
+
+    @Test
+    void clientRequestedConnectionCloseIsHonoredByServer() throws Exception {
+        startServer(routerForText(Method.GET, "/", "bye", true));
+
+        try (RawHttpConnection raw = newRawConnection()) {
+            raw.send("GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
+
+            RawResponse response = raw.readResponse(false);
+            assertEquals(200, response.statusCode());
+            assertEquals("close", response.header("connection"));
+
+            assertConnectionCloses(raw);
+        }
+    }
+
+    @Test
+    void unsupportedTransferEncodingIsRejected() throws Exception {
+        startServer(routerForText(Method.GET, "/", "ok", true));
+
+        try (RawHttpConnection raw = newRawConnection()) {
+            raw.send("""
+                POST / HTTP/1.1\r
+                Host: localhost\r
+                Transfer-Encoding: gzip\r
+                \r
+                """);
+
+            RawResponse response = raw.readResponse(false);
+            assertEquals(400, response.statusCode());
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
