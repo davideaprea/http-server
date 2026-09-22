@@ -43,16 +43,17 @@ public class Server {
      * Starts the server and processes client connections and I/O events.
      *
      * <p>This method blocks while the server is running.</p>
-     *
-     * @throws IOException if an I/O error occurs while initializing or processing
-     *                     the server
      */
     public void start() throws IOException {
         selector = Selector.open();
         ServerSocketChannel serverChannel = createServerChannel();
 
         while (selector.isOpen() && serverChannel.isOpen()) {
-            selector.select();
+            try {
+                selector.select();
+            } catch (IOException e) {
+                continue;
+            }
 
             Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
 
@@ -78,7 +79,7 @@ public class Server {
                     } else if (key.isWritable()) {
                         ((Client) key.attachment()).outputChannel().flush();
                     }
-                } catch (CancelledKeyException | ClosedChannelException e) {
+                } catch (CancelledKeyException | IOException e) {
                     System.out.println("The key has been cancelled: " + e);
                 }
             }
@@ -142,10 +143,8 @@ public class Server {
 
     /**
      * Stops the server and shuts down its worker and timer executors.
-     *
-     * @throws IOException if an I/O error occurs while closing the selector
      */
-    public void stop() throws IOException {
+    public void stop() {
         if (selector != null && selector.isOpen()) {
             selector.wakeup();
 
@@ -157,8 +156,14 @@ public class Server {
                 }
             }
 
-            selector.close();
+            try {
+                selector.close();
+            } catch (IOException e) {
+                System.out.println("Error while closing selector: " + e);
+            }
         }
+
+        selector = null;
 
         executor.shutdownNow();
         timersScheduler.shutdownNow();
