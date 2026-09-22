@@ -37,11 +37,9 @@ public class RequestBody {
             throw new IllegalStateException();
         }
 
-        boolean wasFull = bufferedBytes.size() == MAX - 1;
-
         bufferedBytes.add(bodyByte);
 
-        if (wasFull) {
+        if (bufferedBytes.size() == 1) {
             notifyAll();
         }
     }
