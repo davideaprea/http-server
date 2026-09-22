@@ -109,6 +109,8 @@ public class HeadersReader extends RequestReader {
                         );
                     } else if (transferEncodingValue.filter("chunked"::equals).isPresent()) {
                         nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody, sizeLimits);
+                    } else if (transferEncodingValue.isPresent()) {
+                        throw new MalformedRequestException("Unsupported transfer encoding.");
                     } else {
                         requestBody.close();
                         readingLifecycleEvents.onEnd().run();
