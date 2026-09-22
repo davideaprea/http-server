@@ -41,7 +41,7 @@ public class Request {
     public boolean isClosingRequest() {
         return Optional.ofNullable(headers.get(HeaderKey.CONNECTION.getValue()))
                 .filter(values -> !values.isEmpty())
-                .map(values -> "close".equals(values.getFirst()))
+                .map(values -> "close".equalsIgnoreCase(values.getFirst()))
                 .orElse(false);
     }
 }

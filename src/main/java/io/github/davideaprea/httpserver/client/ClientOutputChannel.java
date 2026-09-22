@@ -14,7 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * and written to the client socket by the selector thread through {@link #flush()}.</p>
  */
 public class ClientOutputChannel {
-    private static final int MAX = 8192;
+    private static final int MAX = 16;
 
     private final BlockingQueue<OutputChunk> bodyChunks = new LinkedBlockingQueue<>(MAX);
     private final ClientChannelKey clientChannelKey;
