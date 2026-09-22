@@ -81,19 +81,20 @@ public class ClientResponsesQueue {
             if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
                 long bytesToWrite = Long.parseLong(response.headers().get(HeaderKey.CONTENT_LENGTH.getValue()));
                 byte[] buffer = new byte[8192];
-                int bytesRead;
 
-                while ((bytesRead = bodyStream.read(buffer)) != -1 && bytesToWrite > 0) {
-                    if (Thread.currentThread().isInterrupted()) {
+                while (bytesToWrite > 0) {
+                    int maxRead = (int) Math.min(buffer.length, bytesToWrite);
+                    int bytesRead = bodyStream.read(buffer, 0, maxRead);
+
+                    if (bytesRead == -1) {
+                        onError.accept(new IllegalStateException("Content length hasn't been reached."));
+
                         return;
                     }
 
-                    clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead > bytesToWrite ? (int) bytesToWrite : bytesRead), false);
-                    bytesToWrite -= bytesRead;
-                }
+                    clientOutputChannel.write(Arrays.copyOf(buffer, bytesRead), false);
 
-                if (!enqueuedResponse.shouldSkipBodyProcessing() && bytesToWrite > 0) {
-                    onError.accept(new IllegalStateException("Content length hasn't been reached."));
+                    bytesToWrite -= bytesRead;
                 }
             } else {
                 byte[] buffer = new byte[8192];
