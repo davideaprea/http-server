@@ -1,9 +1,9 @@
 package io.github.davideaprea.httpserver.router;
 
 import io.github.davideaprea.httpserver.model.*;
-import lombok.AllArgsConstructor;
 import io.github.davideaprea.httpserver.router.dto.HandlerCreateCommand;
 import io.github.davideaprea.httpserver.router.exception.ConflictingRoutesException;
+import lombok.AllArgsConstructor;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -20,12 +20,12 @@ public class Router {
      *
      * @param request the HTTP request to handle
      * @return the response produced by the matching handler, or a response with
-     *         status {@link Status#NOT_FOUND} if the requested path does not exist,
-     *         {@link Status#METHOD_NOT_ALLOWED} if the path does not support the requested method
-     *         or {@link Status#INTERNAL_SERVER_ERROR} if the handler raised an unknown exception
+     * status {@link Status#NOT_FOUND} if the requested path does not exist,
+     * {@link Status#METHOD_NOT_ALLOWED} if the path does not support the requested method
+     * or {@link Status#INTERNAL_SERVER_ERROR} if the handler raised an unknown exception
      */
     public Response handle(Request request) {
-        String[] pathSegments = request.getUrl().split("/");
+        String[] pathSegments = request.getUrl().substring(1).split("/");
         Segment currSegment = root;
 
         for (String segmentName : pathSegments) {
@@ -44,7 +44,7 @@ public class Router {
 
                         if (
                                 !response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue()) &&
-                                !response.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue())
+                                        !response.headers().containsKey(HeaderKey.TRANSFER_ENCODING.getValue())
                         ) {
                             response.headers().put(HeaderKey.TRANSFER_ENCODING.getValue(), "chunked");
                         }
@@ -79,7 +79,15 @@ public class Router {
          *                                    method has already been registered
          */
         public Builder add(HandlerCreateCommand command) {
-            String[] pathSegments = command.path().split("/");
+            String path;
+
+            if (command.path().startsWith("/")) {
+                path = command.path().substring(1);
+            } else {
+                path = command.path();
+            }
+
+            String[] pathSegments = path.split("/");
             Segment currSegment = root;
 
             for (String segmentName : pathSegments) {
