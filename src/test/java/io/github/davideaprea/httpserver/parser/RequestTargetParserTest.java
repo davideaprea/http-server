@@ -1,6 +1,5 @@
 package io.github.davideaprea.httpserver.parser;
 
-import io.github.davideaprea.httpserver.parser.RequestTargetParser;
 import io.github.davideaprea.httpserver.parser.exception.BadFormatException;
 import io.github.davideaprea.httpserver.model.Method;
 import io.github.davideaprea.httpserver.model.Version;
@@ -13,18 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 public class RequestTargetParserTest {
-    @Test
-    void testValid() {
-        RequestTarget requestLine = RequestTargetParser.from("POST /a/b/c HTTP/1.1");
-
-        Assertions.assertEquals(new RequestTarget(
-                Method.POST,
-                Version.HTTP_1_1,
-                "/a/b/c",
-                new HashMap<>()
-        ), requestLine);
-    }
-
     @Test
     void testInvalidMethod() {
         Assertions.assertThrows(
@@ -111,6 +98,19 @@ public class RequestTargetParserTest {
         Assertions.assertThrows(
                 BadFormatException.class,
                 () -> RequestTargetParser.from("GET /target?a=1&b HTTP/1.1")
+        );
+    }
+
+    @Test
+    void parsePercentEncodedTarget() {
+        Assertions.assertEquals(
+                new RequestTarget(
+                        Method.GET,
+                        Version.HTTP_1_1,
+                        "/joe cafè",
+                        new HashMap<>()
+                ),
+                RequestTargetParser.from("GET /joe%20caf%C3%A8 HTTP/1.1")
         );
     }
 }

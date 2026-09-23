@@ -44,7 +44,7 @@ public final class RequestTargetParser {
         return new RequestTarget(
                 parseMethod(splitRequestLine[0]),
                 parseVersion(splitRequestLine[2]),
-                path,
+                URLDecoder.decode(path, StandardCharsets.UTF_8),
                 queryParams
         );
     }
