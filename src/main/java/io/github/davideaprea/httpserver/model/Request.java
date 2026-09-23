@@ -24,13 +24,6 @@ public class Request {
     private final RequestBody body;
 
     public Request(Method method, Version version, String url, Map<String, List<String>> queryParams, Map<String, List<String>> headers, RequestBody body) {
-        this.method = method;
-        this.version = version;
-        this.url = url;
-        this.queryParams = queryParams;
-        this.headers = headers;
-        this.body = body;
-
         var contentLength = Optional.ofNullable(headers.get(HeaderKey.CONTENT_LENGTH.getValue()));
         var transferEncoding = Optional.ofNullable(headers.get(HeaderKey.TRANSFER_ENCODING.getValue()));
 
@@ -65,6 +58,13 @@ public class Request {
         if (contentLength.isPresent() && transferEncoding.isPresent()) {
             throw new MalformedRequestException("One of content length or transfer encoding headers must be present in the request.");
         }
+
+        this.method = method;
+        this.version = version;
+        this.url = url;
+        this.queryParams = queryParams;
+        this.headers = headers;
+        this.body = body;
     }
 
     public Optional<String> getHeaderValue(String headerName) {
