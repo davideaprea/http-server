@@ -43,7 +43,7 @@ public class HeadersReader extends RequestReader {
      */
     @Override
     public ReadResult eval(byte requestByte) {
-        char c = (char) requestByte;
+        char c = (char) (requestByte & 0xFF);
 
         switch (c) {
             case '\r' -> {

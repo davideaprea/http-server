@@ -38,7 +38,7 @@ public class RequestLineReader extends RequestReader {
      */
     @Override
     public ReadResult eval(byte requestByte) {
-        char c = (char) requestByte;
+        char c = (char) (requestByte & 0xFF);
 
         switch (c) {
             case '\n' -> {
