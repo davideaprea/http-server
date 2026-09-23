@@ -8,6 +8,7 @@ import io.github.davideaprea.httpserver.router.dto.HandlerCreateCommand;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RouterTest {
@@ -33,7 +34,7 @@ public class RouterTest {
                 Version.HTTP_1_1,
                 command.path(),
                 new HashMap<>(),
-                new HashMap<>(),
+                Map.of(HeaderKey.HOST.getValue(), List.of("host")),
                 new RequestBody(() -> {
                 })
         ));
@@ -56,7 +57,7 @@ public class RouterTest {
                 Version.HTTP_1_1,
                 "/non/existing/path",
                 new HashMap<>(),
-                new HashMap<>(),
+                Map.of(HeaderKey.HOST.getValue(), List.of("host")),
                 null
         ));
 
@@ -78,7 +79,7 @@ public class RouterTest {
                 Version.HTTP_1_1,
                 command.path(),
                 new HashMap<>(),
-                new HashMap<>(),
+                Map.of(HeaderKey.HOST.getValue(), List.of("host")),
                 null
         ));
 
@@ -102,7 +103,7 @@ public class RouterTest {
                 Version.HTTP_1_1,
                 command.path(),
                 new HashMap<>(),
-                new HashMap<>(),
+                Map.of(HeaderKey.HOST.getValue(), List.of("host")),
                 null
         ));
 

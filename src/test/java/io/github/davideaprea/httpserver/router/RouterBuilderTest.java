@@ -9,6 +9,7 @@ import io.github.davideaprea.httpserver.router.exception.ConflictingRoutesExcept
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class RouterBuilderTest {
@@ -47,7 +48,7 @@ public class RouterBuilderTest {
                 Version.HTTP_1_1,
                 command.path(),
                 Map.of(),
-                Map.of(),
+                Map.of(HeaderKey.HOST.getValue(), List.of("host")),
                 null
         ));
 
