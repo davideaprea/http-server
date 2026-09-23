@@ -103,7 +103,7 @@ public class Router {
                 return command.handler();
             });
 
-            if (Method.GET.equals(command.method())) {
+            if (Method.GET.equals(command.method()) && !currSegment.methodHandlers.containsKey(Method.HEAD)) {
                 currSegment.methodHandlers.put(Method.HEAD, request -> {
                     Response response = command.handler().handle(request);
 
