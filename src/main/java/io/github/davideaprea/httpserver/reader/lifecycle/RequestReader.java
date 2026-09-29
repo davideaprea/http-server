@@ -1,5 +1,6 @@
 package io.github.davideaprea.httpserver.reader.lifecycle;
 
+import io.github.davideaprea.httpserver.reader.dto.Context;
 import io.github.davideaprea.httpserver.reader.dto.ReadResult;
 import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
 import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
@@ -11,12 +12,10 @@ import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
  * determines the next step in the request reading lifecycle.</p>
  */
 public abstract class RequestReader {
-    protected final ReadingLifecycleEvents readingLifecycleEvents;
-    protected final SizeLimits sizeLimits;
+    protected final Context context;
 
-    protected RequestReader(ReadingLifecycleEvents readingLifecycleEvents, SizeLimits sizeLimits) {
-        this.readingLifecycleEvents = readingLifecycleEvents;
-        this.sizeLimits = sizeLimits;
+    protected RequestReader(Context context) {
+        this.context = context;
     }
 
     /**

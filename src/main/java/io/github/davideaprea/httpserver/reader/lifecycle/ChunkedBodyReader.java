@@ -1,6 +1,7 @@
 package io.github.davideaprea.httpserver.reader.lifecycle;
 
 import io.github.davideaprea.httpserver.model.RequestBody;
+import io.github.davideaprea.httpserver.reader.dto.Context;
 import io.github.davideaprea.httpserver.reader.dto.ReadResult;
 import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
 import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
@@ -20,10 +21,10 @@ public class ChunkedBodyReader extends RequestReader {
 
     private final RequestBody requestBody;
 
-    public ChunkedBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody, SizeLimits sizeLimits) {
-        super(readingLifecycleEvents, sizeLimits);
+    public ChunkedBodyReader(Context context, RequestBody requestBody) {
+        super(context);
         this.requestBody = requestBody;
-        availableSpace = sizeLimits.maxBodySize();
+        availableSpace = context.sizeLimits().maxBodySize();
     }
 
     /**
@@ -94,10 +95,10 @@ public class ChunkedBodyReader extends RequestReader {
 
                     if (currentChunkBytes == 0) {
                         requestBody.close();
-                        readingLifecycleEvents.onEnd().run();
+                        context.requestTimer().stop();
 
                         return new ReadResult(
-                                new RequestLineReader(readingLifecycleEvents, sizeLimits),
+                                new RequestLineReader(context),
                                 true
                         );
                     }

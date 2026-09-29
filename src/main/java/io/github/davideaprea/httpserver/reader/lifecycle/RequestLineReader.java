@@ -4,8 +4,8 @@ import io.github.davideaprea.httpserver.model.Request;
 import io.github.davideaprea.httpserver.parser.RequestTargetParser;
 import io.github.davideaprea.httpserver.parser.dto.RequestTarget;
 import io.github.davideaprea.httpserver.parser.exception.BadFormatException;
+import io.github.davideaprea.httpserver.reader.dto.Context;
 import io.github.davideaprea.httpserver.reader.dto.ReadResult;
-import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
 import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
 import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
 
@@ -19,12 +19,12 @@ public class RequestLineReader extends RequestReader {
     private ReadingState readingState = ReadingState.NORMAL;
     private long availableSpace;
 
-    public RequestLineReader(ReadingLifecycleEvents readingLifecycleEvents, SizeLimits sizeLimits) {
-        super(readingLifecycleEvents, sizeLimits);
+    public RequestLineReader(Context context) {
+        super(context);
 
-        availableSpace = sizeLimits.maxHeadersSize();
+        availableSpace = context.sizeLimits().maxHeadersSize();
 
-        readingLifecycleEvents.onStart().run();
+        context.requestTimer().start();
     }
 
     /**
@@ -63,7 +63,7 @@ public class RequestLineReader extends RequestReader {
                 readingState = ReadingState.NORMAL;
 
                 return new ReadResult(
-                        new HeadersReader(readingLifecycleEvents, requestBuilder, sizeLimits, availableSpace),
+                        new HeadersReader(context, requestBuilder, availableSpace),
                         true
                 );
             }

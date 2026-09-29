@@ -1,9 +1,8 @@
 package io.github.davideaprea.httpserver.reader.lifecycle;
 
 import io.github.davideaprea.httpserver.model.RequestBody;
+import io.github.davideaprea.httpserver.reader.dto.Context;
 import io.github.davideaprea.httpserver.reader.dto.ReadResult;
-import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
-import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
 import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
 
 /**
@@ -17,12 +16,12 @@ public class ContentLengthBodyReader extends RequestReader {
     /**
      * @throws MalformedRequestException if the remaining bytes to read ar bigger than the configured body size limit
      */
-    public ContentLengthBodyReader(ReadingLifecycleEvents readingLifecycleEvents, RequestBody requestBody, long remainingBytes, SizeLimits sizeLimits) {
-        super(readingLifecycleEvents, sizeLimits);
+    public ContentLengthBodyReader(Context context, RequestBody requestBody, long remainingBytes) {
+        super(context);
         this.requestBody = requestBody;
         this.remainingBytes = remainingBytes;
 
-        if (remainingBytes > sizeLimits.maxBodySize()) {
+        if (remainingBytes > context.sizeLimits().maxBodySize()) {
             throw new MalformedRequestException("Max body size exceeded");
         }
     }
@@ -41,9 +40,9 @@ public class ContentLengthBodyReader extends RequestReader {
 
         if (remainingBytes == 0) {
             requestBody.close();
-            readingLifecycleEvents.onEnd().run();
+            context.requestTimer().stop();
 
-            return new ReadResult(new RequestLineReader(readingLifecycleEvents, sizeLimits), true);
+            return new ReadResult(new RequestLineReader(context), true);
         }
 
         return new ReadResult(this, !requestBody.isFull());

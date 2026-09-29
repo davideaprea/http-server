@@ -1,13 +1,12 @@
 package io.github.davideaprea.httpserver.reader.lifecycle;
 
-import io.github.davideaprea.httpserver.model.HeaderKey;
-import io.github.davideaprea.httpserver.model.Request;
-import io.github.davideaprea.httpserver.model.RequestBody;
+import io.github.davideaprea.httpserver.client.dto.EnqueuedResponse;
+import io.github.davideaprea.httpserver.model.*;
 import io.github.davideaprea.httpserver.parser.HeaderParser;
 import io.github.davideaprea.httpserver.parser.dto.Header;
 import io.github.davideaprea.httpserver.parser.exception.BadFormatException;
+import io.github.davideaprea.httpserver.reader.dto.Context;
 import io.github.davideaprea.httpserver.reader.dto.ReadResult;
-import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
 import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
 import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
 
@@ -24,8 +23,8 @@ public class HeadersReader extends RequestReader {
     private ReadingState readingState = ReadingState.NORMAL;
     private long availableSpace;
 
-    public HeadersReader(ReadingLifecycleEvents readingLifecycleEvents, Request.RequestBuilder requestBuilder, SizeLimits sizeLimits, long availableSpace) {
-        super(readingLifecycleEvents, sizeLimits);
+    public HeadersReader(Context context, Request.RequestBuilder requestBuilder, long availableSpace) {
+        super(context);
         this.requestBuilder = requestBuilder;
         this.availableSpace = availableSpace;
     }
@@ -59,7 +58,7 @@ public class HeadersReader extends RequestReader {
                 }
 
                 if (currentLine.isEmpty()) {
-                    RequestBody requestBody = new RequestBody(readingLifecycleEvents.onReadingAvailable());
+                    RequestBody requestBody = new RequestBody(context.channelKey()::addReadInterest);
                     Request request = requestBuilder
                             .headers(headers)
                             .body(requestBody)
@@ -68,21 +67,31 @@ public class HeadersReader extends RequestReader {
 
                     if (request.getContentLength().filter(v -> v > 0).isPresent()) {
                         nextReader = new ContentLengthBodyReader(
-                                readingLifecycleEvents,
+                                context,
                                 requestBody,
-                                request.getContentLength().get(),
-                                sizeLimits
+                                request.getContentLength().get()
                         );
                     } else if (request.getHeaderValue(HeaderKey.TRANSFER_ENCODING.getValue()).isPresent()) {
-                        nextReader = new ChunkedBodyReader(readingLifecycleEvents, requestBody, sizeLimits);
+                        nextReader = new ChunkedBodyReader(context, requestBody);
                     } else {
                         requestBody.close();
-                        readingLifecycleEvents.onEnd().run();
+                        context.requestTimer().stop();
 
-                        nextReader = new RequestLineReader(readingLifecycleEvents, sizeLimits);
+                        nextReader = new RequestLineReader(context);
                     }
 
-                    readingLifecycleEvents.onNewRequest().accept(request);
+                    context.responsesQueue().enqueue(new EnqueuedResponse(
+                            () -> {
+                                Response response = context.router().handle(request);
+
+                                if (request.isClosingRequest()) {
+                                    response.headers().put(HeaderKey.CONNECTION.getValue(), "close");
+                                }
+
+                                return response;
+                            },
+                            Method.HEAD.equals(request.getMethod())
+                    ));
 
                     return new ReadResult(
                             nextReader,
