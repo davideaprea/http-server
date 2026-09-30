@@ -5,7 +5,6 @@ import io.github.davideaprea.httpserver.parser.RequestTargetParser;
 import io.github.davideaprea.httpserver.parser.dto.RequestTarget;
 import io.github.davideaprea.httpserver.parser.exception.BadFormatException;
 import io.github.davideaprea.httpserver.reader.dto.Context;
-import io.github.davideaprea.httpserver.reader.dto.ReadResult;
 import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
 import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
 
@@ -37,7 +36,7 @@ public class RequestLineReader extends RequestReader {
      *                                   format or exceeds the configured {@link SizeLimits#maxHeadersSize()}
      */
     @Override
-    public ReadResult eval(byte requestByte) {
+    public RequestReader evalNextReader(byte requestByte) {
         char c = (char) (requestByte & 0xFF);
 
         switch (c) {
@@ -62,10 +61,7 @@ public class RequestLineReader extends RequestReader {
 
                 readingState = ReadingState.NORMAL;
 
-                return new ReadResult(
-                        new HeadersReader(context, requestBuilder, availableSpace),
-                        true
-                );
+                return new HeadersReader(context, requestBuilder, availableSpace);
             }
             case '\r' -> {
                 if (!ReadingState.NORMAL.equals(readingState)) {
@@ -84,9 +80,6 @@ public class RequestLineReader extends RequestReader {
             }
         }
 
-        return new ReadResult(
-                this,
-                true
-        );
+        return this;
     }
 }

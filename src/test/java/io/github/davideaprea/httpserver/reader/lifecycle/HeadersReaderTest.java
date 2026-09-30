@@ -2,11 +2,10 @@ package io.github.davideaprea.httpserver.reader.lifecycle;
 
 import io.github.davideaprea.httpserver.model.HeaderKey;
 import io.github.davideaprea.httpserver.model.Request;
-import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
-import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
 import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import util.Mocks;
 
 public class HeadersReaderTest {
     private static final String CRLF = "\r" + '\n';
@@ -15,7 +14,7 @@ public class HeadersReaderTest {
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
         HeadersReader reader = withMocks();
-        RequestReader result = reader.eval((byte) 'G').nextReader();
+        RequestReader result = reader.evalNextReader((byte) 'G');
 
         Assertions.assertSame(reader, result);
     }
@@ -23,7 +22,7 @@ public class HeadersReaderTest {
     @Test
     void shouldRemainInSameStateWhenReceivingCarriageReturn() {
         HeadersReader reader = withMocks();
-        RequestReader result = reader.eval((byte) '\r').nextReader();
+        RequestReader result = reader.evalNextReader((byte) '\r');
 
         Assertions.assertSame(reader, result);
     }
@@ -35,7 +34,7 @@ public class HeadersReaderTest {
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);
-            state = state.eval((byte) c).nextReader();
+            state = state.evalNextReader((byte) c);
         }
 
         Assertions.assertInstanceOf(HeadersReader.class, state);
@@ -48,7 +47,7 @@ public class HeadersReaderTest {
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);
-            state = state.eval((byte) c).nextReader();
+            state = state.evalNextReader((byte) c);
         }
 
         Assertions.assertInstanceOf(ContentLengthBodyReader.class, state);
@@ -61,7 +60,7 @@ public class HeadersReaderTest {
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);
-            state = state.eval((byte) c).nextReader();
+            state = state.evalNextReader((byte) c);
         }
 
         Assertions.assertInstanceOf(ChunkedBodyReader.class, state);
@@ -75,7 +74,7 @@ public class HeadersReaderTest {
 
             for (int i = 0; i < rawRequest.length(); i++) {
                 char c = rawRequest.charAt(i);
-                state = state.eval((byte) c).nextReader();
+                state = state.evalNextReader((byte) c);
             }
         });
     }
@@ -89,7 +88,7 @@ public class HeadersReaderTest {
 
             for (int i = 0; i < rawRequest.length(); i++) {
                 char c = rawRequest.charAt(i);
-                state = state.eval((byte) c).nextReader();
+                state = state.evalNextReader((byte) c);
             }
         });
     }
@@ -104,7 +103,7 @@ public class HeadersReaderTest {
 
             for (int i = 0; i < rawRequest.length(); i++) {
                 char c = rawRequest.charAt(i);
-                state = state.eval((byte) c).nextReader();
+                state = state.evalNextReader((byte) c);
             }
         });
     }
@@ -116,7 +115,7 @@ public class HeadersReaderTest {
 
         for (int i = 0; i < contentLengthHeader.length(); i++) {
             char c = contentLengthHeader.charAt(i);
-            state = state.eval((byte) c).nextReader();
+            state = state.evalNextReader((byte) c);
         }
 
         Assertions.assertInstanceOf(RequestLineReader.class, state);
@@ -124,20 +123,8 @@ public class HeadersReaderTest {
 
     private HeadersReader withMocks() {
         return new HeadersReader(
-                new ReadingLifecycleEvents(
-                        request -> {
-                        },
-                        () -> {
-                        },
-                        () -> {
-                        },
-                        () -> {
-                        },
-                        (error) -> {
-                        }
-                ),
+                Mocks.context(),
                 Request.builder(),
-                new SizeLimits(1000, 1000),
                 1000
         );
     }

@@ -2,7 +2,6 @@ package io.github.davideaprea.httpserver.reader.lifecycle;
 
 import io.github.davideaprea.httpserver.model.RequestBody;
 import io.github.davideaprea.httpserver.reader.dto.Context;
-import io.github.davideaprea.httpserver.reader.dto.ReadResult;
 import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
 
 /**
@@ -33,7 +32,7 @@ public class ContentLengthBodyReader extends RequestReader {
      * the reading lifecycle proceeds to the next request.</p>
      */
     @Override
-    public ReadResult eval(byte requestByte) {
+    public RequestReader evalNextReader(byte requestByte) {
         requestBody.enqueue(Byte.toUnsignedInt(requestByte));
 
         remainingBytes--;
@@ -42,9 +41,11 @@ public class ContentLengthBodyReader extends RequestReader {
             requestBody.close();
             context.requestTimer().stop();
 
-            return new ReadResult(new RequestLineReader(context), true);
+            return new RequestLineReader(context);
         }
 
-        return new ReadResult(this, !requestBody.isFull());
+        isFree = !requestBody.isFull();
+
+        return this;
     }
 }

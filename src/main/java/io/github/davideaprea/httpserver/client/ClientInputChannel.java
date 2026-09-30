@@ -1,6 +1,8 @@
 package io.github.davideaprea.httpserver.client;
 
-import io.github.davideaprea.httpserver.reader.lifecycle.RequestReaderEvaluator;
+import io.github.davideaprea.httpserver.reader.dto.Context;
+import io.github.davideaprea.httpserver.reader.lifecycle.RequestLineReader;
+import io.github.davideaprea.httpserver.reader.lifecycle.RequestReader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -11,14 +13,15 @@ import java.nio.channels.SocketChannel;
  * lifecycle.
  */
 public class ClientInputChannel {
-    private final ClientChannelKey clientChannelKey;
+    private final SocketChannel socketChannel;
     private final ByteBuffer buffer;
-    private final RequestReaderEvaluator requestReaderEvaluator;
 
-    public ClientInputChannel(ClientChannelKey clientChannelKey, RequestReaderEvaluator requestReaderEvaluator) {
-        this.clientChannelKey = clientChannelKey;
-        this.requestReaderEvaluator = requestReaderEvaluator;
+    private RequestReader requestReader;
+
+    public ClientInputChannel(Context context) {
+        socketChannel = context.channelKey().getSocketChannel();
         buffer = ByteBuffer.allocateDirect(8192);
+        requestReader = new RequestLineReader(context);
     }
 
     /**
@@ -29,36 +32,28 @@ public class ClientInputChannel {
      * reader signals that it cannot proceed, or the client connection is closed.</p>
      */
     public void read() {
-        boolean isFree = true;
-        SocketChannel client = clientChannelKey.getSocketChannel();
-        int bytesRead = 0;
-
         while (true) {
             buffer.flip();
 
-            while (buffer.hasRemaining() && isFree) {
-                isFree = requestReaderEvaluator.eval(buffer.get());
+            while (buffer.hasRemaining() && requestReader.isFree()) {
+                requestReader = requestReader.evaluate(buffer.get());
             }
 
             buffer.compact();
 
-            if (!isFree) break;
+            int bytesRead;
 
             try {
-                bytesRead = client.read(buffer);
+                bytesRead = socketChannel.read(buffer);
             } catch (IOException e) {
                 bytesRead = -1;
             }
 
+            if (bytesRead == -1) {
+                requestReader.close();
+            }
+
             if (bytesRead <= 0) break;
-        }
-
-        if (!isFree) {
-            clientChannelKey.removeReadInterest();
-        }
-
-        if (bytesRead == -1) {
-            clientChannelKey.close();
         }
     }
 }

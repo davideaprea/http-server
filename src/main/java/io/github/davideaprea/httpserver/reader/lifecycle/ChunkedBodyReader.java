@@ -2,9 +2,6 @@ package io.github.davideaprea.httpserver.reader.lifecycle;
 
 import io.github.davideaprea.httpserver.model.RequestBody;
 import io.github.davideaprea.httpserver.reader.dto.Context;
-import io.github.davideaprea.httpserver.reader.dto.ReadResult;
-import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
-import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
 
 /**
  * Reads the body of an HTTP request encoded using chunked transfer encoding.
@@ -33,7 +30,7 @@ public class ChunkedBodyReader extends RequestReader {
      * body is closed and the reading lifecycle proceeds to the next request.</p>
      */
     @Override
-    public ReadResult eval(byte requestByte) {
+    public RequestReader evalNextReader(byte requestByte) {
         if (isReadingChunkSize) {
             char currChar = (char) requestByte;
 
@@ -97,10 +94,7 @@ public class ChunkedBodyReader extends RequestReader {
                         requestBody.close();
                         context.requestTimer().stop();
 
-                        return new ReadResult(
-                                new RequestLineReader(context),
-                                true
-                        );
+                        return new RequestLineReader(context);
                     }
                 } else {
                     throw new IllegalStateException("Invalid character found in body chunk.");
@@ -108,7 +102,9 @@ public class ChunkedBodyReader extends RequestReader {
             }
         }
 
-        return new ReadResult(this, !requestBody.isFull());
+        isFree = !requestBody.isFull();
+
+        return this;
     }
 
     private boolean isHexDigit(char c) {

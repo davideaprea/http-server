@@ -1,13 +1,9 @@
 package io.github.davideaprea.httpserver.reader.lifecycle;
 
 import io.github.davideaprea.httpserver.model.RequestBody;
-import io.github.davideaprea.httpserver.reader.lifecycle.ChunkedBodyReader;
-import io.github.davideaprea.httpserver.reader.lifecycle.RequestLineReader;
-import io.github.davideaprea.httpserver.reader.lifecycle.RequestReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
-import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
+import util.Mocks;
 
 import java.nio.charset.StandardCharsets;
 
@@ -18,7 +14,7 @@ public class ChunkedBodyReaderTest {
         RequestBody requestBody = new RequestBody(() -> {
         });
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(mockReadingLifecycleEvents(), requestBody, new SizeLimits(1000, 1000)),
+                new ChunkedBodyReader(Mocks.context(), requestBody),
                 "A\r\n%s\r\n0\r\n\r\n".formatted(content)
         );
         String body = buildBody(requestBody);
@@ -32,7 +28,7 @@ public class ChunkedBodyReaderTest {
         RequestBody requestBody = new RequestBody(() -> {
         });
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(mockReadingLifecycleEvents(), requestBody, new SizeLimits(1000, 1000)),
+                new ChunkedBodyReader(Mocks.context(), requestBody),
                 "5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n"
         );
         String body = buildBody(requestBody);
@@ -45,7 +41,7 @@ public class ChunkedBodyReaderTest {
         RequestReader curr = reader;
 
         for (byte b : content.getBytes(StandardCharsets.US_ASCII)) {
-            curr = reader.eval(b).nextReader();
+            curr = reader.evalNextReader(b);
         }
 
         return curr;
@@ -60,20 +56,5 @@ public class ChunkedBodyReaderTest {
         }
 
         return body.toString();
-    }
-
-    private ReadingLifecycleEvents mockReadingLifecycleEvents() {
-        return new ReadingLifecycleEvents(
-                request -> {
-                },
-                () -> {
-                },
-                () -> {
-                },
-                () -> {
-                },
-                (error) -> {
-                }
-        );
     }
 }

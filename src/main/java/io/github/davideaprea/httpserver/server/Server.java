@@ -5,13 +5,8 @@ import io.github.davideaprea.httpserver.client.ClientInputChannel;
 import io.github.davideaprea.httpserver.client.ClientOutputChannel;
 import io.github.davideaprea.httpserver.client.ClientResponsesQueue;
 import io.github.davideaprea.httpserver.client.dto.Client;
-import io.github.davideaprea.httpserver.client.dto.EnqueuedResponse;
 import io.github.davideaprea.httpserver.common.TimedOperation;
-import io.github.davideaprea.httpserver.model.HeaderKey;
-import io.github.davideaprea.httpserver.model.Method;
-import io.github.davideaprea.httpserver.model.Response;
-import io.github.davideaprea.httpserver.reader.dto.ReadingLifecycleEvents;
-import io.github.davideaprea.httpserver.reader.lifecycle.RequestReaderEvaluator;
+import io.github.davideaprea.httpserver.reader.dto.Context;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -90,42 +85,17 @@ public class Server {
         ClientChannelKey clientChannelKey = new ClientChannelKey(selectionKey);
         ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
         ClientResponsesQueue clientResponsesQueue = new ClientResponsesQueue(executor, outputChannel, e -> clientChannelKey.close());
-
-        clientChannelKey.subscribeToCloseEvent(clientResponsesQueue::close);
-
         TimedOperation requestTimer = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
-        ReadingLifecycleEvents readingLifecycleEvents = ReadingLifecycleEvents.builder()
-                .onNewRequest(request -> clientResponsesQueue.enqueue(new EnqueuedResponse(
-                        () -> {
-                            Response response = configuration.router().handle(request);
-
-                            if (request.isClosingRequest()) {
-                                response.headers().put(HeaderKey.CONNECTION.getValue(), "close");
-                            }
-
-                            return response;
-                        },
-                        Method.HEAD.equals(request.getMethod())
-                )))
-                .onReadingAvailable(clientChannelKey::addReadInterest)
-                .onStart(requestTimer::start)
-                .onEnd(requestTimer::stop)
-                .onError(error -> {
-                    if (error.isRecoverable()) {
-                        clientResponsesQueue.enqueue(new EnqueuedResponse(
-                                () -> Response.badRequestError(error.value()),
-                                false
-                        ));
-                    } else {
-                        clientChannelKey.close();
-                    }
-                })
-                .build();
 
         return new Client(
                 new ClientInputChannel(
-                        clientChannelKey,
-                        new RequestReaderEvaluator(readingLifecycleEvents, configuration.sizeLimits())
+                        new Context(
+                                clientChannelKey,
+                                requestTimer,
+                                clientResponsesQueue,
+                                configuration.sizeLimits(),
+                                configuration.router()
+                        )
                 ),
                 outputChannel
         );

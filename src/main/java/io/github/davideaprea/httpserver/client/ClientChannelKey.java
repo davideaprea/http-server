@@ -5,17 +5,10 @@ import lombok.AllArgsConstructor;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.List;
 
 @AllArgsConstructor
 public class ClientChannelKey {
     private final SelectionKey clientKey;
-    private final List<Runnable> onCloseSubscribers = new ArrayList<>();
-
-    public void subscribeToCloseEvent(Runnable runnable) {
-        onCloseSubscribers.add(runnable);
-    }
 
     public void removeReadInterest() {
         clientKey.interestOps(clientKey.interestOps() & ~SelectionKey.OP_READ);
@@ -38,10 +31,6 @@ public class ClientChannelKey {
     }
 
     public void close() {
-        if (clientKey.channel().isOpen()) {
-            onCloseSubscribers.forEach(Runnable::run);
-        }
-
         clientKey.cancel();
 
         try {
