@@ -1,13 +1,13 @@
-package io.github.davideaprea.httpserver.reader.lifecycle;
+package io.github.davideaprea.httpserver.connection.lifecycle;
 
-import io.github.davideaprea.httpserver.client.dto.EnqueuedResponse;
+import io.github.davideaprea.httpserver.connection.dto.EnqueuedResponse;
 import io.github.davideaprea.httpserver.model.*;
 import io.github.davideaprea.httpserver.parser.HeaderParser;
 import io.github.davideaprea.httpserver.parser.dto.Header;
 import io.github.davideaprea.httpserver.parser.exception.BadFormatException;
-import io.github.davideaprea.httpserver.reader.dto.Context;
-import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
-import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
+import io.github.davideaprea.httpserver.connection.dto.Context;
+import io.github.davideaprea.httpserver.connection.dto.SizeLimits;
+import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
 
 import java.util.*;
 

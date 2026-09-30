@@ -1,4 +1,4 @@
-package io.github.davideaprea.httpserver.reader.exception;
+package io.github.davideaprea.httpserver.connection.exception;
 
 public class MalformedRequestException extends RuntimeException {
     public MalformedRequestException(String message) {

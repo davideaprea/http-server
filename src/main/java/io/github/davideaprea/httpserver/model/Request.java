@@ -1,6 +1,6 @@
 package io.github.davideaprea.httpserver.model;
 
-import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
+import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
 import lombok.Builder;
 import lombok.Getter;
 

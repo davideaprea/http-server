@@ -1,10 +1,10 @@
 import io.github.davideaprea.httpserver.model.*;
-import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
+import io.github.davideaprea.httpserver.connection.dto.SizeLimits;
 import io.github.davideaprea.httpserver.router.RequestHandler;
 import io.github.davideaprea.httpserver.router.Router;
 import io.github.davideaprea.httpserver.router.dto.HandlerCreateCommand;
 import io.github.davideaprea.httpserver.server.Server;
-import io.github.davideaprea.httpserver.server.ServerConfiguration;
+import io.github.davideaprea.httpserver.server.Configuration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -155,8 +155,8 @@ class ServerTest {
                 .timeout(Duration.ofSeconds(5))
                 .build();
 
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        try (HttpClient connection = HttpClient.newHttpClient()) {
+            HttpResponse<String> response = connection.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(200, response.statusCode());
             assertEquals(method.name(), response.body());
         }
@@ -288,7 +288,7 @@ class ServerTest {
 
         startServer(routerForBodyConsumer(
                 Method.POST,
-                "/chunked-http-client",
+                "/chunked-http-connection",
                 request -> {
                     received.set(readBody(request));
                     return textResponse("ok");
@@ -298,7 +298,7 @@ class ServerTest {
 
         byte[] payload = "chunked through HttpClient".getBytes(StandardCharsets.UTF_8);
 
-        HttpRequest request = HttpRequest.newBuilder(uri("/chunked-http-client"))
+        HttpRequest request = HttpRequest.newBuilder(uri("/chunked-http-connection"))
                 .POST(HttpRequest.BodyPublishers.ofInputStream(() -> new ByteArrayInputStream(payload)))
                 .version(HttpClient.Version.HTTP_1_1)
                 .timeout(Duration.ofSeconds(5))
@@ -782,7 +782,7 @@ class ServerTest {
             raw.socket().setReceiveBufferSize(1024);
             raw.send("GET /slow-reader HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
-            // Do not read immediately: the server must tolerate a client that stops consuming data.
+            // Do not read immediately: the server must tolerate a connection that stops consuming data.
             Thread.sleep(250);
 
             RawResponse response = raw.readResponse(false);
@@ -1071,7 +1071,7 @@ class ServerTest {
                 Content-Length: 1000\r
                 \r
                 """);
-            raw.sendBytes(new byte[]{1, 2, 3}); // far short of 1000: the client vanishes mid-body
+            raw.sendBytes(new byte[]{1, 2, 3}); // far short of 1000: the connection vanishes mid-body
         }
 
         HttpResponse<String> response = send("GET", "/ok", HttpRequest.BodyPublishers.noBody());
@@ -1122,7 +1122,7 @@ class ServerTest {
     private void startServer(Router router, int threadPoolSize, long requestTimeoutSeconds, SizeLimits limits) throws Exception {
         port = findFreePort();
 
-        ServerConfiguration configuration = ServerConfiguration.builder()
+        Configuration configuration = Configuration.builder()
                 .port(port)
                 .threadPoolSize(threadPoolSize)
                 .requestTimeoutTime(requestTimeoutSeconds)

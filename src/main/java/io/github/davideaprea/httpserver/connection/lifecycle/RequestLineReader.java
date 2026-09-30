@@ -1,12 +1,12 @@
-package io.github.davideaprea.httpserver.reader.lifecycle;
+package io.github.davideaprea.httpserver.connection.lifecycle;
 
 import io.github.davideaprea.httpserver.model.Request;
 import io.github.davideaprea.httpserver.parser.RequestTargetParser;
 import io.github.davideaprea.httpserver.parser.dto.RequestTarget;
 import io.github.davideaprea.httpserver.parser.exception.BadFormatException;
-import io.github.davideaprea.httpserver.reader.dto.Context;
-import io.github.davideaprea.httpserver.reader.dto.SizeLimits;
-import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
+import io.github.davideaprea.httpserver.connection.dto.Context;
+import io.github.davideaprea.httpserver.connection.dto.SizeLimits;
+import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
 
 /**
  * Reads and parses the request line of an HTTP request.

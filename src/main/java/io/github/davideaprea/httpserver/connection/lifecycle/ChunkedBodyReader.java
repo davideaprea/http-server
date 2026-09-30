@@ -1,7 +1,7 @@
-package io.github.davideaprea.httpserver.reader.lifecycle;
+package io.github.davideaprea.httpserver.connection.lifecycle;
 
 import io.github.davideaprea.httpserver.model.RequestBody;
-import io.github.davideaprea.httpserver.reader.dto.Context;
+import io.github.davideaprea.httpserver.connection.dto.Context;
 
 /**
  * Reads the body of an HTTP request encoded using chunked transfer encoding.

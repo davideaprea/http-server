@@ -1,15 +1,15 @@
-package io.github.davideaprea.httpserver.client;
+package io.github.davideaprea.httpserver.connection.channel;
 
-import io.github.davideaprea.httpserver.reader.dto.Context;
-import io.github.davideaprea.httpserver.reader.lifecycle.RequestLineReader;
-import io.github.davideaprea.httpserver.reader.lifecycle.RequestReader;
+import io.github.davideaprea.httpserver.connection.dto.Context;
+import io.github.davideaprea.httpserver.connection.lifecycle.RequestLineReader;
+import io.github.davideaprea.httpserver.connection.lifecycle.RequestReader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 /**
- * Reads request data from a client socket and passes it to the request reader
+ * Reads request data from a connection socket and passes it to the request reader
  * lifecycle.
  */
 public class ClientInputChannel {
@@ -25,11 +25,11 @@ public class ClientInputChannel {
     }
 
     /**
-     * Reads available data from the client socket and processes it as part of an
+     * Reads available data from the connection socket and processes it as part of an
      * HTTP request.
      *
      * <p>Reading stops when no more data is currently available, the request
-     * reader signals that it cannot proceed, or the client connection is closed.</p>
+     * reader signals that it cannot proceed, or the connection is closed.</p>
      */
     public void read() {
         while (true) {

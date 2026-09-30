@@ -1,9 +1,9 @@
-package io.github.davideaprea.httpserver.reader.lifecycle;
+package io.github.davideaprea.httpserver.connection.lifecycle;
 
-import io.github.davideaprea.httpserver.client.dto.EnqueuedResponse;
+import io.github.davideaprea.httpserver.connection.dto.EnqueuedResponse;
 import io.github.davideaprea.httpserver.model.Response;
-import io.github.davideaprea.httpserver.reader.dto.Context;
-import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
+import io.github.davideaprea.httpserver.connection.dto.Context;
+import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
 import lombok.Getter;
 
 /**
@@ -22,6 +22,10 @@ public abstract class RequestReader {
         this.context = context;
     }
 
+    /**
+     * @param requestByte the byte read from the request
+     * @return the result of processing the byte
+     */
     public RequestReader evaluate(byte requestByte) {
         try {
             RequestReader requestReader = evalNextReader(requestByte);
@@ -45,15 +49,14 @@ public abstract class RequestReader {
         }
     }
 
+    /**
+     * Ends the connection, closing the client channel and stopping the request timer.
+     */
     public void close() {
         context.requestTimer().stop();
         context.channelKey().close();
         context.responsesQueue().close();
     }
 
-    /**
-     * @param requestByte the byte read from the request
-     * @return the result of processing the byte
-     */
     protected abstract RequestReader evalNextReader(byte requestByte);
 }

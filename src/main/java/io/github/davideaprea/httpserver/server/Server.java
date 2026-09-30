@@ -1,12 +1,12 @@
 package io.github.davideaprea.httpserver.server;
 
-import io.github.davideaprea.httpserver.client.ClientChannelKey;
-import io.github.davideaprea.httpserver.client.ClientInputChannel;
-import io.github.davideaprea.httpserver.client.ClientOutputChannel;
-import io.github.davideaprea.httpserver.client.ClientResponsesQueue;
-import io.github.davideaprea.httpserver.client.dto.Client;
+import io.github.davideaprea.httpserver.connection.channel.ClientChannelKey;
+import io.github.davideaprea.httpserver.connection.channel.ClientInputChannel;
+import io.github.davideaprea.httpserver.connection.channel.ClientOutputChannel;
+import io.github.davideaprea.httpserver.connection.channel.ClientResponsesQueue;
+import io.github.davideaprea.httpserver.connection.dto.Channel;
 import io.github.davideaprea.httpserver.common.TimedOperation;
-import io.github.davideaprea.httpserver.reader.dto.Context;
+import io.github.davideaprea.httpserver.connection.dto.Context;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,24 +18,24 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Runs an HTTP server that accepts client connections and processes HTTP
+ * Runs an HTTP server that accepts connection connections and processes HTTP
  * requests using a non-blocking I/O model.
  */
 public class Server {
-    private final ServerConfiguration configuration;
+    private final Configuration configuration;
     private final ExecutorService executor;
     private final ScheduledExecutorService timersScheduler;
 
     private Selector selector;
 
-    public Server(ServerConfiguration configuration) {
+    public Server(Configuration configuration) {
         this.configuration = configuration;
         executor = Executors.newFixedThreadPool(configuration.threadPoolSize());
         timersScheduler = Executors.newScheduledThreadPool(1);
     }
 
     /**
-     * Starts the server and processes client connections and I/O events.
+     * Starts the server and processes connection connections and I/O events.
      *
      * <p>This method blocks while the server is running.</p>
      */
@@ -70,9 +70,9 @@ public class Server {
 
                         clientKey.attach(createClient(clientKey));
                     } else if (key.isReadable()) {
-                        ((Client) key.attachment()).inputChannel().read();
+                        ((Channel) key.attachment()).input().read();
                     } else if (key.isWritable()) {
-                        ((Client) key.attachment()).outputChannel().flush();
+                        ((Channel) key.attachment()).output().flush();
                     }
                 } catch (CancelledKeyException | IOException e) {
                     System.out.println("The key has been cancelled: " + e);
@@ -81,13 +81,13 @@ public class Server {
         }
     }
 
-    private Client createClient(SelectionKey selectionKey) {
+    private Channel createClient(SelectionKey selectionKey) {
         ClientChannelKey clientChannelKey = new ClientChannelKey(selectionKey);
         ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
         ClientResponsesQueue clientResponsesQueue = new ClientResponsesQueue(executor, outputChannel, e -> clientChannelKey.close());
         TimedOperation requestTimer = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS, clientChannelKey::close);
 
-        return new Client(
+        return new Channel(
                 new ClientInputChannel(
                         new Context(
                                 clientChannelKey,
@@ -122,7 +122,7 @@ public class Server {
                 try {
                     key.channel().close();
                 } catch (IOException e) {
-                    System.out.println("Error while closing channel: " + e);
+                    System.out.println("Error while closing connection: " + e);
                 }
             }
 

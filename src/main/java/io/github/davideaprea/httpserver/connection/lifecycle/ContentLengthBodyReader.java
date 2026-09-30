@@ -1,8 +1,8 @@
-package io.github.davideaprea.httpserver.reader.lifecycle;
+package io.github.davideaprea.httpserver.connection.lifecycle;
 
 import io.github.davideaprea.httpserver.model.RequestBody;
-import io.github.davideaprea.httpserver.reader.dto.Context;
-import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
+import io.github.davideaprea.httpserver.connection.dto.Context;
+import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
 
 /**
  * Reads the body of an HTTP request with a known content length.

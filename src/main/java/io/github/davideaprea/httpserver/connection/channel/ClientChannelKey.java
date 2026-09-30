@@ -1,4 +1,4 @@
-package io.github.davideaprea.httpserver.client;
+package io.github.davideaprea.httpserver.connection.channel;
 
 import lombok.AllArgsConstructor;
 
@@ -36,7 +36,7 @@ public class ClientChannelKey {
         try {
             clientKey.channel().close();
         } catch (IOException e) {
-            System.out.println("Error while closing socket channel: " + e.getMessage());
+            System.out.println("Error while closing socket connection: " + e.getMessage());
         }
     }
 

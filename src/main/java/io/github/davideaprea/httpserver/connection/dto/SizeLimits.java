@@ -1,4 +1,4 @@
-package io.github.davideaprea.httpserver.reader.dto;
+package io.github.davideaprea.httpserver.connection.dto;
 
 public record SizeLimits(
         long maxHeadersSize,

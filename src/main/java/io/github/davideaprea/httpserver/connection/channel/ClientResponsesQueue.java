@@ -1,6 +1,6 @@
-package io.github.davideaprea.httpserver.client;
+package io.github.davideaprea.httpserver.connection.channel;
 
-import io.github.davideaprea.httpserver.client.dto.EnqueuedResponse;
+import io.github.davideaprea.httpserver.connection.dto.EnqueuedResponse;
 import io.github.davideaprea.httpserver.model.HeaderKey;
 import io.github.davideaprea.httpserver.model.Response;
 
@@ -13,9 +13,9 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
- * Queues HTTP responses for sequential processing and writing to a client.
+ * Queues HTTP responses for sequential processing and writing to a connection.
  *
- * <p>Responses are processed asynchronously and written to the client in the
+ * <p>Responses are processed asynchronously and written to the connection in the
  * same order in which they are enqueued.</p>
  */
 public class ClientResponsesQueue {

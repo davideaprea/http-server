@@ -1,8 +1,9 @@
-package io.github.davideaprea.httpserver.reader.lifecycle;
+package io.github.davideaprea.httpserver.connection.lifecycle;
 
+import io.github.davideaprea.httpserver.connection.lifecycle.*;
 import io.github.davideaprea.httpserver.model.HeaderKey;
 import io.github.davideaprea.httpserver.model.Request;
-import io.github.davideaprea.httpserver.reader.exception.MalformedRequestException;
+import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import util.Mocks;

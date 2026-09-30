@@ -1,4 +1,4 @@
-package io.github.davideaprea.httpserver.client.dto;
+package io.github.davideaprea.httpserver.connection.dto;
 
 import io.github.davideaprea.httpserver.model.Response;
 
