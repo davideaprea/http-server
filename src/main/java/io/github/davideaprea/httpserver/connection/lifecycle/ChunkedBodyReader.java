@@ -102,9 +102,12 @@ public class ChunkedBodyReader extends RequestReader {
             }
         }
 
-        isFree = !requestBody.isFull();
-
         return this;
+    }
+
+    @Override
+    public boolean isFree() {
+        return !requestBody.isFull();
     }
 
     private boolean isHexDigit(char c) {

@@ -4,7 +4,6 @@ import io.github.davideaprea.httpserver.connection.dto.EnqueuedResponse;
 import io.github.davideaprea.httpserver.model.Response;
 import io.github.davideaprea.httpserver.connection.dto.Context;
 import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
-import lombok.Getter;
 
 /**
  * Defines a lifecycle stage for reading an HTTP request.
@@ -14,9 +13,6 @@ import lombok.Getter;
  */
 public abstract class RequestReader {
     protected final Context context;
-
-    @Getter
-    protected boolean isFree = true;
 
     protected RequestReader(Context context) {
         this.context = context;
@@ -30,7 +26,7 @@ public abstract class RequestReader {
         try {
             RequestReader requestReader = evalNextReader(requestByte);
 
-            if (!isFree) {
+            if (!isFree()) {
                 context.channelKey().removeReadInterest();
             }
 
@@ -59,4 +55,8 @@ public abstract class RequestReader {
     }
 
     protected abstract RequestReader evalNextReader(byte requestByte);
+
+    public boolean isFree() {
+        return true;
+    }
 }

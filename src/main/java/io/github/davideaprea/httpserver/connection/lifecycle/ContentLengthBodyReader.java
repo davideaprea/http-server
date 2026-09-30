@@ -1,8 +1,8 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
-import io.github.davideaprea.httpserver.model.RequestBody;
 import io.github.davideaprea.httpserver.connection.dto.Context;
 import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
+import io.github.davideaprea.httpserver.model.RequestBody;
 
 /**
  * Reads the body of an HTTP request with a known content length.
@@ -44,8 +44,11 @@ public class ContentLengthBodyReader extends RequestReader {
             return new RequestLineReader(context);
         }
 
-        isFree = !requestBody.isFull();
-
         return this;
+    }
+
+    @Override
+    public boolean isFree() {
+        return !requestBody.isFull();
     }
 }
