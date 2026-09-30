@@ -1,7 +1,5 @@
 package io.github.davideaprea.httpserver.connection.channel;
 
-import io.github.davideaprea.httpserver.connection.dto.OutputChunk;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
@@ -16,8 +14,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ClientOutputChannel {
     private static final int MAX = 16;
 
-    private final BlockingQueue<OutputChunk> bodyChunks = new LinkedBlockingQueue<>(MAX);
+    private final BlockingQueue<ByteBuffer> bodyChunks = new LinkedBlockingQueue<>(MAX);
     private final ClientChannelKey clientChannelKey;
+
+    private ByteBuffer lastChunkBeforeClosingConnection;
 
     public ClientOutputChannel(ClientChannelKey clientChannelKey) {
         this.clientChannelKey = clientChannelKey;
@@ -32,15 +32,15 @@ public class ClientOutputChannel {
     public void flush() {
         try {
             while (!bodyChunks.isEmpty()) {
-                OutputChunk chunk = bodyChunks.peek();
-                ByteBuffer buffer = chunk.value();
+                ByteBuffer buffer = bodyChunks.peek();
                 int written = clientChannelKey.getSocketChannel().write(buffer);
 
                 if (!buffer.hasRemaining()) {
                     bodyChunks.poll();
 
-                    if (chunk.isLast()) {
+                    if (buffer == lastChunkBeforeClosingConnection) {
                         clientChannelKey.close();
+                        lastChunkBeforeClosingConnection = null;
 
                         return;
                     }
@@ -62,13 +62,19 @@ public class ClientOutputChannel {
      *
      * <p>The chunk is queued for writing by the selector thread.</p>
      *
-     * @param chunk the response data to queue
+     * @param chunk  the response data to queue
      * @param isLast whether the chunk is the last one to be written before
      *               closing the connection
      */
     public void write(byte[] chunk, boolean isLast) {
         try {
-            bodyChunks.put(new OutputChunk(ByteBuffer.wrap(chunk), isLast));
+            ByteBuffer bodyChunk = ByteBuffer.wrap(chunk);
+
+            bodyChunks.put(bodyChunk);
+
+            if (isLast) {
+                lastChunkBeforeClosingConnection = bodyChunk;
+            }
         } catch (InterruptedException e) {
             clientChannelKey.close();
 
