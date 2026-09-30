@@ -18,7 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Runs an HTTP server that accepts connection connections and processes HTTP
+ * Runs an HTTP server that accepts socket connections and processes HTTP
  * requests using a non-blocking I/O model.
  */
 public class Server {
@@ -35,7 +35,7 @@ public class Server {
     }
 
     /**
-     * Starts the server and processes connection connections and I/O events.
+     * Starts the server and processes socket connections and I/O events.
      *
      * <p>This method blocks while the server is running.</p>
      */

@@ -9,8 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 /**
- * Reads request data from a connection socket and passes it to the request reader
- * lifecycle.
+ * Reads request data from a socket channel and passes it to the request reader lifecycle.
  */
 public class ClientInputChannel {
     private final SocketChannel socketChannel;
@@ -25,11 +24,11 @@ public class ClientInputChannel {
     }
 
     /**
-     * Reads available data from the connection socket and processes it as part of an
+     * Reads available data from the socket and processes it as part of an
      * HTTP request.
      *
      * <p>Reading stops when no more data is currently available, the request
-     * reader signals that it cannot proceed, or the connection is closed.</p>
+     * reader signals that it cannot proceed, or the channel is closed.</p>
      */
     public void read() {
         while (true) {

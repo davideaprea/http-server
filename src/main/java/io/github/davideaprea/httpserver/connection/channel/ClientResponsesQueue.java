@@ -13,9 +13,9 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
- * Queues HTTP responses for sequential processing and writing to a connection.
+ * Queues HTTP responses for sequential processing and writing to a channel.
  *
- * <p>Responses are processed asynchronously and written to the connection in the
+ * <p>Responses are processed asynchronously and written to the channel in the
  * same order in which they are enqueued.</p>
  */
 public class ClientResponsesQueue {

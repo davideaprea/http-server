@@ -6,10 +6,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Manages outgoing HTTP response data for a connection connection.
+ * Manages outgoing HTTP response data for a channel.
  *
  * <p>Response data is queued by the handler thread through {@link #write(byte[], boolean)}
- * and written to the connection socket by the selector thread through {@link #flush()}.</p>
+ * and written to the socket by the selector thread through {@link #flush()}.</p>
  */
 public class ClientOutputChannel {
     private static final int MAX = 16;
@@ -24,7 +24,7 @@ public class ClientOutputChannel {
     }
 
     /**
-     * Writes queued response data to the connection socket.
+     * Writes queued response data to the socket.
      *
      * <p>Writing stops when the socket cannot accept more data. Once all queued
      * data has been written, write interest is removed from the selector.</p>
@@ -58,7 +58,7 @@ public class ClientOutputChannel {
     }
 
     /**
-     * Queues a response chunk to be written to the connection socket.
+     * Queues a response chunk to be written to the socket.
      *
      * <p>The chunk is queued for writing by the selector thread.</p>
      *
