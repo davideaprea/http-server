@@ -23,7 +23,7 @@ public class RequestLineReader extends RequestReader {
 
         availableSpace = context.sizeLimits().maxHeadersSize();
 
-        context.requestTimer().start();
+        context.requestTimer().start(this::close);
     }
 
     /**

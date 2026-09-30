@@ -15,7 +15,6 @@ public class TimedOperation {
     private final ScheduledExecutorService scheduler;
     private final long timeout;
     private final TimeUnit unit;
-    private final Runnable action;
 
     private ScheduledFuture<?> future;
 
@@ -25,7 +24,7 @@ public class TimedOperation {
      * <p>If an operation is already scheduled, it is cancelled before scheduling
      * a new one.</p>
      */
-    public synchronized void start() {
+    public synchronized void start(Runnable action) {
         stop();
 
         future = scheduler.schedule(
