@@ -30,6 +30,10 @@ public class ClientOutputChannel {
      * data has been written, write interest is removed from the selector.</p>
      */
     public void flush() {
+        if (!clientChannelKey.getSocketChannel().isOpen()) {
+            return;
+        }
+
         try {
             while (!bodyChunks.isEmpty()) {
                 ByteBuffer buffer = bodyChunks.peek();

@@ -31,6 +31,10 @@ public class ClientInputChannel {
      * reader signals that it cannot proceed, or the channel is closed.</p>
      */
     public void read() {
+        if (!socketChannel.isOpen()) {
+            return;
+        }
+
         while (true) {
             buffer.flip();
 
