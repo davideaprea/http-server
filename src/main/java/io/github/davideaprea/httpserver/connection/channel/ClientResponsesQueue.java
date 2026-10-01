@@ -83,6 +83,10 @@ public class ClientResponsesQueue {
                 byte[] buffer = new byte[8192];
 
                 while (!enqueuedResponse.shouldSkipBodyProcessing() && bytesToWrite > 0) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+
                     int maxRead = (int) Math.min(buffer.length, bytesToWrite);
                     int bytesRead = bodyStream.read(buffer, 0, maxRead);
 
