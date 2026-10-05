@@ -23,6 +23,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
+/**
+ * Represents a client connection and manages its HTTP request and response
+ * processing lifecycle.
+ *
+ * <p>The channel is responsible for reading requests from the client socket,
+ * processing queued responses, buffering response data, and writing that data
+ * back to the socket through the selector.</p>
+ */
 public class ClientChannel {
     private final SelectionKey selectionKey;
     private final ByteBuffer buffer;
@@ -214,16 +222,35 @@ public class ClientChannel {
         }
     }
 
+    /**
+     * Disables the specified selection interest operation for this channel.
+     *
+     * @param interest the selection key operation to disable.
+     * {@link SelectionKey} values ar meant to be used
+     */
     public void disableInterest(int interest) {
         selectionKey.interestOps(selectionKey.interestOps() & ~interest);
         selectionKey.selector().wakeup();
     }
 
+    /**
+     * Enables the specified selection interest operation for this channel.
+     *
+     * @param interest the selection key operation to enable.
+     * {@link SelectionKey} values ar meant to be used
+     */
     public void enableInterest(int interest) {
         selectionKey.interestOps(selectionKey.interestOps() | interest);
         selectionKey.selector().wakeup();
     }
 
+    /**
+     * Closes the client connection and releases all resources associated with it.
+     *
+     * <p>Pending response processing is cancelled, queued responses and buffered
+     * response data are discarded, and the selection key and underlying channel
+     * are closed.</p>
+     */
     public void close() {
         requestTimer.stop();
 

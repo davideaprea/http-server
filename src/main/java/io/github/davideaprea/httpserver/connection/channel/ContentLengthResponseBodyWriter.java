@@ -12,6 +12,15 @@ public class ContentLengthResponseBodyWriter extends ResponseBodyWriter {
         super(onBodyChunk);
     }
 
+    /**
+     * Writes the response body according to its {@code Content-Length} header.
+     *
+     * <p>The body is read until the declared number of bytes has been written.</p>
+     *
+     * @param response the HTTP response to write
+     * @throws Exception if the response body cannot be read or its content length
+     *                   cannot be processed
+     */
     public void write(Response response) throws Exception {
         try (InputStream bodyStream = response.body()) {
             long bytesToWrite = Long.parseLong(response.headers().get(HeaderKey.CONTENT_LENGTH.getValue()));
