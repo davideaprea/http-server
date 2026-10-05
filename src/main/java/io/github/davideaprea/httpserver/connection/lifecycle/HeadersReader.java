@@ -1,14 +1,15 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
+import io.github.davideaprea.httpserver.connection.channel.ClientChannel;
 import io.github.davideaprea.httpserver.connection.dto.EnqueuedResponse;
 import io.github.davideaprea.httpserver.model.*;
 import io.github.davideaprea.httpserver.parser.HeaderParser;
 import io.github.davideaprea.httpserver.parser.dto.Header;
 import io.github.davideaprea.httpserver.parser.exception.BadFormatException;
-import io.github.davideaprea.httpserver.connection.dto.Context;
 import io.github.davideaprea.httpserver.connection.dto.SizeLimits;
 import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
 
+import java.nio.channels.SelectionKey;
 import java.util.*;
 
 /**
@@ -22,8 +23,8 @@ public class HeadersReader extends RequestReader {
     private ReadingState readingState = ReadingState.NORMAL;
     private long availableSpace;
 
-    public HeadersReader(Context context, Request.RequestBuilder requestBuilder, long availableSpace) {
-        super(context);
+    public HeadersReader(ClientChannel clientChannel, Request.RequestBuilder requestBuilder, long availableSpace) {
+        super(clientChannel);
         this.requestBuilder = requestBuilder;
         this.availableSpace = availableSpace;
     }
@@ -57,7 +58,7 @@ public class HeadersReader extends RequestReader {
                 }
 
                 if (currentLine.isEmpty()) {
-                    RequestBody requestBody = new RequestBody(context.channelKey()::addReadInterest);
+                    RequestBody requestBody = new RequestBody(() -> clientChannel.enableInterest(SelectionKey.OP_READ));
                     Request request = requestBuilder
                             .headers(headers)
                             .body(requestBody)
@@ -66,22 +67,22 @@ public class HeadersReader extends RequestReader {
 
                     if (request.getContentLength().filter(v -> v > 0).isPresent()) {
                         nextReader = new ContentLengthBodyReader(
-                                context,
+                                clientChannel,
                                 requestBody,
                                 request.getContentLength().get()
                         );
                     } else if (request.getHeaderValue(HeaderKey.TRANSFER_ENCODING.getValue()).isPresent()) {
-                        nextReader = new ChunkedBodyReader(context, requestBody);
+                        nextReader = new ChunkedBodyReader(clientChannel, requestBody);
                     } else {
                         requestBody.close();
-                        context.requestTimer().stop();
+                        clientChannel.getRequestTimer().stop();
 
-                        nextReader = new RequestLineReader(context);
+                        nextReader = new RequestLineReader(clientChannel);
                     }
 
-                    context.responsesQueue().enqueue(new EnqueuedResponse(
+                    clientChannel.enqueue(new EnqueuedResponse(
                             () -> {
-                                Response response = context.router().handle(request);
+                                Response response = clientChannel.getRouter().handle(request);
 
                                 if (request.isClosingRequest()) {
                                     response.headers().put(HeaderKey.CONNECTION.getValue(), "close");

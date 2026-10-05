@@ -1,7 +1,7 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
+import io.github.davideaprea.httpserver.connection.channel.ClientChannel;
 import io.github.davideaprea.httpserver.model.RequestBody;
-import io.github.davideaprea.httpserver.connection.dto.Context;
 
 /**
  * Reads the body of an HTTP request encoded using chunked transfer encoding.
@@ -18,10 +18,10 @@ public class ChunkedBodyReader extends RequestReader {
 
     private final RequestBody requestBody;
 
-    public ChunkedBodyReader(Context context, RequestBody requestBody) {
-        super(context);
+    public ChunkedBodyReader(ClientChannel clientChannel, RequestBody requestBody) {
+        super(clientChannel);
         this.requestBody = requestBody;
-        availableSpace = context.sizeLimits().maxBodySize();
+        availableSpace = clientChannel.getSizeLimits().maxBodySize();
     }
 
     /**
@@ -92,9 +92,9 @@ public class ChunkedBodyReader extends RequestReader {
 
                     if (currentChunkBytes == 0) {
                         requestBody.close();
-                        context.requestTimer().stop();
+                        clientChannel.getRequestTimer().stop();
 
-                        return new RequestLineReader(context);
+                        return new RequestLineReader(clientChannel);
                     }
                 } else {
                     throw new IllegalStateException("Invalid character found in body chunk.");

@@ -1,12 +1,7 @@
 package io.github.davideaprea.httpserver.server;
 
-import io.github.davideaprea.httpserver.connection.channel.ClientChannelKey;
-import io.github.davideaprea.httpserver.connection.channel.ClientInputChannel;
-import io.github.davideaprea.httpserver.connection.channel.ClientOutputChannel;
-import io.github.davideaprea.httpserver.connection.channel.ClientResponsesQueue;
-import io.github.davideaprea.httpserver.connection.dto.Channel;
 import io.github.davideaprea.httpserver.common.TimedOperation;
-import io.github.davideaprea.httpserver.connection.dto.Context;
+import io.github.davideaprea.httpserver.connection.channel.ClientChannel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -41,7 +36,11 @@ public class Server {
      */
     public void start() throws IOException {
         selector = Selector.open();
-        ServerSocketChannel serverChannel = createServerChannel();
+        ServerSocketChannel serverChannel = ServerSocketChannel.open();
+
+        serverChannel.configureBlocking(false);
+        serverChannel.bind(new InetSocketAddress(configuration.port()));
+        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
         while (selector.isOpen() && serverChannel.isOpen()) {
             try {
@@ -68,47 +67,23 @@ public class Server {
 
                         SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
 
-                        clientKey.attach(createClient(clientKey));
+                        clientKey.attach(ClientChannel.builder()
+                                .selectionKey(clientKey)
+                                .requestTimer(new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS))
+                                .sizeLimits(configuration.sizeLimits())
+                                .router(configuration.router())
+                                .executorService(executor)
+                                .build());
                     } else if (key.isReadable()) {
-                        ((Channel) key.attachment()).input().read();
+                        ((ClientChannel) key.attachment()).read();
                     } else if (key.isWritable()) {
-                        ((Channel) key.attachment()).output().flush();
+                        ((ClientChannel) key.attachment()).flush();
                     }
                 } catch (CancelledKeyException | IOException e) {
                     System.out.println("The key has been cancelled: " + e);
                 }
             }
         }
-    }
-
-    private Channel createClient(SelectionKey selectionKey) {
-        ClientChannelKey clientChannelKey = new ClientChannelKey(selectionKey);
-        ClientOutputChannel outputChannel = new ClientOutputChannel(clientChannelKey);
-        ClientResponsesQueue clientResponsesQueue = new ClientResponsesQueue(executor, outputChannel, e -> clientChannelKey.close());
-        TimedOperation requestTimer = new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS);
-
-        return new Channel(
-                new ClientInputChannel(
-                        new Context(
-                                clientChannelKey,
-                                requestTimer,
-                                clientResponsesQueue,
-                                configuration.sizeLimits(),
-                                configuration.router()
-                        )
-                ),
-                outputChannel
-        );
-    }
-
-    private ServerSocketChannel createServerChannel() throws IOException {
-        ServerSocketChannel serverChannel = ServerSocketChannel.open();
-
-        serverChannel.configureBlocking(false);
-        serverChannel.bind(new InetSocketAddress(configuration.port()));
-        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-
-        return serverChannel;
     }
 
     /**

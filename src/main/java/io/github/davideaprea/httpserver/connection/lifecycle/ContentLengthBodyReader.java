@@ -1,6 +1,6 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
-import io.github.davideaprea.httpserver.connection.dto.Context;
+import io.github.davideaprea.httpserver.connection.channel.ClientChannel;
 import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
 import io.github.davideaprea.httpserver.model.RequestBody;
 
@@ -15,12 +15,12 @@ public class ContentLengthBodyReader extends RequestReader {
     /**
      * @throws MalformedRequestException if the remaining bytes to read ar bigger than the configured body size limit
      */
-    public ContentLengthBodyReader(Context context, RequestBody requestBody, long remainingBytes) {
-        super(context);
+    public ContentLengthBodyReader(ClientChannel clientChannel, RequestBody requestBody, long remainingBytes) {
+        super(clientChannel);
         this.requestBody = requestBody;
         this.remainingBytes = remainingBytes;
 
-        if (remainingBytes > context.sizeLimits().maxBodySize()) {
+        if (remainingBytes > clientChannel.getSizeLimits().maxBodySize()) {
             throw new MalformedRequestException("Max body size exceeded");
         }
     }
@@ -39,9 +39,9 @@ public class ContentLengthBodyReader extends RequestReader {
 
         if (remainingBytes == 0) {
             requestBody.close();
-            context.requestTimer().stop();
+            clientChannel.getRequestTimer().stop();
 
-            return new RequestLineReader(context);
+            return new RequestLineReader(clientChannel);
         }
 
         return this;

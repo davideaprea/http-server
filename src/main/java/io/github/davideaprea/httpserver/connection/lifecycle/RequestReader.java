@@ -1,9 +1,11 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
+import io.github.davideaprea.httpserver.connection.channel.ClientChannel;
 import io.github.davideaprea.httpserver.connection.dto.EnqueuedResponse;
 import io.github.davideaprea.httpserver.model.Response;
-import io.github.davideaprea.httpserver.connection.dto.Context;
 import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
+
+import java.nio.channels.SelectionKey;
 
 /**
  * Defines a lifecycle stage for reading an HTTP request.
@@ -12,10 +14,10 @@ import io.github.davideaprea.httpserver.connection.exception.MalformedRequestExc
  * determines the next step in the request reading lifecycle.</p>
  */
 public abstract class RequestReader {
-    protected final Context context;
+    protected final ClientChannel clientChannel;
 
-    protected RequestReader(Context context) {
-        this.context = context;
+    protected RequestReader(ClientChannel clientChannel) {
+        this.clientChannel = clientChannel;
     }
 
     /**
@@ -27,31 +29,22 @@ public abstract class RequestReader {
             RequestReader requestReader = evalNextReader(requestByte);
 
             if (!isFree()) {
-                context.channelKey().removeReadInterest();
+                clientChannel.disableInterest(SelectionKey.OP_READ);
             }
 
             return requestReader;
         } catch (Exception e) {
             if (e instanceof MalformedRequestException) {
-                context.responsesQueue().enqueue(new EnqueuedResponse(
+                clientChannel.enqueue(new EnqueuedResponse(
                         () -> Response.badRequestError(e),
                         false
                 ));
             } else {
-                context.channelKey().close();
+                clientChannel.close();
             }
 
-            return new RequestLineReader(context);
+            return new RequestLineReader(clientChannel);
         }
-    }
-
-    /**
-     * Ends the connection, closing the client channel and stopping the request timer.
-     */
-    public void close() {
-        context.requestTimer().stop();
-        context.channelKey().close();
-        context.responsesQueue().close();
     }
 
     protected abstract RequestReader evalNextReader(byte requestByte);
