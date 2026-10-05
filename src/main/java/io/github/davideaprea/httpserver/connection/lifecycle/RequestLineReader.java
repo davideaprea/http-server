@@ -1,7 +1,6 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
 import io.github.davideaprea.httpserver.connection.channel.ClientChannel;
-import io.github.davideaprea.httpserver.model.Request;
 import io.github.davideaprea.httpserver.parser.RequestTargetParser;
 import io.github.davideaprea.httpserver.parser.dto.RequestTarget;
 import io.github.davideaprea.httpserver.parser.exception.BadFormatException;
@@ -13,7 +12,6 @@ import io.github.davideaprea.httpserver.connection.exception.MalformedRequestExc
  */
 public class RequestLineReader extends RequestReader {
     private final StringBuilder requestLineBuilder = new StringBuilder();
-    private final Request.RequestBuilder requestBuilder = Request.builder();
 
     private ReadingState readingState = ReadingState.NORMAL;
     private long availableSpace;
@@ -53,15 +51,9 @@ public class RequestLineReader extends RequestReader {
                     throw new MalformedRequestException(e.getMessage());
                 }
 
-                requestBuilder
-                        .method(requestTarget.method())
-                        .version(requestTarget.version())
-                        .url(requestTarget.url())
-                        .queryParams(requestTarget.queryParams());
-
                 readingState = ReadingState.NORMAL;
 
-                return new HeadersReader(clientChannel, requestBuilder, availableSpace);
+                return new HeadersReader(clientChannel, requestTarget, availableSpace);
             }
             case '\r' -> {
                 if (!ReadingState.NORMAL.equals(readingState)) {

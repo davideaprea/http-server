@@ -16,7 +16,7 @@ public class Router {
 
     /**
      * Handles an HTTP request by finding the handler associated to
-     * the given {@link Request#getUrl()} and {@link Request#getMethod()}
+     * the given {@code  Request#getUrl()} and {@code  Request#getMethod()}
      *
      * @param request the HTTP request to handle
      * @return the response produced by the matching handler, or a response with

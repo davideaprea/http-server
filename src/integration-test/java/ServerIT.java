@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ServerTest {
+class ServerIT {
 
     private static final int DEFAULT_SOCKET_TIMEOUT_MILLIS = 5_000;
     private static final SizeLimits DEFAULT_LIMITS = new SizeLimits(16_384, 1_048_576);

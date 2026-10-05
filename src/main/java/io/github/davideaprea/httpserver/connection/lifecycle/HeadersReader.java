@@ -5,6 +5,7 @@ import io.github.davideaprea.httpserver.connection.dto.EnqueuedResponse;
 import io.github.davideaprea.httpserver.model.*;
 import io.github.davideaprea.httpserver.parser.HeaderParser;
 import io.github.davideaprea.httpserver.parser.dto.Header;
+import io.github.davideaprea.httpserver.parser.dto.RequestTarget;
 import io.github.davideaprea.httpserver.parser.exception.BadFormatException;
 import io.github.davideaprea.httpserver.connection.dto.SizeLimits;
 import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
@@ -16,16 +17,16 @@ import java.util.*;
  * Reads and parses the headers of an HTTP request.
  */
 public class HeadersReader extends RequestReader {
-    private final Request.RequestBuilder requestBuilder;
+    private final RequestTarget requestTarget;
     private final StringBuilder currentLine = new StringBuilder();
     private final Map<String, List<String>> headers = new HashMap<>();
 
     private ReadingState readingState = ReadingState.NORMAL;
     private long availableSpace;
 
-    public HeadersReader(ClientChannel clientChannel, Request.RequestBuilder requestBuilder, long availableSpace) {
+    public HeadersReader(ClientChannel clientChannel, RequestTarget requestTarget, long availableSpace) {
         super(clientChannel);
-        this.requestBuilder = requestBuilder;
+        this.requestTarget = requestTarget;
         this.availableSpace = availableSpace;
     }
 
@@ -59,9 +60,13 @@ public class HeadersReader extends RequestReader {
 
                 if (currentLine.isEmpty()) {
                     RequestBody requestBody = new RequestBody(() -> clientChannel.enableInterest(SelectionKey.OP_READ));
-                    Request request = requestBuilder
+                    Request request = Request.builder()
                             .headers(headers)
                             .body(requestBody)
+                            .method(requestTarget.method())
+                            .version(requestTarget.version())
+                            .url(requestTarget.url())
+                            .queryParams(requestTarget.queryParams())
                             .build();
                     RequestReader nextReader;
 
