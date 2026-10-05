@@ -1,6 +1,5 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
-import io.github.davideaprea.httpserver.connection.lifecycle.*;
 import io.github.davideaprea.httpserver.model.HeaderKey;
 import io.github.davideaprea.httpserver.model.Request;
 import io.github.davideaprea.httpserver.connection.exception.MalformedRequestException;
@@ -124,7 +123,7 @@ public class HeadersReaderTest {
 
     private HeadersReader withMocks() {
         return new HeadersReader(
-                Mocks.context(),
+                Mocks.clientChannel(),
                 Request.builder(),
                 1000
         );

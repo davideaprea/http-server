@@ -1,8 +1,5 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
-import io.github.davideaprea.httpserver.connection.lifecycle.HeadersReader;
-import io.github.davideaprea.httpserver.connection.lifecycle.RequestLineReader;
-import io.github.davideaprea.httpserver.connection.lifecycle.RequestReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import util.Mocks;
@@ -10,7 +7,7 @@ import util.Mocks;
 public class RequestLineReaderTest {
     @Test
     void shouldRemainInSameStateWhenReadingRegularCharacters() {
-        RequestLineReader reader = new RequestLineReader(Mocks.context());
+        RequestLineReader reader = new RequestLineReader(Mocks.clientChannel());
         RequestReader result = reader.evalNextReader((byte) 'G');
 
         Assertions.assertSame(reader, result);
@@ -18,7 +15,7 @@ public class RequestLineReaderTest {
 
     @Test
     void shouldRemainInSameStateWhenReceivingCarriageReturn() {
-        RequestLineReader reader = new RequestLineReader(Mocks.context());
+        RequestLineReader reader = new RequestLineReader(Mocks.clientChannel());
         RequestReader result = reader.evalNextReader((byte) '\r');
 
         Assertions.assertSame(reader, result);
@@ -27,7 +24,7 @@ public class RequestLineReaderTest {
     @Test
     void shouldPassInReadingHeadersState() {
         String rawRequest = "GET /path HTTP/1.1";
-        RequestReader state = new RequestLineReader(Mocks.context());
+        RequestReader state = new RequestLineReader(Mocks.clientChannel());
 
         for (int i = 0; i < rawRequest.length(); i++) {
             char c = rawRequest.charAt(i);

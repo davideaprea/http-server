@@ -1,8 +1,5 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
-import io.github.davideaprea.httpserver.connection.lifecycle.ContentLengthBodyReader;
-import io.github.davideaprea.httpserver.connection.lifecycle.RequestLineReader;
-import io.github.davideaprea.httpserver.connection.lifecycle.RequestReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -25,7 +22,7 @@ public class ContentLengthBodyReaderTest {
 
     private ContentLengthBodyReader newContentLengthBodyReader(int bytesNumber) {
         return new ContentLengthBodyReader(
-                Mocks.context(),
+                Mocks.clientChannel(),
                 Mockito.mock(),
                 bytesNumber
         );

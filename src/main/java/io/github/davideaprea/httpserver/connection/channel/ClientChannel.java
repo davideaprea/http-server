@@ -8,7 +8,6 @@ import io.github.davideaprea.httpserver.connection.lifecycle.RequestReader;
 import io.github.davideaprea.httpserver.model.HeaderKey;
 import io.github.davideaprea.httpserver.model.Response;
 import io.github.davideaprea.httpserver.router.Router;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -16,36 +15,47 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
-@Builder
 public class ClientChannel {
     private final SelectionKey selectionKey;
-    private final ByteBuffer buffer = ByteBuffer.allocateDirect(8192);
+    private final ByteBuffer buffer;
     @Getter
     private final TimedOperation requestTimer;
     @Getter
     private final SizeLimits sizeLimits;
     @Getter
     private final Router router;
-    private final BlockingQueue<ByteBuffer> bodyChunks = new LinkedBlockingQueue<>(16);
+    private final BlockingQueue<ByteBuffer> bodyChunks;
     private final ExecutorService executorService;
-    private final Queue<EnqueuedResponse> responsesQueue = new LinkedList<>();
+    private final Queue<EnqueuedResponse> responsesQueue;
 
     private Future<?> ongoingResponseWriting;
     private ByteBuffer lastChunkBeforeClosingConnection;
-    private RequestReader requestReader = new RequestLineReader(this);
+    private RequestReader requestReader;
 
     public ClientChannel(SelectionKey selectionKey, TimedOperation requestTimer, SizeLimits sizeLimits, Router router, ExecutorService executorService) {
+        Objects.requireNonNull(selectionKey);
+        Objects.requireNonNull(requestTimer);
+        Objects.requireNonNull(sizeLimits);
+        Objects.requireNonNull(router);
+        Objects.requireNonNull(executorService);
+
         this.selectionKey = selectionKey;
         this.requestTimer = requestTimer;
         this.sizeLimits = sizeLimits;
         this.router = router;
         this.executorService = executorService;
+
+        buffer = ByteBuffer.allocateDirect(8192);
+        bodyChunks = new LinkedBlockingQueue<>(16);
+        responsesQueue = new LinkedList<>();
+        requestReader = new RequestLineReader(this);
     }
 
     /**
@@ -79,12 +89,12 @@ public class ClientChannel {
         }
 
         ongoingResponseWriting = executorService.submit(() -> {
-            enableInterest(SelectionKey.OP_WRITE);
-
             Response response = enqueuedResponse.responseSupplier().get();
 
             try {
                 bodyChunks.put(ByteBuffer.wrap(response.toHTTPFrame().getBytes()));
+
+                enableInterest(SelectionKey.OP_WRITE);
 
                 if (!enqueuedResponse.shouldSkipBodyProcessing()) {
                     ResponseBodyWriter responseBodyWriter;

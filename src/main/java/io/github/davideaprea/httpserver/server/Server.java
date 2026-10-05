@@ -67,13 +67,13 @@ public class Server {
 
                         SelectionKey clientKey = client.register(selector, SelectionKey.OP_READ);
 
-                        clientKey.attach(ClientChannel.builder()
-                                .selectionKey(clientKey)
-                                .requestTimer(new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS))
-                                .sizeLimits(configuration.sizeLimits())
-                                .router(configuration.router())
-                                .executorService(executor)
-                                .build());
+                        clientKey.attach(new ClientChannel(
+                                clientKey,
+                                new TimedOperation(timersScheduler, configuration.requestTimeoutTime(), TimeUnit.SECONDS),
+                                configuration.sizeLimits(),
+                                configuration.router(),
+                                executor
+                        ));
                     } else if (key.isReadable()) {
                         ((ClientChannel) key.attachment()).read();
                     } else if (key.isWritable()) {

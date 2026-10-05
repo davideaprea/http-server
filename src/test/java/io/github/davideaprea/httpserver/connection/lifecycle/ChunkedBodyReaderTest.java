@@ -1,8 +1,5 @@
 package io.github.davideaprea.httpserver.connection.lifecycle;
 
-import io.github.davideaprea.httpserver.connection.lifecycle.ChunkedBodyReader;
-import io.github.davideaprea.httpserver.connection.lifecycle.RequestLineReader;
-import io.github.davideaprea.httpserver.connection.lifecycle.RequestReader;
 import io.github.davideaprea.httpserver.model.RequestBody;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,7 +14,7 @@ public class ChunkedBodyReaderTest {
         RequestBody requestBody = new RequestBody(() -> {
         });
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(Mocks.context(), requestBody),
+                new ChunkedBodyReader(Mocks.clientChannel(), requestBody),
                 "A\r\n%s\r\n0\r\n\r\n".formatted(content)
         );
         String body = buildBody(requestBody);
@@ -31,7 +28,7 @@ public class ChunkedBodyReaderTest {
         RequestBody requestBody = new RequestBody(() -> {
         });
         RequestReader reader = evaluateBody(
-                new ChunkedBodyReader(Mocks.context(), requestBody),
+                new ChunkedBodyReader(Mocks.clientChannel(), requestBody),
                 "5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n"
         );
         String body = buildBody(requestBody);
