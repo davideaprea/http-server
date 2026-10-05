@@ -2,14 +2,13 @@ package io.github.davideaprea.httpserver.connection.channel;
 
 import io.github.davideaprea.httpserver.model.Response;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.BlockingQueue;
+import java.util.function.Consumer;
 
 public abstract class ResponseBodyWriter {
-    protected final BlockingQueue<ByteBuffer> outgoingBodyChunks;
+    protected final Consumer<byte[]> onBodyChunk;
 
-    public ResponseBodyWriter(BlockingQueue<ByteBuffer> outgoingBodyChunks) {
-        this.outgoingBodyChunks = outgoingBodyChunks;
+    protected ResponseBodyWriter(Consumer<byte[]> onBodyChunk) {
+        this.onBodyChunk = onBodyChunk;
     }
 
     public abstract void write(Response response) throws Exception;

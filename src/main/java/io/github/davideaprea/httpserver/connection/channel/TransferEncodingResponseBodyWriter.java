@@ -3,13 +3,12 @@ package io.github.davideaprea.httpserver.connection.channel;
 import io.github.davideaprea.httpserver.model.Response;
 
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.concurrent.BlockingQueue;
+import java.util.function.Consumer;
 
 public class TransferEncodingResponseBodyWriter extends ResponseBodyWriter {
-    public TransferEncodingResponseBodyWriter(BlockingQueue<ByteBuffer> outgoingBodyChunks) {
-        super(outgoingBodyChunks);
+    protected TransferEncodingResponseBodyWriter(Consumer<byte[]> onBodyChunk) {
+        super(onBodyChunk);
     }
 
     @Override
@@ -23,12 +22,12 @@ public class TransferEncodingResponseBodyWriter extends ResponseBodyWriter {
                     return;
                 }
 
-                outgoingBodyChunks.put(ByteBuffer.wrap((Integer.toHexString(bytesRead) + "\r\n").getBytes()));
-                outgoingBodyChunks.put(ByteBuffer.wrap(Arrays.copyOf(buffer, bytesRead)));
-                outgoingBodyChunks.put(ByteBuffer.wrap("\r\n".getBytes()));
+                onBodyChunk.accept((Integer.toHexString(bytesRead) + "\r\n").getBytes());
+                onBodyChunk.accept(Arrays.copyOf(buffer, bytesRead));
+                onBodyChunk.accept("\r\n".getBytes());
             }
 
-            outgoingBodyChunks.put(ByteBuffer.wrap("0\r\n\r\n".getBytes()));
+            onBodyChunk.accept("0\r\n\r\n".getBytes());
         }
     }
 }

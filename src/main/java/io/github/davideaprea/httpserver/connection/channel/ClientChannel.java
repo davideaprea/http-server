@@ -21,6 +21,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
 
 public class ClientChannel {
     private final SelectionKey selectionKey;
@@ -97,12 +98,21 @@ public class ClientChannel {
                 enableInterest(SelectionKey.OP_WRITE);
 
                 if (!enqueuedResponse.shouldSkipBodyProcessing()) {
+                    Consumer<byte[]> bodyChunksConsumer = bytes -> {
+                        try {
+                            bodyChunks.put(ByteBuffer.wrap(bytes));
+
+                            enableInterest(SelectionKey.OP_WRITE);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    };
                     ResponseBodyWriter responseBodyWriter;
 
                     if (response.headers().containsKey(HeaderKey.CONTENT_LENGTH.getValue())) {
-                        responseBodyWriter = new ContentLengthResponseBodyWriter(bodyChunks);
+                        responseBodyWriter = new ContentLengthResponseBodyWriter(bodyChunksConsumer);
                     } else {
-                        responseBodyWriter = new TransferEncodingResponseBodyWriter(bodyChunks);
+                        responseBodyWriter = new TransferEncodingResponseBodyWriter(bodyChunksConsumer);
                     }
 
                     responseBodyWriter.write(response);
@@ -114,6 +124,8 @@ public class ClientChannel {
                     bodyChunks.put(lastChunkBeforeClosingConnection);
                 }
             } catch (Exception e) {
+                Thread.currentThread().interrupt();
+
                 close();
             }
 

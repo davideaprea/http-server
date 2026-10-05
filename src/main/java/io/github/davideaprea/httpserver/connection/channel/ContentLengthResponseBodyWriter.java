@@ -4,13 +4,12 @@ import io.github.davideaprea.httpserver.model.HeaderKey;
 import io.github.davideaprea.httpserver.model.Response;
 
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.concurrent.BlockingQueue;
+import java.util.function.Consumer;
 
 public class ContentLengthResponseBodyWriter extends ResponseBodyWriter {
-    public ContentLengthResponseBodyWriter(BlockingQueue<ByteBuffer> outgoingBodyChunks) {
-        super(outgoingBodyChunks);
+    protected ContentLengthResponseBodyWriter(Consumer<byte[]> onBodyChunk) {
+        super(onBodyChunk);
     }
 
     public void write(Response response) throws Exception {
@@ -30,7 +29,7 @@ public class ContentLengthResponseBodyWriter extends ResponseBodyWriter {
                     throw new IllegalStateException();
                 }
 
-                outgoingBodyChunks.put(ByteBuffer.wrap(Arrays.copyOf(buffer, bytesRead)));
+                onBodyChunk.accept(Arrays.copyOf(buffer, bytesRead));
 
                 bytesToWrite -= bytesRead;
             }
