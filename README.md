@@ -22,11 +22,17 @@ A lightweight, dependency-free HTTP/1.1 server for Java.
 - Unit and integration test suites — the integration suite drives the
   server over real sockets
 
-## Requirements
+## Installation
 
-- Java 21+
-- [Lombok](https://projectlombok.org/) — used for builders and getters;
-  enable annotation processing in your IDE
+### Maven
+
+```xml
+<dependency>
+    <groupId>io.github.davideaprea</groupId>
+    <artifactId>http-server</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 
 ## Getting started
 
